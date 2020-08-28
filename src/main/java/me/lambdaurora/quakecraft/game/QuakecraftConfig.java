@@ -28,17 +28,20 @@ public class QuakecraftConfig
     public static final Codec<QuakecraftConfig> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             MapConfig.CODEC.fieldOf("map").forGetter(config -> config.map),
             PlayerConfig.CODEC.fieldOf("players").forGetter(config -> config.players),
+            Codec.INT.optionalFieldOf("time", 20 * 60 * 20).forGetter(config -> config.time),
             Codec.INT.optionalFieldOf("time_of_day", 6000).forGetter(config -> config.timeOfDay)
     ).apply(instance, QuakecraftConfig::new));
 
     public final MapConfig    map;
     public final PlayerConfig players;
+    public final int          time;
     public final int          timeOfDay;
 
-    public QuakecraftConfig(@NotNull MapConfig map, @NotNull PlayerConfig players, int timeOfDay)
+    public QuakecraftConfig(@NotNull MapConfig map, @NotNull PlayerConfig players, int time, int timeOfDay)
     {
         this.map = map;
         this.players = players;
+        this.time = time;
         this.timeOfDay = timeOfDay;
     }
 }

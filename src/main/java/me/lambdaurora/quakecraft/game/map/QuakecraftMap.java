@@ -23,32 +23,29 @@ import net.minecraft.world.gen.chunk.ChunkGenerator;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.map.template.MapTemplate;
 import xyz.nucleoid.plasmid.game.map.template.TemplateChunkGenerator;
+import xyz.nucleoid.plasmid.util.BlockBounds;
 
 /**
  * Represents the Quakecraft map.
+ *
+ * @author LambdAurora
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class QuakecraftMap
 {
-    private final MapTemplate template;
-    private       BlockPos    spawn = new BlockPos(0, 150, 0);
+    public static final BlockPos    ORIGIN = new BlockPos(0, 150, 0); // @TODO BlockPos.ORIGIN when having own maps
+    private final       MapTemplate template;
+    public final        BlockBounds spawn;
 
-    public QuakecraftMap(@NotNull MapTemplate template)
+    public QuakecraftMap(@NotNull MapTemplate template, @NotNull BlockBounds spawn)
     {
         this.template = template;
-    }
-
-    public BlockPos getSpawn()
-    {
-        return this.spawn;
-    }
-
-    public void setSpawn(BlockPos spawn)
-    {
         this.spawn = spawn;
     }
 
     public @NotNull ChunkGenerator asGenerator(@NotNull MinecraftServer server)
     {
-        return new TemplateChunkGenerator(server, this.template, this.spawn);
+        return new TemplateChunkGenerator(server, this.template, ORIGIN);
     }
 }

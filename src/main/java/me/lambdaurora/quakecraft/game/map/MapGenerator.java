@@ -17,9 +17,12 @@
 
 package me.lambdaurora.quakecraft.game.map;
 
+import me.lambdaurora.quakecraft.Quakecraft;
+import net.minecraft.text.LiteralText;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameOpenException;
 import xyz.nucleoid.plasmid.game.map.template.MapTemplateSerializer;
+import xyz.nucleoid.plasmid.util.BlockBounds;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -35,7 +38,14 @@ public class MapGenerator
     public CompletableFuture<QuakecraftMap> create() throws GameOpenException
     {
         return MapTemplateSerializer.INSTANCE.load(this.config.id).thenApply(template -> {
-            QuakecraftMap map = new QuakecraftMap(template);
+            BlockBounds spawn = template.getFirstRegion("spawn");
+            if (spawn == null) {
+                Quakecraft.get().logger.error("No spawn is defined on the map! The game will not work.");
+                throw new GameOpenException(new LiteralText("no spawn defined"));
+            }
+
+            QuakecraftMap map = new QuakecraftMap(template, spawn.offset(QuakecraftMap.ORIGIN));
+
             //template.setBiome(BuiltinBiomes.PLAINS);
 
             return map;

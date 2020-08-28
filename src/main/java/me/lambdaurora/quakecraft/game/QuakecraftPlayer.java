@@ -17,11 +17,92 @@
 
 package me.lambdaurora.quakecraft.game;
 
-public class QuakecraftPlayer
+import me.lambdaurora.quakecraft.QuakecraftConstants;
+import me.lambdaurora.quakecraft.weapon.Weapon;
+import me.lambdaurora.quakecraft.weapon.Weapons;
+import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Hand;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import xyz.nucleoid.plasmid.game.GameWorld;
+
+import java.util.UUID;
+
+/**
+ * Represents a Quakecraft player.
+ *
+ * @author LambdAurora
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
 {
+    private final ServerWorld world;
+    public final  UUID        uuid;
+    public final  String      name;
+    public final  Weapon      primaryWeapon;
+    private       long        respawnTime = -1;
+    private       int         kills       = 0;
 
+    public QuakecraftPlayer(@NotNull ServerPlayerEntity player)
+    {
+        this.world = player.getServerWorld();
+        this.uuid = player.getUuid();
+        this.name = player.getEntityName();
+        this.primaryWeapon = Weapons.ADVANCED_SHOOTER;
+    }
 
-    public void shoot() {
+    public int getKills()
+    {
+        return this.kills;
+    }
 
+    public void incrementKills()
+    {
+        this.kills++;
+    }
+
+    public boolean hasWon()
+    {
+        return this.kills >= 24;
+    }
+
+    public void startRespawn(long time)
+    {
+        this.respawnTime = time + QuakecraftConstants.RESPAWN_TICKS;
+    }
+
+    boolean tryRespawn(long time)
+    {
+        if (this.respawnTime != -1 && time >= this.respawnTime) {
+            this.respawnTime = -1;
+            return true;
+        }
+        return false;
+    }
+
+    public int onItemUse(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
+    {
+        ItemStack heldStack = player.getStackInHand(hand);
+
+        if (this.primaryWeapon.matchesStack(heldStack)) {
+            this.primaryWeapon.onUse(world, player, hand);
+            return this.primaryWeapon.cooldown;
+        }
+
+        return -1;
+    }
+
+    public @Nullable ServerPlayerEntity getPlayer()
+    {
+        return this.world.getServer().getPlayerManager().getPlayer(this.uuid);
+    }
+
+    @Override
+    public int compareTo(@NotNull QuakecraftPlayer other)
+    {
+        return Integer.compare(this.getKills(), other.getKills());
     }
 }

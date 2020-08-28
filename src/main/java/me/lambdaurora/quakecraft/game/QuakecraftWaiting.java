@@ -17,14 +17,11 @@
 
 package me.lambdaurora.quakecraft.game;
 
-import me.lambdaurora.quakecraft.Quakecraft;
 import me.lambdaurora.quakecraft.game.map.MapGenerator;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameOpenContext;
@@ -49,15 +46,17 @@ import java.util.concurrent.CompletableFuture;
  */
 public class QuakecraftWaiting
 {
-    private final GameWorld        world;
-    private final QuakecraftMap    map;
-    private final QuakecraftConfig config;
+    private final GameWorld            world;
+    private final QuakecraftMap        map;
+    private final QuakecraftConfig     config;
+    private final QuakecraftSpawnLogic spawnLogic;
 
     private QuakecraftWaiting(@NotNull GameWorld world, @NotNull QuakecraftMap map, @NotNull QuakecraftConfig config)
     {
         this.world = world;
         this.map = map;
         this.config = config;
+        this.spawnLogic = new QuakecraftSpawnLogic(world, map);
     }
 
     public static @NotNull CompletableFuture<GameWorld> open(@NotNull GameOpenContext<QuakecraftConfig> context)
@@ -95,23 +94,15 @@ public class QuakecraftWaiting
 
     private StartResult requestStart()
     {
-        QuakecraftActive.open(this.config, this.world, this.map);
+        QuakecraftGame.open(this.config, this.world, this.map, this.spawnLogic);
         return StartResult.OK;
     }
 
 
-    private void spawnPlayer(ServerPlayerEntity player)
+    private void spawnPlayer(@NotNull ServerPlayerEntity player)
     {
-        ServerWorld world = this.world.getWorld();
-
-        BlockPos pos = this.map.getSpawn();
-        if (pos == null) {
-            Quakecraft.get().logger.warn("Cannot spawn player! No spawn is defined in the map!");
-            return;
-        }
-
         player.setGameMode(GameMode.ADVENTURE);
-        player.teleport(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 0.0F, 0.0F);
+        this.spawnLogic.spawnWaitingPlayer(player);
     }
 
     private void addPlayer(@NotNull ServerPlayerEntity player)
