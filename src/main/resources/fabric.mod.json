@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "quakecraft",
+  "name": "Quakecraft",
+  "version": "${version}",
+  "description": "The Quakecraft minigame for Fabric and Plasmid.",
+  "authors": [
+    "LambdAurora"
+  ],
+  "contact": {
+    "sources": "https://github.com/LambdAurora/Quakecraft.git",
+    "issues": "https://github.com/LambdAurora/Quakecraft/issues"
+  },
+  "license": "LGPLv3",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "me.lambdaurora.quakecraft.Quakecraft"
+    ]
+  },
+  "mixins": [
+    "quakecraft.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.9.0",
+    "fabric": ">=0.14.0",
+    "minecraft": ">=1.16.2",
+    "plasmid": ">=0.3.0"
+  },
+  "custom": {
+  }
+}
