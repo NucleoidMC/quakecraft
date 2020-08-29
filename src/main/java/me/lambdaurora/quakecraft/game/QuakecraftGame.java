@@ -227,7 +227,7 @@ public class QuakecraftGame
 
         QuakecraftPlayer participant = this.getParticipant(player);
         if (participant != null) {
-            player.inventory.insertStack(participant.primaryWeapon.build());
+            participant.reset(player);
         } else {
             player.inventory.insertStack(Weapons.BASE_SHOOTER.build());
         }

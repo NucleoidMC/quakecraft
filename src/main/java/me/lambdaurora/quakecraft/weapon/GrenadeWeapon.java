@@ -25,6 +25,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.util.ItemStackBuilder;
 
 /**
  * Represents a grenade weapon.
@@ -51,5 +52,11 @@ public class GrenadeWeapon extends Weapon
         world.getWorld().spawnEntity(grenade);
 
         return super.onUse(world, player, hand);
+    }
+
+    @Override
+    public @NotNull ItemStackBuilder stackBuilder()
+    {
+        return super.stackBuilder().setCount(64);
     }
 }

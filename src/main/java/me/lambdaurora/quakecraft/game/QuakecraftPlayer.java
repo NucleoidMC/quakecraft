@@ -49,6 +49,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
     public final  UUID               uuid;
     public final  String             name;
     public final  Weapon             primaryWeapon;
+    public final  Weapon             grenadeWeapon;
     private       ServerPlayerEntity player;
     private       long               respawnTime = -1;
     private       int                kills       = 0;
@@ -59,6 +60,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         this.uuid = player.getUuid();
         this.name = player.getEntityName();
         this.primaryWeapon = Weapons.ADVANCED_SHOOTER;
+        this.grenadeWeapon = Weapons.BASE_GRENADE;
         this.player = player;
     }
 
@@ -89,6 +91,9 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
 
         this.player.setGameMode(GameMode.ADVENTURE);
         this.player.inventory.clear();
+
+        this.player.inventory.insertStack(this.primaryWeapon.build());
+        this.player.inventory.insertStack(this.grenadeWeapon.build());
     }
 
     public void onDeath(@NotNull ServerPlayerEntity player)
@@ -129,6 +134,9 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         if (this.primaryWeapon.matchesStack(heldStack)) {
             this.primaryWeapon.onUse(world, player, hand);
             return this.primaryWeapon.cooldown;
+        } else if (this.primaryWeapon.matchesStack(heldStack)) {
+            this.grenadeWeapon.onUse(world, player, hand);
+            return this.grenadeWeapon.cooldown;
         }
 
         return -1;
