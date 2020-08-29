@@ -133,9 +133,9 @@ public final class RayUtils
         double stepZ = delta.z / length;
 
         for (double d = 0.0; d <= length; d += 0.5) {
-            double x = origin.x + stepX;
-            double y = origin.y + stepY;
-            double z = origin.z + stepZ;
+            double x = origin.x + stepX * d;
+            double y = origin.y + stepY * d;
+            double z = origin.z + stepZ * d;
 
             ParticleS2CPacket packet = new ParticleS2CPacket(new DustParticleEffect(1.f, 0.647f, 0.f, .25f), false, x, y, z,
                     0.f, 0.f, 0.f, 0.5f, 1);
