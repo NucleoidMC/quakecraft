@@ -20,9 +20,12 @@ package me.lambdaurora.quakecraft.util;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
 import net.minecraft.particle.DustParticleEffect;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,6 +52,11 @@ public final class RayUtils
         Vec3d delta = sourceEntity.getRotationVec(1.0F).multiply(range);
 
         Vec3d target = origin.add(delta);
+
+        BlockHitResult blockHitResult = world.raycast(new RaycastContext(origin, target, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, sourceEntity));
+        if (blockHitResult.getType() != HitResult.Type.MISS) {
+            return null;
+        }
 
         double testMargin = Math.max(1.0, margin);
 
@@ -94,6 +102,11 @@ public final class RayUtils
 
         Vec3d target = origin.add(delta);
 
+        BlockHitResult blockHitResult = world.getWorld().raycast(new RaycastContext(origin, target, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, source));
+        if (blockHitResult.getType() != HitResult.Type.MISS) {
+            target = blockHitResult.getPos();
+        }
+
         drawRay(world, origin, target);
     }
 
@@ -102,6 +115,11 @@ public final class RayUtils
         Vec3d origin = source.getCameraPosVec(1.f).subtract(0, 0.5, 0);
 
         Vec3d end = target.getCameraPosVec(1.f).subtract(0, 0.5, 0);
+
+        BlockHitResult blockHitResult = world.getWorld().raycast(new RaycastContext(origin, end, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, source));
+        if (blockHitResult.getType() != HitResult.Type.MISS) {
+            end = blockHitResult.getPos();
+        }
 
         drawRay(world, origin, end);
     }
