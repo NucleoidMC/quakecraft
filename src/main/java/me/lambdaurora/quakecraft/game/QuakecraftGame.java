@@ -32,6 +32,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -115,6 +116,7 @@ public class QuakecraftGame
             game.on(PlayerDamageListener.EVENT, active::onDamage);
             game.on(PlayerDeathListener.EVENT, active::onPlayerDeath);
 
+            game.on(UseBlockListener.EVENT, active::onUseBlock);
             game.on(UseItemListener.EVENT, active::onUseItem);
             game.on(HandSwingListener.EVENT, active::onSwingHand);
         });
@@ -198,6 +200,11 @@ public class QuakecraftGame
 
     private void onSwingHand(@NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
+    }
+
+    private ActionResult onUseBlock(ServerPlayerEntity playerEntity, Hand hand, BlockHitResult blockHitResult)
+    {
+        return ActionResult.FAIL;
     }
 
     private @NotNull TypedActionResult<ItemStack> onUseItem(@NotNull ServerPlayerEntity player, @NotNull Hand hand)

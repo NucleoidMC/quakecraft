@@ -26,16 +26,14 @@ import net.minecraft.tag.ItemTags;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameOpenContext;
 import xyz.nucleoid.plasmid.game.GameWaitingLobby;
 import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.game.StartResult;
-import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
-import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
-import xyz.nucleoid.plasmid.game.event.RequestStartListener;
-import xyz.nucleoid.plasmid.game.event.UseItemListener;
+import xyz.nucleoid.plasmid.game.event.*;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
 import xyz.nucleoid.plasmid.world.bubble.BubbleWorldConfig;
@@ -85,19 +83,19 @@ public class QuakecraftWaiting
                     game.setRule(GameRule.FALL_DAMAGE, RuleResult.DENY);
                     game.setRule(GameRule.HUNGER, RuleResult.DENY);
                     game.setRule(GameRule.THROW_ITEMS, RuleResult.DENY);
-                    game.setRule(GameRule.INTERACTION, RuleResult.DENY);
+                    game.setRule(GameRule.INTERACTION, RuleResult.ALLOW);
 
                     game.on(RequestStartListener.EVENT, waiting::requestStart);
 
                     game.on(PlayerAddListener.EVENT, waiting::addPlayer);
                     game.on(PlayerDeathListener.EVENT, waiting::onPlayerDeath);
 
+                    game.on(UseBlockListener.EVENT, waiting::onUseBlock);
                     game.on(UseItemListener.EVENT, waiting::onUseItem);
                 });
             });
         });
     }
-
 
     private StartResult requestStart()
     {
@@ -120,6 +118,11 @@ public class QuakecraftWaiting
     private @NotNull ActionResult onPlayerDeath(@NotNull ServerPlayerEntity player, @NotNull DamageSource source)
     {
         this.spawnPlayer(player);
+        return ActionResult.FAIL;
+    }
+
+    private ActionResult onUseBlock(ServerPlayerEntity playerEntity, Hand hand, BlockHitResult blockHitResult)
+    {
         return ActionResult.FAIL;
     }
 

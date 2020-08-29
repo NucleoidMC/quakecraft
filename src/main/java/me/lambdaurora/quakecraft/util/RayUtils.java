@@ -137,8 +137,8 @@ public final class RayUtils
             double y = origin.y + stepY * d;
             double z = origin.z + stepZ * d;
 
-            ParticleS2CPacket packet = new ParticleS2CPacket(new DustParticleEffect(1.f, 0.647f, 0.f, .25f), false, x, y, z,
-                    0.f, 0.f, 0.f, 0.5f, 1);
+            ParticleS2CPacket packet = new ParticleS2CPacket(new DustParticleEffect(1.f, 0.647f, 0.f, .5f), false, x, y, z,
+                    0.f, 0.f, 0.f, 0.5f, 3);
             world.getPlayerSet().sendPacket(packet);
         }
     }
