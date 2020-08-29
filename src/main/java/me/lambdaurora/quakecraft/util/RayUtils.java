@@ -53,11 +53,6 @@ public final class RayUtils
 
         Vec3d target = origin.add(delta);
 
-        BlockHitResult blockHitResult = world.raycast(new RaycastContext(origin, target, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, sourceEntity));
-        if (blockHitResult.getType() != HitResult.Type.MISS) {
-            return null;
-        }
-
         double testMargin = Math.max(1.0, margin);
 
         Box testBox = sourceEntity.getBoundingBox()
@@ -89,6 +84,11 @@ public final class RayUtils
         }
 
         if (hitEntity == null) {
+            return null;
+        }
+
+        BlockHitResult blockHitResult = world.raycast(new RaycastContext(origin, target, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, sourceEntity));
+        if (blockHitResult.getType() != HitResult.Type.MISS) {
             return null;
         }
 
@@ -126,11 +126,18 @@ public final class RayUtils
 
     public static void drawRay(@NotNull GameWorld world, @NotNull Vec3d origin, @NotNull Vec3d target)
     {
-        double range = Math.abs(target.lengthSquared() - origin.lengthSquared());
-        for (double d = 0.0; d < range; d += 1.0) {
-            Vec3d point = origin.add(target.subtract(origin).multiply(d / range));
+        Vec3d delta = target.subtract(origin);
+        double length = delta.length();
+        double stepX = delta.x / length;
+        double stepY = delta.y / length;
+        double stepZ = delta.z / length;
 
-            ParticleS2CPacket packet = new ParticleS2CPacket(new DustParticleEffect(1.f, 0.647f, 0.f, .25f), false, point.x, point.y, point.z,
+        for (double d = 0.0; d <= length; d += 0.5) {
+            double x = origin.x + stepX;
+            double y = origin.y + stepY;
+            double z = origin.z + stepZ;
+
+            ParticleS2CPacket packet = new ParticleS2CPacket(new DustParticleEffect(1.f, 0.647f, 0.f, .25f), false, x, y, z,
                     0.f, 0.f, 0.f, 0.5f, 1);
             world.getPlayerSet().sendPacket(packet);
         }

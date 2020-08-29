@@ -37,7 +37,7 @@ public class ShooterWeapon extends Weapon
     @Override
     public @NotNull ActionResult onUse(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
-        EntityHitResult result = RayUtils.raycastEntity(player, 100.0, 0.5, QuakecraftConstants.PLAYER_PREDICATE);
+        EntityHitResult result = RayUtils.raycastEntity(player, 80.0, 0.5, QuakecraftConstants.PLAYER_PREDICATE);
 
         if (result != null) {
             ServerPlayerEntity hitPlayer = (ServerPlayerEntity) result.getEntity();
@@ -50,7 +50,7 @@ public class ShooterWeapon extends Weapon
             return ActionResult.SUCCESS;
         }
 
-        RayUtils.drawRay(world, player, 100.0);
+        RayUtils.drawRay(world, player, 80.0);
 
         return super.onUse(world, player, hand);
     }
