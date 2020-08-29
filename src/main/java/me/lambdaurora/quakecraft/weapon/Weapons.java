@@ -28,4 +28,6 @@ public final class Weapons
 
     public static final ShooterWeapon BASE_SHOOTER = new ShooterWeapon(Items.STONE_HOE, 2 * 20 + 10);
     public static final ShooterWeapon ADVANCED_SHOOTER = new ShooterWeapon(Items.IRON_HOE, 30);
+
+    public static final GrenadeWeapon BASE_GRENADE = new GrenadeWeapon(Items.SNOWBALL, 40);
 }

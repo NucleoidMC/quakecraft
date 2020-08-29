@@ -20,16 +20,11 @@ package me.lambdaurora.quakecraft.game;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
-import me.lambdaurora.quakecraft.mixin.FireworkRocketEntityAccessor;
 import me.lambdaurora.quakecraft.weapon.Weapons;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.ItemCooldownManager;
-import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
@@ -47,6 +42,7 @@ import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -171,7 +167,7 @@ public class QuakecraftGame
 
     private boolean onDamage(ServerPlayerEntity player, DamageSource source, float amount)
     {
-        return source.isExplosive();
+        return source.isExplosive() && !(source.getAttacker() instanceof ServerPlayerEntity);
     }
 
     private @NotNull ActionResult onPlayerDeath(@NotNull ServerPlayerEntity player, @NotNull DamageSource source)
@@ -187,19 +183,8 @@ public class QuakecraftGame
                         .append(new LiteralText(" killed ").formatted(Formatting.GRAY))
                         .append(player.getDisplayName())
                         .append(new LiteralText(".").formatted(Formatting.GRAY)));
-                ItemStack fireworkStack = new ItemStack(Items.FIREWORK_ROCKET);
-                CompoundTag tag = fireworkStack.getOrCreateSubTag("Fireworks");
-                tag.putByte("Flight", (byte) 0);
-                ListTag explosions = new ListTag();
-                CompoundTag explosion = new CompoundTag();
-                explosion.putByte("Type", (byte) 0);
-                explosion.putIntArray("Colors", new int[]{15435844, 11743532});
-                explosions.add(explosion);
-                tag.put("Explosions", explosions);
-                FireworkRocketEntity firework = new FireworkRocketEntity(this.world.getWorld(), player.getX(), player.getY() + 1.0, player.getZ(), fireworkStack);
-                firework.setSilent(true);
-                ((FireworkRocketEntityAccessor) firework).setLifeTime(0);
-                this.world.getWorld().spawnEntity(firework);
+
+                this.getOptParticipant(player).ifPresent(participant -> participant.onDeath(player));
             }
 
             player.setAttacker(null);
@@ -256,6 +241,11 @@ public class QuakecraftGame
     public @Nullable QuakecraftPlayer getParticipant(@NotNull ServerPlayerEntity player)
     {
         return this.participants.get(player.getUuid());
+    }
+
+    public @NotNull Optional<QuakecraftPlayer> getOptParticipant(@NotNull ServerPlayerEntity player)
+    {
+        return Optional.ofNullable(this.getParticipant(player));
     }
 
     public @NotNull Collection<QuakecraftPlayer> getParticipants()

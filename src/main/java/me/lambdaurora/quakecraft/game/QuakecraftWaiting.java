@@ -20,8 +20,12 @@ package me.lambdaurora.quakecraft.game;
 import me.lambdaurora.quakecraft.game.map.MapGenerator;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.tag.ItemTags;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameOpenContext;
@@ -31,6 +35,7 @@ import xyz.nucleoid.plasmid.game.StartResult;
 import xyz.nucleoid.plasmid.game.event.PlayerAddListener;
 import xyz.nucleoid.plasmid.game.event.PlayerDeathListener;
 import xyz.nucleoid.plasmid.game.event.RequestStartListener;
+import xyz.nucleoid.plasmid.game.event.UseItemListener;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
 import xyz.nucleoid.plasmid.world.bubble.BubbleWorldConfig;
@@ -86,6 +91,8 @@ public class QuakecraftWaiting
 
                     game.on(PlayerAddListener.EVENT, waiting::addPlayer);
                     game.on(PlayerDeathListener.EVENT, waiting::onPlayerDeath);
+
+                    game.on(UseItemListener.EVENT, waiting::onUseItem);
                 });
             });
         });
@@ -101,7 +108,7 @@ public class QuakecraftWaiting
 
     private void spawnPlayer(@NotNull ServerPlayerEntity player)
     {
-        player.setGameMode(GameMode.ADVENTURE);
+        this.spawnLogic.resetWaitingPlayer(player);
         this.spawnLogic.spawnWaitingPlayer(player);
     }
 
@@ -110,9 +117,21 @@ public class QuakecraftWaiting
         this.spawnPlayer(player);
     }
 
-    private ActionResult onPlayerDeath(@NotNull ServerPlayerEntity player, @NotNull DamageSource source)
+    private @NotNull ActionResult onPlayerDeath(@NotNull ServerPlayerEntity player, @NotNull DamageSource source)
     {
         this.spawnPlayer(player);
         return ActionResult.FAIL;
+    }
+
+    private @NotNull TypedActionResult<ItemStack> onUseItem(@NotNull ServerPlayerEntity player, @NotNull Hand hand)
+    {
+        ItemStack heldStack = player.getStackInHand(hand);
+
+        if (heldStack.getItem().isIn(ItemTags.BEDS)) {
+            this.world.removePlayer(player);
+            return TypedActionResult.success(heldStack);
+        }
+
+        return TypedActionResult.pass(ItemStack.EMPTY);
     }
 }

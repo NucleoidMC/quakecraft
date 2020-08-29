@@ -18,13 +18,19 @@
 package me.lambdaurora.quakecraft.game;
 
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.util.BlockBounds;
+import xyz.nucleoid.plasmid.util.ItemStackBuilder;
 
 /**
  * Represents the Quakecraft spawn logic.
@@ -48,6 +54,17 @@ public class QuakecraftSpawnLogic
     public void spawnPlayer(@NotNull ServerPlayerEntity player)
     {
 
+    }
+
+    public void resetWaitingPlayer(@NotNull ServerPlayerEntity player)
+    {
+        player.setGameMode(GameMode.ADVENTURE);
+        player.inventory.clear();
+
+        ItemStack leaveGame = ItemStackBuilder.of(Items.RED_BED)
+                .setName(new LiteralText("Leave Lobby").formatted(Formatting.YELLOW))
+                .build();
+        player.inventory.insertStack(8, leaveGame);
     }
 
     /**

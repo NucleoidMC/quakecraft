@@ -18,12 +18,18 @@
 package me.lambdaurora.quakecraft.game;
 
 import me.lambdaurora.quakecraft.QuakecraftConstants;
+import me.lambdaurora.quakecraft.mixin.FireworkRocketEntityAccessor;
 import me.lambdaurora.quakecraft.weapon.Weapon;
 import me.lambdaurora.quakecraft.weapon.Weapons;
+import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Hand;
+import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.plasmid.game.GameWorld;
@@ -39,12 +45,13 @@ import java.util.UUID;
  */
 public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
 {
-    private final ServerWorld world;
-    public final  UUID        uuid;
-    public final  String      name;
-    public final  Weapon      primaryWeapon;
-    private       long        respawnTime = -1;
-    private       int         kills       = 0;
+    private final ServerWorld        world;
+    public final  UUID               uuid;
+    public final  String             name;
+    public final  Weapon             primaryWeapon;
+    private       ServerPlayerEntity player;
+    private       long               respawnTime = -1;
+    private       int                kills       = 0;
 
     public QuakecraftPlayer(@NotNull ServerPlayerEntity player)
     {
@@ -52,6 +59,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         this.uuid = player.getUuid();
         this.name = player.getEntityName();
         this.primaryWeapon = Weapons.ADVANCED_SHOOTER;
+        this.player = player;
     }
 
     public int getKills()
@@ -67,6 +75,37 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
     public boolean hasWon()
     {
         return this.kills >= 24;
+    }
+
+    public boolean hasTeam()
+    {
+        // @TODO team management
+        return false;
+    }
+
+    public void reset(@NotNull ServerPlayerEntity player)
+    {
+        this.player = player;
+
+        this.player.setGameMode(GameMode.ADVENTURE);
+        this.player.inventory.clear();
+    }
+
+    public void onDeath(@NotNull ServerPlayerEntity player)
+    {
+        ItemStack fireworkStack = new ItemStack(Items.FIREWORK_ROCKET);
+        CompoundTag tag = fireworkStack.getOrCreateSubTag("Fireworks");
+        tag.putByte("Flight", (byte) 0);
+        ListTag explosions = new ListTag();
+        CompoundTag explosion = new CompoundTag();
+        explosion.putByte("Type", (byte) 0);
+        explosion.putIntArray("Colors", new int[]{15435844, 11743532});
+        explosions.add(explosion);
+        tag.put("Explosions", explosions);
+        FireworkRocketEntity firework = new FireworkRocketEntity(this.world, player.getX(), player.getY() + 1.0, player.getZ(), fireworkStack);
+        firework.setSilent(true);
+        ((FireworkRocketEntityAccessor) firework).setLifeTime(0);
+        this.world.spawnEntity(firework);
     }
 
     public void startRespawn(long time)
@@ -97,7 +136,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
 
     public @Nullable ServerPlayerEntity getPlayer()
     {
-        return this.world.getServer().getPlayerManager().getPlayer(this.uuid);
+        return this.player;
     }
 
     @Override
