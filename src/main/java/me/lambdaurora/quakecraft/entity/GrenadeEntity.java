@@ -41,7 +41,7 @@ public class GrenadeEntity extends SnowballEntity
 
     public void detonate()
     {
-        this.getEntityWorld().createExplosion(this, this.getX(), this.getY(), this.getZ(), 1.f, Explosion.DestructionType.NONE);
+        this.getEntityWorld().createExplosion(this, this.getX(), this.getY(), this.getZ(), 1.25f, Explosion.DestructionType.NONE);
     }
 
     @Override

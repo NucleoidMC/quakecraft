@@ -21,7 +21,7 @@ repositories {
         url = 'https://aperlambda.github.io/maven'
     }
     maven { url = "https://jitpack.io/" }
-	maven { url = "https://maven.gegy.dev/" }
+    maven { url = "https://maven.gegy.dev/" }
 }
 
 configurations {
@@ -95,6 +95,7 @@ task shadowRemapJar(type: RemapJarTask) {
     addNestedDependencies = true
 }
 
+build.dependsOn shadowRemapJar
 
 // Configure the maven publication.
 publishing {

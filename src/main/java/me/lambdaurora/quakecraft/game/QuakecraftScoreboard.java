@@ -57,12 +57,22 @@ public class QuakecraftScoreboard implements AutoCloseable
         lines.add("");
 
         this.game.getParticipants().stream().sorted(Comparator.reverseOrder()).forEach(player -> {
-            lines.add(String.format("%s%s%s: %s%d",
-                    Formatting.GRAY,
-                    player.name,
-                    Formatting.RESET,
-                    Formatting.AQUA,
-                    player.getKills()));
+            if (player.hasLeft()) {
+                lines.add(String.format("%s%s%s%s: %s%d",
+                        Formatting.GRAY,
+                        Formatting.STRIKETHROUGH,
+                        player.name,
+                        Formatting.RESET,
+                        Formatting.AQUA,
+                        player.getKills()));
+            } else {
+                lines.add(String.format("%s%s%s: %s%d",
+                        Formatting.GRAY,
+                        player.name,
+                        Formatting.RESET,
+                        Formatting.AQUA,
+                        player.getKills()));
+            }
         });
 
         this.sidebar.set(lines.toArray(new String[0]));

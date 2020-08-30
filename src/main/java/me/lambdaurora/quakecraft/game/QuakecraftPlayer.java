@@ -17,17 +17,16 @@
 
 package me.lambdaurora.quakecraft.game;
 
+import me.lambdaurora.quakecraft.Quakecraft;
 import me.lambdaurora.quakecraft.QuakecraftConstants;
-import me.lambdaurora.quakecraft.mixin.FireworkRocketEntityAccessor;
 import me.lambdaurora.quakecraft.weapon.Weapon;
 import me.lambdaurora.quakecraft.weapon.Weapons;
-import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.NotNull;
@@ -51,8 +50,11 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
     public final  Weapon             primaryWeapon;
     public final  Weapon             grenadeWeapon;
     private       ServerPlayerEntity player;
-    private       long               respawnTime = -1;
-    private       int                kills       = 0;
+    private       long               respawnTime      = -1;
+    private       int                kills            = 0;
+    private       int                killsWithinATick = 0;
+
+    private boolean left = false;
 
     public QuakecraftPlayer(@NotNull ServerPlayerEntity player)
     {
@@ -71,7 +73,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
 
     public void incrementKills()
     {
-        this.kills++;
+        this.killsWithinATick++;
     }
 
     public boolean hasWon()
@@ -85,9 +87,29 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         return false;
     }
 
+    public boolean hasLeft()
+    {
+        return this.left;
+    }
+
+    public void leave()
+    {
+        this.left = true;
+    }
+
+    /**
+     * Resets the player.
+     *
+     * @param player The player instance.
+     */
     public void reset(@NotNull ServerPlayerEntity player)
     {
         this.player = player;
+
+        if (this.left) {
+            this.player.setGameMode(GameMode.SPECTATOR);
+            return;
+        }
 
         this.player.setGameMode(GameMode.ADVENTURE);
         this.player.inventory.clear();
@@ -96,21 +118,44 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         this.player.inventory.insertStack(this.grenadeWeapon.build());
     }
 
+    public void tick(@NotNull GameWorld world)
+    {
+        this.kills += this.killsWithinATick;
+        if (this.killsWithinATick >= 2) {
+            switch (this.killsWithinATick) {
+                case 2:
+                    world.getPlayerSet().sendMessage(new LiteralText("Double-kill by ").formatted(Formatting.RED, Formatting.BOLD)
+                            .append(this.player.getDisplayName())
+                            .append("!"));
+                    break;
+                case 3:
+                    world.getPlayerSet().sendMessage(new LiteralText("Triple-kill by ").formatted(Formatting.RED, Formatting.BOLD)
+                            .append(this.player.getDisplayName())
+                            .append("!"));
+                    break;
+                case 4:
+                    world.getPlayerSet().sendMessage(new LiteralText("Quadruple-kill by ").formatted(Formatting.RED, Formatting.BOLD)
+                            .append(this.player.getDisplayName())
+                            .append("!"));
+                    break;
+                case 5:
+                    world.getPlayerSet().sendMessage(new LiteralText("Quintuple-kill by ").formatted(Formatting.RED, Formatting.BOLD)
+                            .append(this.player.getDisplayName())
+                            .append("!"));
+                default:
+                    world.getPlayerSet().sendMessage(new LiteralText("Too many kills at once by ").formatted(Formatting.RED, Formatting.BOLD)
+                            .append(this.player.getDisplayName())
+                            .append("!"));
+                    break;
+            }
+        }
+
+        this.killsWithinATick = 0;
+    }
+
     public void onDeath(@NotNull ServerPlayerEntity player)
     {
-        ItemStack fireworkStack = new ItemStack(Items.FIREWORK_ROCKET);
-        CompoundTag tag = fireworkStack.getOrCreateSubTag("Fireworks");
-        tag.putByte("Flight", (byte) 0);
-        ListTag explosions = new ListTag();
-        CompoundTag explosion = new CompoundTag();
-        explosion.putByte("Type", (byte) 0);
-        explosion.putIntArray("Colors", new int[]{15435844, 11743532});
-        explosions.add(explosion);
-        tag.put("Explosions", explosions);
-        FireworkRocketEntity firework = new FireworkRocketEntity(this.world, player.getX(), player.getY() + 1.0, player.getZ(), fireworkStack);
-        firework.setSilent(true);
-        ((FireworkRocketEntityAccessor) firework).setLifeTime(0);
-        this.world.spawnEntity(firework);
+        Quakecraft.spawnFirework(this.world, player.getX(), player.getY(), player.getZ(), new int[]{15435844, 11743532}, true, 0);
     }
 
     public void startRespawn(long time)
@@ -140,6 +185,19 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         }
 
         return -1;
+    }
+
+    /**
+     * Returns the display name of the player.
+     *
+     * @return The display name.
+     */
+    public @NotNull Text getDisplayName()
+    {
+        if (this.player != null)
+            return this.player.getDisplayName();
+
+        return new LiteralText(this.name);
     }
 
     public @Nullable ServerPlayerEntity getPlayer()

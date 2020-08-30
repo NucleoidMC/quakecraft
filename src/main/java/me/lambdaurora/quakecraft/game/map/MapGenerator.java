@@ -19,12 +19,18 @@ package me.lambdaurora.quakecraft.game.map;
 
 import me.lambdaurora.quakecraft.Quakecraft;
 import net.minecraft.text.LiteralText;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import org.aperlambda.lambdacommon.utils.Pair;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameOpenException;
 import xyz.nucleoid.plasmid.game.map.template.MapTemplateSerializer;
 import xyz.nucleoid.plasmid.util.BlockBounds;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 public class MapGenerator
 {
@@ -35,20 +41,44 @@ public class MapGenerator
         this.config = config;
     }
 
-    public CompletableFuture<QuakecraftMap> create() throws GameOpenException
+    public @NotNull CompletableFuture<QuakecraftMap> create() throws GameOpenException
     {
         return MapTemplateSerializer.INSTANCE.load(this.config.id).thenApply(template -> {
-            BlockBounds spawn = template.getFirstRegion("spawn");
+            BlockBounds spawn = template.getFirstRegion("waiting_spawn");
             if (spawn == null) {
-                Quakecraft.get().logger.error("No spawn is defined on the map! The game will not work.");
-                throw new GameOpenException(new LiteralText("no spawn defined"));
+                spawn = template.getFirstRegion("spawn");
+                if (spawn == null) {
+                    Quakecraft.get().logger.error("No spawn is defined on the map! The game will not work.");
+                    throw new GameOpenException(new LiteralText("No spawn defined."));
+                }
             }
 
-            QuakecraftMap map = new QuakecraftMap(template, spawn.offset(QuakecraftMap.ORIGIN));
+            List<Pair<BlockPos, Direction>> spawns = new ArrayList<>();
+
+            // @TODO remove
+            this.loadSpawns(template.getRegions("spawn"), spawns, Direction.NORTH);
+
+            this.loadSpawns(template.getRegions("spawn_north"), spawns, Direction.NORTH);
+            this.loadSpawns(template.getRegions("spawn_east"), spawns, Direction.EAST);
+            this.loadSpawns(template.getRegions("spawn_south"), spawns, Direction.SOUTH);
+            this.loadSpawns(template.getRegions("spawn_west"), spawns, Direction.WEST);
+
+            if (spawns.size() == 0) {
+                Quakecraft.get().logger.error("No player spawns are defined on the map! The game will not work.");
+                throw new GameOpenException(new LiteralText("No player spawn defined."));
+            }
+
+            QuakecraftMap map = new QuakecraftMap(template, spawn.offset(QuakecraftMap.ORIGIN), spawns);
 
             //template.setBiome(BuiltinBiomes.PLAINS);
 
             return map;
         });
+    }
+
+    private void loadSpawns(@NotNull Stream<BlockBounds> stream, @NotNull List<Pair<BlockPos, Direction>> spawns, @NotNull Direction direction)
+    {
+        stream.map(s -> new BlockPos(s.offset(QuakecraftMap.ORIGIN).getCenter()))
+                .forEach(s -> spawns.add(Pair.of(s, direction)));
     }
 }

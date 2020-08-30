@@ -19,11 +19,15 @@ package me.lambdaurora.quakecraft.game.map;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
+import org.aperlambda.lambdacommon.utils.Pair;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.map.template.MapTemplate;
 import xyz.nucleoid.plasmid.game.map.template.TemplateChunkGenerator;
 import xyz.nucleoid.plasmid.util.BlockBounds;
+
+import java.util.List;
 
 /**
  * Represents the Quakecraft map.
@@ -34,14 +38,37 @@ import xyz.nucleoid.plasmid.util.BlockBounds;
  */
 public class QuakecraftMap
 {
-    public static final BlockPos    ORIGIN = new BlockPos(0, 150, 0); // @TODO BlockPos.ORIGIN when having own maps
-    private final       MapTemplate template;
-    public final        BlockBounds spawn;
+    public static final BlockPos                        ORIGIN = new BlockPos(0, 150, 0); // @TODO BlockPos.ORIGIN when having own maps
+    private final       MapTemplate                     template;
+    public final        BlockBounds                     waitingSpawn;
+    private final       List<Pair<BlockPos, Direction>> spawns;
 
-    public QuakecraftMap(@NotNull MapTemplate template, @NotNull BlockBounds spawn)
+    public QuakecraftMap(@NotNull MapTemplate template, @NotNull BlockBounds waitingSpawn, @NotNull List<Pair<BlockPos, Direction>> spawns)
     {
         this.template = template;
-        this.spawn = spawn;
+        this.waitingSpawn = waitingSpawn;
+        this.spawns = spawns;
+    }
+
+    /**
+     * Returns the spawn count.
+     *
+     * @return The spawn count.
+     */
+    public int getSpawnCount()
+    {
+        return this.spawns.size();
+    }
+
+    /**
+     * Returns a spawn assigned to the specified index.
+     *
+     * @param index The index of the spawn.
+     * @return The spawn position.
+     */
+    public Pair<BlockPos, Direction> getSpawn(int index)
+    {
+        return this.spawns.get(index);
     }
 
     public @NotNull ChunkGenerator asGenerator(@NotNull MinecraftServer server)

@@ -25,12 +25,16 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameMode;
+import org.aperlambda.lambdacommon.utils.Pair;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.util.BlockBounds;
 import xyz.nucleoid.plasmid.util.ItemStackBuilder;
+
+import java.util.Random;
 
 /**
  * Represents the Quakecraft spawn logic.
@@ -41,9 +45,10 @@ import xyz.nucleoid.plasmid.util.ItemStackBuilder;
  */
 public class QuakecraftSpawnLogic
 {
-    private final GameWorld     world;
-    private final QuakecraftMap map;
-    private final int           lastSpawn = -1;
+    private static final Random        RANDOM    = new Random();
+    private final        GameWorld     world;
+    private final        QuakecraftMap map;
+    private              int           lastSpawn = -1;
 
     public QuakecraftSpawnLogic(@NotNull GameWorld world, @NotNull QuakecraftMap map)
     {
@@ -53,7 +58,19 @@ public class QuakecraftSpawnLogic
 
     public void spawnPlayer(@NotNull ServerPlayerEntity player)
     {
+        int index = 0;
+        if (this.map.getSpawnCount() > 1) {
+            index = RANDOM.nextInt(this.map.getSpawnCount() - 1);
+            if (index >= lastSpawn)
+                index++;
+            if (index >= this.map.getSpawnCount())
+                index = 0;
+        }
 
+        this.lastSpawn = index;
+
+        Pair<BlockPos, Direction> spawnPos = this.map.getSpawn(index);
+        player.teleport(this.world.getWorld(), spawnPos.getFirst().getX(), spawnPos.getFirst().getY(), spawnPos.getFirst().getZ(), spawnPos.getSecond().asRotation(), 0.f);
     }
 
     public void resetWaitingPlayer(@NotNull ServerPlayerEntity player)
@@ -76,7 +93,7 @@ public class QuakecraftSpawnLogic
     {
         ServerWorld world = this.world.getWorld();
 
-        BlockBounds bounds = this.map.spawn;
+        BlockBounds bounds = this.map.waitingSpawn;
         BlockPos min = bounds.getMin();
         BlockPos max = bounds.getMax();
 

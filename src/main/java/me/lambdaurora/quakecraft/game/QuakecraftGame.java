@@ -19,8 +19,8 @@ package me.lambdaurora.quakecraft.game;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import me.lambdaurora.quakecraft.Quakecraft;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
-import me.lambdaurora.quakecraft.weapon.Weapons;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.ItemCooldownManager;
@@ -28,6 +28,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -42,10 +43,7 @@ import xyz.nucleoid.plasmid.game.player.JoinResult;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Represents the Quakecraft running game.
@@ -62,7 +60,12 @@ public class QuakecraftGame
     private final QuakecraftSpawnLogic                     spawnLogic;
     private final QuakecraftScoreboard                     scoreboard;
     private final Object2ObjectMap<UUID, QuakecraftPlayer> participants;
+    private       boolean                                  running = false;
+    private       boolean                                  end     = false;
     private       int                                      time;
+    private       int                                      endTime = 10 * 20;
+
+    private Set<QuakecraftPlayer> winners = new HashSet<>();
 
     private QuakecraftGame(@NotNull QuakecraftConfig config, @NotNull GameWorld world, @NotNull QuakecraftMap map, @NotNull QuakecraftSpawnLogic spawnLogic,
                            @NotNull Set<ServerPlayerEntity> participants)
@@ -128,6 +131,7 @@ public class QuakecraftGame
             this.spawnParticipant(player);
         }
         this.scoreboard.update();
+        this.running = true;
     }
 
     private void onClose()
@@ -137,38 +141,79 @@ public class QuakecraftGame
 
     private void tick()
     {
-        this.participants.forEach((uuid, participant) -> {
-            if (participant.hasWon()) {
-                onWin(participant);
-            }
-        });
-        this.time--;
-        this.scoreboard.update();
+        if (this.running) {
+            int[] activePlayer = new int[]{0};
+            this.participants.forEach((uuid, participant) -> {
+                if (participant.hasLeft())
+                    return;
 
-        if (this.time <= 0) {
-            this.world.getPlayerSet().sendMessage(new LiteralText("nobody has won.").formatted(Formatting.RED));
-            this.world.close();
+                participant.tick(this.world);
+                activePlayer[0]++;
+
+                if (participant.hasWon()) {
+                    onWin(participant);
+                }
+            });
+            this.time--;
+
+            if (activePlayer[0] <= 1) {
+                this.world.getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.end.not_enough_players").formatted(Formatting.RED));
+            }
+
+            if (this.time <= 0) {
+                this.world.getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.end.nobody_won").formatted(Formatting.RED));
+                this.world.close();
+            }
+        } else if (this.end) {
+            this.endTime--;
+
+            if (this.endTime % 20 == 0) {
+                this.winners.forEach(player -> {
+                    if (!player.hasLeft()) {
+                        ServerPlayerEntity mcPlayer = player.getPlayer();
+                        if (mcPlayer == null)
+                            return;
+
+                        Quakecraft.spawnFirework(this.world.getWorld(), mcPlayer.getX(), mcPlayer.getY(), mcPlayer.getZ(), new int[]{15435844, 11743532}, false, -1);
+                    }
+                });
+            }
+
+            if (this.endTime == 0)
+                this.world.close();
         }
+
+        this.scoreboard.update();
     }
 
     private void onWin(@NotNull QuakecraftPlayer winner)
     {
-        this.world.getPlayerSet().sendMessage(new LiteralText(winner.name + " has won \\o/"));
-        this.world.close();
+        this.world.getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.end.win", winner.getDisplayName()).formatted(Formatting.GREEN));
+        this.end = true;
+        this.running = false;
+        this.winners.add(winner);
     }
 
     private void addPlayer(@NotNull ServerPlayerEntity player)
     {
-        this.spawnLogic.spawnPlayer(player);
+        this.spawnParticipant(player);
     }
 
     private void removePlayer(@NotNull ServerPlayerEntity player)
     {
-
+        QuakecraftPlayer participant = this.participants.get(player.getUuid());
+        if (participant != null) {
+            participant.leave();
+        }
     }
 
     private boolean onDamage(ServerPlayerEntity player, DamageSource source, float amount)
     {
+        if (source.isExplosive() && source.getAttacker() instanceof ServerPlayerEntity && source.getAttacker() != player) {
+            player.setAttacker((LivingEntity) source.getAttacker());
+            ((ServerPlayerEntity) source.getAttacker()).setAttacking(player);
+            player.kill();
+        }
         return source.isExplosive() && !(source.getAttacker() instanceof ServerPlayerEntity);
     }
 
@@ -229,14 +274,14 @@ public class QuakecraftGame
 
     private void spawnParticipant(@NotNull ServerPlayerEntity player)
     {
-        player.setGameMode(GameMode.ADVENTURE);
-        player.inventory.clear();
-
         QuakecraftPlayer participant = this.getParticipant(player);
         if (participant != null) {
             participant.reset(player);
-        } else {
-            player.inventory.insertStack(Weapons.BASE_SHOOTER.build());
+            this.spawnLogic.spawnPlayer(player);
+        } else if (this.running) {
+            player.setGameMode(GameMode.SPECTATOR);
+            player.inventory.clear();
+            this.spawnLogic.spawnWaitingPlayer(player);
         }
     }
 
