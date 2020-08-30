@@ -134,7 +134,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         if (this.primaryWeapon.matchesStack(heldStack)) {
             this.primaryWeapon.onUse(world, player, hand);
             return this.primaryWeapon.cooldown;
-        } else if (this.primaryWeapon.matchesStack(heldStack)) {
+        } else if (this.grenadeWeapon.matchesStack(heldStack)) {
             this.grenadeWeapon.onUse(world, player, hand);
             return this.grenadeWeapon.cooldown;
         }

@@ -23,10 +23,16 @@ import net.minecraft.item.Item;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.hit.EntityHitResult;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameWorld;
 
+/**
+ * Represents a weapon that shoot.
+ *
+ * @author LambdAurora
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 public class ShooterWeapon extends Weapon
 {
     public ShooterWeapon(@NotNull Item item, int cooldown)
@@ -37,20 +43,16 @@ public class ShooterWeapon extends Weapon
     @Override
     public @NotNull ActionResult onUse(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
-        EntityHitResult result = RayUtils.raycastEntity(player, 80.0, 0.5, QuakecraftConstants.PLAYER_PREDICATE);
-
-        if (result != null) {
-            ServerPlayerEntity hitPlayer = (ServerPlayerEntity) result.getEntity();
-
-            RayUtils.drawRay(world, player, hitPlayer);
-
-            hitPlayer.setAttacker(player);
-            player.setAttacking(hitPlayer);
-            hitPlayer.kill();
-            return ActionResult.SUCCESS;
-        }
-
         RayUtils.drawRay(world, player, 80.0);
+
+        if (RayUtils.raycastEntities(player, 80.0, 0.5, QuakecraftConstants.PLAYER_PREDICATE,
+                entity -> {
+                    ServerPlayerEntity hitPlayer = (ServerPlayerEntity) entity;
+                    hitPlayer.setAttacker(player);
+                    player.setAttacking(hitPlayer);
+                    hitPlayer.kill();
+                }))
+            return ActionResult.SUCCESS;
 
         return super.onUse(world, player, hand);
     }

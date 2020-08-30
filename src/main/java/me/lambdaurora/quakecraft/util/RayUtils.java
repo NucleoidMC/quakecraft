@@ -32,13 +32,65 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.plasmid.game.GameWorld;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+/**
+ * Represents a ray utilities class.
+ *
+ * @author LambdAurora, Gegy
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 public final class RayUtils
 {
     private RayUtils()
     {
         throw new UnsupportedOperationException("RayUtils only contains static definitions.");
+    }
+
+    public static boolean raycastEntities(@NotNull Entity source, double range, double margin, @NotNull Predicate<Entity> predicate, @NotNull Consumer<Entity> consumer)
+    {
+        World world = source.getEntityWorld();
+
+        final Vec3d origin = source.getCameraPosVec(1.0F);
+        final Vec3d delta = source.getRotationVec(1.0F).multiply(range);
+
+        final Vec3d target = origin.add(delta);
+
+        final double testMargin = Math.max(1.0, margin);
+        final Box testBox = source.getBoundingBox()
+                .stretch(delta)
+                .expand(testMargin, testMargin, testMargin);
+
+        BlockHitResult blockHitResult = null;
+        double blockDistance = -1.0;
+
+        boolean success = false;
+
+        for (Entity entity : world.getOtherEntities(source, testBox, predicate)) {
+            Box targetBox = entity.getBoundingBox().expand(Math.max(entity.getTargetingMargin(), margin));
+
+            if (targetBox.contains(origin) || targetBox.raycast(origin, target).isPresent()) {
+                if (blockHitResult == null) {
+                    blockHitResult = world.raycast(new RaycastContext(origin, target, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, source));
+                }
+
+                if (blockHitResult.getType() != HitResult.Type.MISS) {
+                    if (blockDistance < 0.0) {
+                        blockDistance = source.squaredDistanceTo(blockHitResult.getPos());
+                    }
+
+                    if (source.squaredDistanceTo(entity) > blockDistance)
+                        continue;
+                }
+
+                success = true;
+                consumer.accept(entity);
+            }
+        }
+
+        return success;
     }
 
     /**
@@ -137,8 +189,8 @@ public final class RayUtils
             double y = origin.y + stepY * d;
             double z = origin.z + stepZ * d;
 
-            ParticleS2CPacket packet = new ParticleS2CPacket(new DustParticleEffect(1.f, 0.647f, 0.f, .5f), false, x, y, z,
-                    0.f, 0.f, 0.f, 0.5f, 3);
+            ParticleS2CPacket packet = new ParticleS2CPacket(new DustParticleEffect(1.f, 0.647f, 0.f, .75f), false, x, y, z,
+                    0.f, 0.f, 0.f, 1.f, 3);
             world.getPlayerSet().sendPacket(packet);
         }
     }
