@@ -25,7 +25,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
@@ -229,7 +231,8 @@ public class QuakecraftGame
         if (attacker != null) {
             QuakecraftPlayer other = this.participants.get(attacker.getUuid());
             if (other != null) {
-                attacker.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING, 2.f, 5.f);
+                ((ServerPlayerEntity) attacker).networkHandler.sendPacket(new PlaySoundS2CPacket(SoundEvents.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER,
+                        attacker.getX(), attacker.getY(), attacker.getZ(), 2.f, 5.f));
                 other.incrementKills();
                 this.world.getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.kill", attacker.getDisplayName(), player.getDisplayName())
                         .formatted(Formatting.GRAY));
@@ -257,6 +260,10 @@ public class QuakecraftGame
 
     private @NotNull TypedActionResult<ItemStack> onUseItem(@NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
+        if (hand == Hand.OFF_HAND) {
+            return TypedActionResult.fail(ItemStack.EMPTY);
+        }
+
         ItemStack heldStack = player.getStackInHand(hand);
 
         ItemCooldownManager cooldown = player.getItemCooldownManager();

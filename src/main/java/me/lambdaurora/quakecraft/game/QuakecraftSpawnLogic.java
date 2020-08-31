@@ -79,7 +79,7 @@ public class QuakecraftSpawnLogic
         player.inventory.clear();
 
         ItemStack leaveGame = ItemStackBuilder.of(Items.RED_BED)
-                .setName(new LiteralText("Leave Lobby").formatted(Formatting.YELLOW))
+                .setName(new LiteralText("Leave Lobby").formatted(Formatting.RESET, Formatting.YELLOW))
                 .build();
         player.inventory.insertStack(8, leaveGame);
     }

@@ -23,6 +23,8 @@ import me.lambdaurora.quakecraft.weapon.Weapon;
 import me.lambdaurora.quakecraft.weapon.Weapons;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -131,6 +133,8 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
             movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
             movementSpeedAttribute.addPersistentModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
         }
+
+        this.player.addStatusEffect(new StatusEffectInstance(StatusEffects.DOLPHINS_GRACE, 60 * 60 * 20));
     }
 
     public void tick(@NotNull GameWorld world)
