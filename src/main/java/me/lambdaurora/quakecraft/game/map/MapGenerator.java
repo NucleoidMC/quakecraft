@@ -55,9 +55,6 @@ public class MapGenerator
 
             List<Pair<BlockPos, Direction>> spawns = new ArrayList<>();
 
-            // @TODO remove
-            this.loadSpawns(template.getRegions("spawn"), spawns, Direction.NORTH);
-
             this.loadSpawns(template.getRegions("spawn_north"), spawns, Direction.NORTH);
             this.loadSpawns(template.getRegions("spawn_east"), spawns, Direction.EAST);
             this.loadSpawns(template.getRegions("spawn_south"), spawns, Direction.SOUTH);

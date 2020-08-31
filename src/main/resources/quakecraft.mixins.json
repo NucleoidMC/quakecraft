@@ -3,7 +3,8 @@
   "package": "me.lambdaurora.quakecraft.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "FireworkRocketEntityAccessor"
+    "FireworkRocketEntityAccessor",
+    "LivingEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -21,6 +21,8 @@ import me.lambdaurora.quakecraft.Quakecraft;
 import me.lambdaurora.quakecraft.QuakecraftConstants;
 import me.lambdaurora.quakecraft.weapon.Weapon;
 import me.lambdaurora.quakecraft.weapon.Weapons;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -95,6 +97,11 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
     public void leave()
     {
         this.left = true;
+
+        EntityAttributeInstance movementSpeedAttribute = this.player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+        if (movementSpeedAttribute != null) {
+            movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
+        }
     }
 
     /**
@@ -116,6 +123,13 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
 
         this.player.inventory.insertStack(this.primaryWeapon.build());
         this.player.inventory.insertStack(this.grenadeWeapon.build());
+
+        this.player.setVelocity(0, 0, 0);
+
+        EntityAttributeInstance movementSpeedAttribute = this.player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+        if (movementSpeedAttribute != null) {
+            movementSpeedAttribute.addPersistentModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
+        }
     }
 
     public void tick(@NotNull GameWorld world)
@@ -151,6 +165,14 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         }
 
         this.killsWithinATick = 0;
+    }
+
+    /**
+     * Fired when the game ends.
+     */
+    public void onEnd()
+    {
+        this.player.inventory.clear();
     }
 
     public void onDeath(@NotNull ServerPlayerEntity player)

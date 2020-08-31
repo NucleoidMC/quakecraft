@@ -27,7 +27,6 @@ import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
@@ -129,6 +128,7 @@ public class QuakecraftGame
     {
         for (ServerPlayerEntity player : this.world.getPlayers()) {
             this.spawnParticipant(player);
+            Quakecraft.get().addActivePlayer(player);
         }
         this.scoreboard.update();
         this.running = true;
@@ -158,11 +158,16 @@ public class QuakecraftGame
 
             if (activePlayer[0] <= 1) {
                 this.world.getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.end.not_enough_players").formatted(Formatting.RED));
+                this.world.close();
             }
 
             if (this.time <= 0) {
                 this.world.getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.end.nobody_won").formatted(Formatting.RED));
                 this.world.close();
+            }
+
+            if (this.end) {
+                this.participants.forEach((uuid, participant) -> participant.onEnd());
             }
         } else if (this.end) {
             this.endTime--;
@@ -205,6 +210,7 @@ public class QuakecraftGame
         if (participant != null) {
             participant.leave();
         }
+        Quakecraft.get().removeActivePlayer(player);
     }
 
     private boolean onDamage(ServerPlayerEntity player, DamageSource source, float amount)
@@ -225,11 +231,8 @@ public class QuakecraftGame
             if (other != null) {
                 attacker.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING, 2.f, 5.f);
                 other.incrementKills();
-                this.world.getPlayerSet().sendMessage(new LiteralText("")
-                        .append(attacker.getDisplayName())
-                        .append(new LiteralText(" killed ").formatted(Formatting.GRAY))
-                        .append(player.getDisplayName())
-                        .append(new LiteralText(".").formatted(Formatting.GRAY)));
+                this.world.getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.kill", attacker.getDisplayName(), player.getDisplayName())
+                        .formatted(Formatting.GRAY));
 
                 this.getOptParticipant(player).ifPresent(participant -> participant.onDeath(player));
             }

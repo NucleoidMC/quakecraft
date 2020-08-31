@@ -46,7 +46,7 @@ public class GrenadeWeapon extends Weapon
     {
         ItemStack heldStack = player.getStackInHand(hand);
 
-        GrenadeEntity grenade = new GrenadeEntity(world.getWorld(), player);
+        GrenadeEntity grenade = new GrenadeEntity(world.getWorld(), player, 60);
         grenade.setItem(heldStack);
         grenade.setProperties(player, player.pitch, player.yaw, 0.f, 1.5f, 1.f);
         world.getWorld().spawnEntity(grenade);

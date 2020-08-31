@@ -18,9 +18,11 @@
 package me.lambdaurora.quakecraft;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameMode;
 
+import java.util.UUID;
 import java.util.function.Predicate;
 
 /**
@@ -37,4 +39,9 @@ public class QuakecraftConstants
 
     public static final Predicate<Entity> PLAYER_PREDICATE = entity -> entity instanceof ServerPlayerEntity
             && ((ServerPlayerEntity) entity).interactionManager.getGameMode() != GameMode.SPECTATOR;
+
+    public static final EntityAttributeModifier PLAYER_MOVEMENT_SPEED_MODIFIER = new EntityAttributeModifier(UUID.fromString("91AEAA56-376B-4498-935B-2F7F68070635"),
+            "quakecraft.movement.speed",
+            2 * 0.20000000298023224D,
+            EntityAttributeModifier.Operation.MULTIPLY_TOTAL);
 }

@@ -26,12 +26,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents the Quakecraft minigame mod.
@@ -42,9 +46,10 @@ import xyz.nucleoid.plasmid.game.GameType;
  */
 public class Quakecraft implements ModInitializer
 {
-    public static final String     NAMESPACE = "quakecraft";
-    private static      Quakecraft INSTANCE;
-    public final        Logger     logger    = LogManager.getLogger(NAMESPACE);
+    public static final String                   NAMESPACE     = "quakecraft";
+    private static      Quakecraft               INSTANCE;
+    public final        Logger                   logger        = LogManager.getLogger(NAMESPACE);
+    private final       List<ServerPlayerEntity> activePlayers = new ArrayList<>();
 
     @Override
     public void onInitialize()
@@ -64,6 +69,21 @@ public class Quakecraft implements ModInitializer
     public void log(String info)
     {
         this.logger.info("[" + NAMESPACE + "] " + info);
+    }
+
+    public void addActivePlayer(@NotNull ServerPlayerEntity player)
+    {
+        this.activePlayers.add(player);
+    }
+
+    public void removeActivePlayer(@NotNull ServerPlayerEntity player)
+    {
+        this.activePlayers.remove(player);
+    }
+
+    public boolean isPlayerActive(@NotNull ServerPlayerEntity player)
+    {
+        return this.activePlayers.contains(player);
     }
 
     public static final Quakecraft get()

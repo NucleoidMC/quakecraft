@@ -34,14 +34,30 @@ import org.jetbrains.annotations.NotNull;
  */
 public class GrenadeEntity extends SnowballEntity
 {
-    public GrenadeEntity(@NotNull World world, @NotNull LivingEntity owner)
+    private final int lifetime;
+    private       int life = 0;
+
+    public GrenadeEntity(@NotNull World world, @NotNull LivingEntity owner, int lifetime)
     {
         super(world, owner);
+        this.lifetime = lifetime;
     }
 
     public void detonate()
     {
         this.getEntityWorld().createExplosion(this, this.getX(), this.getY(), this.getZ(), 1.25f, Explosion.DestructionType.NONE);
+    }
+
+    @Override
+    public void tick()
+    {
+        super.tick();
+
+        this.life++;
+        if (this.life >= this.lifetime) {
+            this.detonate();
+            this.kill();
+        }
     }
 
     @Override
