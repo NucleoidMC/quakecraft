@@ -128,6 +128,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
 
         EntityAttributeInstance movementSpeedAttribute = this.player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
         if (movementSpeedAttribute != null) {
+            movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
             movementSpeedAttribute.addPersistentModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
         }
     }
