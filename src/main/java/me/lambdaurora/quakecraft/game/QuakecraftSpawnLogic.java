@@ -40,34 +40,26 @@ import java.util.Random;
  * Represents the Quakecraft spawn logic.
  *
  * @author LambdAurora
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class QuakecraftSpawnLogic
 {
-    private static final Random        RANDOM    = new Random();
+    private static final Random        RANDOM = new Random();
     private final        GameWorld     world;
     private final        QuakecraftMap map;
-    private              int           lastSpawn = -1;
+    private final        SpawnCache    spawnCache;
 
     public QuakecraftSpawnLogic(@NotNull GameWorld world, @NotNull QuakecraftMap map)
     {
         this.world = world;
         this.map = map;
+        this.spawnCache = new SpawnCache(map.getSpawnCount() / 2);
     }
 
     public void spawnPlayer(@NotNull ServerPlayerEntity player)
     {
-        int index = 0;
-        if (this.map.getSpawnCount() > 1) {
-            index = RANDOM.nextInt(this.map.getSpawnCount() - 1);
-            if (index >= lastSpawn)
-                index++;
-            if (index >= this.map.getSpawnCount())
-                index = 0;
-        }
-
-        this.lastSpawn = index;
+        int index = this.spawnCache.rollNextSpawn();
 
         Pair<BlockPos, Direction> spawnPos = this.map.getSpawn(index);
         player.teleport(this.world.getWorld(), spawnPos.getFirst().getX(), spawnPos.getFirst().getY(), spawnPos.getFirst().getZ(), spawnPos.getSecond().asRotation(), 0.f);
@@ -102,5 +94,80 @@ public class QuakecraftSpawnLogic
         double y = min.getY() + 0.5;
 
         player.teleport(world, x, y, z, 0.f, 0.f);
+    }
+
+    /**
+     * Represents a spawn cache.
+     *
+     * @version 1.0.1
+     * @since 1.0.1
+     */
+    public class SpawnCache
+    {
+        private final int   size;
+        private       int[] lastSpawns;
+
+        public SpawnCache(int size)
+        {
+            this.size = size;
+            this.lastSpawns = new int[this.size];
+
+            for (int index = 0; index < this.size; index++) {
+                this.lastSpawns[index] = -1;
+            }
+        }
+
+        /**
+         * Returns whether the spawn index is in the last spawn cache or not.
+         *
+         * @param spawn The spawn index to check.
+         * @return True if the spawn index is in the cache, else false.
+         */
+        public boolean contains(int spawn)
+        {
+            for (int cached : this.lastSpawns)
+                if (spawn == cached)
+                    return true;
+            return false;
+        }
+
+        /**
+         * Rolls the next spawn.
+         *
+         * @return The next spawn index.
+         */
+        public int rollNextSpawn()
+        {
+            int index = 0;
+            if (map.getSpawnCount() > 1) {
+                index = RANDOM.nextInt(map.getSpawnCount() - 1);
+
+                int tries = 0;
+                while (this.contains(index) && tries <= this.size) {
+                    index++;
+
+                    if (index >= map.getSpawnCount())
+                        index = 0;
+
+                    tries++;
+                }
+            }
+
+            this.push(index);
+
+            return index;
+        }
+
+        /**
+         * Pushes a new last spawn index.
+         *
+         * @param spawn The spawn index.
+         */
+        public void push(int spawn)
+        {
+            if (this.size - 1 >= 0) System.arraycopy(this.lastSpawns, 0, this.lastSpawns, 1, this.size - 1);
+
+            this.lastSpawns[0] = spawn;
+        }
     }
 }

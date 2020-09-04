@@ -43,7 +43,7 @@ import java.util.UUID;
  * Represents a Quakecraft player.
  *
  * @author LambdAurora
- * @version 1.0.0
+ * @version 1.0.1
  * @since 1.0.0
  */
 public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
@@ -131,7 +131,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         EntityAttributeInstance movementSpeedAttribute = this.player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
         if (movementSpeedAttribute != null) {
             movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
-            movementSpeedAttribute.addPersistentModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
+            movementSpeedAttribute.addTemporaryModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
         }
 
         this.player.addStatusEffect(new StatusEffectInstance(StatusEffects.DOLPHINS_GRACE, 60 * 60 * 20));
