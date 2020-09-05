@@ -3,5 +3,11 @@
   "quakecraft.game.end.not_enough_players": "There is not enough players to continue the game.",
   "quakecraft.game.end.win": "%s has won!",
 
-  "quakecraft.game.kill": "%s killed %s."
+  "quakecraft.game.kill": "%s killed %s.",
+
+  "quakecraft.game.special.kills.2": "Double-kill by %s!",
+  "quakecraft.game.special.kills.3": "Triple-kill by %s!",
+  "quakecraft.game.special.kills.4": "Quadruple-kill by %s!",
+  "quakecraft.game.special.kills.5": "Quintuple-kill by %s!",
+  "quakecraft.game.special.kills.lot": "%s killed too many people!"
 }

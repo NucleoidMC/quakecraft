@@ -30,6 +30,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.world.GameMode;
@@ -141,31 +142,12 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
     {
         this.kills += this.killsWithinATick;
         if (this.killsWithinATick >= 2) {
-            switch (this.killsWithinATick) {
-                case 2:
-                    world.getPlayerSet().sendMessage(new LiteralText("Double-kill by ").formatted(Formatting.RED, Formatting.BOLD)
-                            .append(this.player.getDisplayName())
-                            .append("!"));
-                    break;
-                case 3:
-                    world.getPlayerSet().sendMessage(new LiteralText("Triple-kill by ").formatted(Formatting.RED, Formatting.BOLD)
-                            .append(this.player.getDisplayName())
-                            .append("!"));
-                    break;
-                case 4:
-                    world.getPlayerSet().sendMessage(new LiteralText("Quadruple-kill by ").formatted(Formatting.RED, Formatting.BOLD)
-                            .append(this.player.getDisplayName())
-                            .append("!"));
-                    break;
-                case 5:
-                    world.getPlayerSet().sendMessage(new LiteralText("Quintuple-kill by ").formatted(Formatting.RED, Formatting.BOLD)
-                            .append(this.player.getDisplayName())
-                            .append("!"));
-                default:
-                    world.getPlayerSet().sendMessage(new LiteralText("Too many kills at once by ").formatted(Formatting.RED, Formatting.BOLD)
-                            .append(this.player.getDisplayName())
-                            .append("!"));
-                    break;
+            if (this.killsWithinATick <= 5) {
+                world.getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.special.kills." + this.killsWithinATick, this.getDisplayName())
+                        .formatted(Formatting.RED, Formatting.BOLD));
+            } else {
+                world.getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.special.kills.lot", this.getDisplayName())
+                        .formatted(Formatting.RED, Formatting.BOLD));
             }
         }
 
