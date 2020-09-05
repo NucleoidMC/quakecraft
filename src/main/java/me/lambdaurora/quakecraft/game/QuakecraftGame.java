@@ -29,7 +29,6 @@ import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
@@ -235,7 +234,7 @@ public class QuakecraftGame
                 ((ServerPlayerEntity) attacker).networkHandler.sendPacket(new PlaySoundS2CPacket(SoundEvents.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER,
                         attacker.getX(), attacker.getY(), attacker.getZ(), 2.f, 5.f));
                 other.incrementKills();
-                this.world.getPlayerSet().sendMessage(new LiteralText("").formatted(Formatting.GRAY)
+                this.world.getPlayerSet().sendMessage(new TranslatableText("").formatted(Formatting.GRAY)
                         .append(new TranslatableText("quakecraft.game.kill", attacker.getDisplayName(), player.getDisplayName()))
                 );
 
