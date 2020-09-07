@@ -21,6 +21,8 @@ import me.lambdaurora.quakecraft.game.QuakecraftConfig;
 import me.lambdaurora.quakecraft.game.QuakecraftWaiting;
 import me.lambdaurora.quakecraft.mixin.FireworkRocketEntityAccessor;
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -41,7 +43,7 @@ import java.util.List;
  * Represents the Quakecraft minigame mod.
  *
  * @author LambdAurora
- * @version 1.0.0
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class Quakecraft implements ModInitializer
@@ -86,9 +88,38 @@ public class Quakecraft implements ModInitializer
         return this.activePlayers.contains(player);
     }
 
-    public static final Quakecraft get()
+    public static @NotNull Quakecraft get()
     {
         return INSTANCE;
+    }
+
+    /**
+     * Applies the speed modifier to the specified player.
+     *
+     * @param player The player.
+     * @since 1.1.0
+     */
+    public static void applySpeed(@NotNull ServerPlayerEntity player)
+    {
+        EntityAttributeInstance movementSpeedAttribute = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+        if (movementSpeedAttribute != null) {
+            movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
+            movementSpeedAttribute.addTemporaryModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
+        }
+    }
+
+    /**
+     * Removes the speed modifier to the specified player.
+     *
+     * @param player The player.
+     * @since 1.1.0
+     */
+    public static void removeSpeed(@NotNull ServerPlayerEntity player)
+    {
+        EntityAttributeInstance movementSpeedAttribute = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+        if (movementSpeedAttribute != null) {
+            movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
+        }
     }
 
     public static void spawnFirework(@NotNull ServerWorld world, double x, double y, double z, int[] colors, boolean silent, int lifetime)

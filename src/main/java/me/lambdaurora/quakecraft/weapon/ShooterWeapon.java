@@ -20,9 +20,12 @@ package me.lambdaurora.quakecraft.weapon;
 import me.lambdaurora.quakecraft.QuakecraftConstants;
 import me.lambdaurora.quakecraft.util.RayUtils;
 import net.minecraft.item.Item;
+import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameWorld;
 
@@ -30,18 +33,18 @@ import xyz.nucleoid.plasmid.game.GameWorld;
  * Represents a weapon that shoot.
  *
  * @author LambdAurora
- * @version 1.0.0
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class ShooterWeapon extends Weapon
 {
-    public ShooterWeapon(@NotNull Item item, int cooldown)
+    public ShooterWeapon(@NotNull Item item, int primaryCooldown, int secondaryCooldown)
     {
-        super(item, cooldown);
+        super(item, primaryCooldown, secondaryCooldown);
     }
 
     @Override
-    public @NotNull ActionResult onUse(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
+    public @NotNull ActionResult onPrimary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
         RayUtils.drawRay(world, player, 80.0);
 
@@ -54,6 +57,17 @@ public class ShooterWeapon extends Weapon
                 }))
             return ActionResult.SUCCESS;
 
-        return super.onUse(world, player, hand);
+        return super.onPrimary(world, player, hand);
+    }
+
+    @Override
+    public @NotNull ActionResult onSecondary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
+    {
+        Vec3d rotationVec = player.getRotationVec(1.0F);
+        player.setVelocity(rotationVec.multiply(QuakecraftConstants.DASH_VELOCITY));
+        player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
+
+        player.playSound(SoundEvents.ENTITY_BAT_TAKEOFF, 1.0F, 1.0F);
+        return super.onSecondary(world, player, hand);
     }
 }

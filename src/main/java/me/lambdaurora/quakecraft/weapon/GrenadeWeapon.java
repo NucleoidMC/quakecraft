@@ -31,7 +31,7 @@ import xyz.nucleoid.plasmid.util.ItemStackBuilder;
  * Represents a grenade weapon.
  *
  * @author LambdAurora
- * @version 1.0.0
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class GrenadeWeapon extends Weapon
@@ -42,7 +42,7 @@ public class GrenadeWeapon extends Weapon
     }
 
     @Override
-    public @NotNull ActionResult onUse(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
+    public @NotNull ActionResult onPrimary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
         ItemStack heldStack = player.getStackInHand(hand);
 
@@ -51,7 +51,7 @@ public class GrenadeWeapon extends Weapon
         grenade.setProperties(player, player.pitch, player.yaw, 0.f, 1.5f, 1.f);
         world.getWorld().spawnEntity(grenade);
 
-        return super.onUse(world, player, hand);
+        return super.onPrimary(world, player, hand);
     }
 
     @Override

@@ -17,6 +17,7 @@
 
 package me.lambdaurora.quakecraft.game;
 
+import me.lambdaurora.quakecraft.Quakecraft;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -40,7 +41,7 @@ import java.util.Random;
  * Represents the Quakecraft spawn logic.
  *
  * @author LambdAurora
- * @version 1.0.1
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class QuakecraftSpawnLogic
@@ -71,9 +72,11 @@ public class QuakecraftSpawnLogic
         player.inventory.clear();
 
         ItemStack leaveGame = ItemStackBuilder.of(Items.RED_BED)
-                .setName(new LiteralText("Leave Lobby").formatted(Formatting.RESET, Formatting.YELLOW))
+                .setName(new LiteralText("Leave Lobby").styled(style -> style.withItalic(false).withColor(Formatting.YELLOW)))
                 .build();
         player.inventory.insertStack(8, leaveGame);
+
+        Quakecraft.applySpeed(player);
     }
 
     /**

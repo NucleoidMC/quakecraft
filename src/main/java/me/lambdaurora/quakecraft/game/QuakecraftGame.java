@@ -25,7 +25,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -44,27 +43,30 @@ import xyz.nucleoid.plasmid.game.player.JoinResult;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Represents the Quakecraft running game.
  *
  * @author LambdAurora
- * @version 1.0.0
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class QuakecraftGame
 {
-    private final QuakecraftConfig                         config;
-    private final QuakecraftMap                            map;
-    public final  GameWorld                                world;
-    private final QuakecraftSpawnLogic                     spawnLogic;
-    private final QuakecraftScoreboard                     scoreboard;
-    private final Object2ObjectMap<UUID, QuakecraftPlayer> participants;
-    private       boolean                                  running = false;
-    private       boolean                                  end     = false;
-    private       int                                      time;
-    private       int                                      endTime = 10 * 20;
+    private final QuakecraftConfig                                       config;
+    private final QuakecraftMap                                          map;
+    public final  GameWorld                                              world;
+    private final QuakecraftSpawnLogic                                   spawnLogic;
+    private final QuakecraftScoreboard                                   scoreboard;
+    private final Object2ObjectMap<ServerPlayerEntity, QuakecraftPlayer> participants;
+    private       boolean                                                running = false;
+    private       boolean                                                end     = false;
+    private       int                                                    time;
+    private       int                                                    endTime = 10 * 20;
 
     private Set<QuakecraftPlayer> winners = new HashSet<>();
 
@@ -79,7 +81,7 @@ public class QuakecraftGame
         this.participants = new Object2ObjectOpenHashMap<>();
 
         for (ServerPlayerEntity player : participants) {
-            this.participants.put(player.getUuid(), new QuakecraftPlayer(player));
+            this.participants.put(player, new QuakecraftPlayer(player));
         }
 
         this.time = this.config.time;
@@ -153,7 +155,7 @@ public class QuakecraftGame
                 activePlayer[0]++;
 
                 if (participant.hasWon()) {
-                    onWin(participant);
+                    this.onWin(participant);
                 }
             });
             this.time--;
@@ -231,14 +233,13 @@ public class QuakecraftGame
         if (attacker != null) {
             QuakecraftPlayer other = this.participants.get(attacker.getUuid());
             if (other != null) {
-                ((ServerPlayerEntity) attacker).networkHandler.sendPacket(new PlaySoundS2CPacket(SoundEvents.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER,
-                        attacker.getX(), attacker.getY(), attacker.getZ(), 2.f, 5.f));
+                ((ServerPlayerEntity) attacker).playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER, 2.f, 5.f);
                 other.incrementKills();
-                this.world.getPlayerSet().sendMessage(new TranslatableText("").formatted(Formatting.GRAY)
-                        .append(new TranslatableText("quakecraft.game.kill", attacker.getDisplayName(), player.getDisplayName()))
+                this.world.getPlayerSet().sendMessage(
+                        new TranslatableText("quakecraft.game.kill", attacker.getDisplayName(), player.getDisplayName()).formatted(Formatting.GRAY)
                 );
 
-                this.getOptParticipant(player).ifPresent(participant -> participant.onDeath(player));
+                this.getOptParticipant(player).ifPresent(QuakecraftPlayer::onDeath);
             }
 
             player.setAttacker(null);
@@ -303,7 +304,7 @@ public class QuakecraftGame
 
     public @Nullable QuakecraftPlayer getParticipant(@NotNull ServerPlayerEntity player)
     {
-        return this.participants.get(player.getUuid());
+        return this.participants.get(player);
     }
 
     public @NotNull Optional<QuakecraftPlayer> getOptParticipant(@NotNull ServerPlayerEntity player)

@@ -26,8 +26,8 @@ public final class Weapons
         throw new UnsupportedOperationException("Weapons only contains static definitions.");
     }
 
-    public static final ShooterWeapon BASE_SHOOTER     = new ShooterWeapon(Items.STONE_HOE, 2 * 20 + 10);
-    public static final ShooterWeapon ADVANCED_SHOOTER = new ShooterWeapon(Items.IRON_HOE, 25);
+    public static final ShooterWeapon BASE_SHOOTER     = new ShooterWeapon(Items.STONE_HOE, 2 * 20 + 10, 4 * 20);
+    public static final ShooterWeapon ADVANCED_SHOOTER = new ShooterWeapon(Items.IRON_HOE, 25, 4 * 20);
 
     public static final GrenadeWeapon BASE_GRENADE = new GrenadeWeapon(Items.SNOWBALL, 45);
 }

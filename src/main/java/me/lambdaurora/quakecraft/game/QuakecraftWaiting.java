@@ -17,6 +17,7 @@
 
 package me.lambdaurora.quakecraft.game;
 
+import me.lambdaurora.quakecraft.Quakecraft;
 import me.lambdaurora.quakecraft.game.map.MapGenerator;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
 import net.minecraft.entity.damage.DamageSource;
@@ -44,7 +45,7 @@ import java.util.concurrent.CompletableFuture;
  * Represents a Quakecraft wait-room.
  *
  * @author LambdAurora
- * @version 1.0.0
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class QuakecraftWaiting
@@ -88,6 +89,7 @@ public class QuakecraftWaiting
                     game.on(RequestStartListener.EVENT, waiting::requestStart);
 
                     game.on(PlayerAddListener.EVENT, waiting::addPlayer);
+                    game.on(PlayerRemoveListener.EVENT, waiting::removePlayer);
                     game.on(PlayerDeathListener.EVENT, waiting::onPlayerDeath);
 
                     game.on(UseBlockListener.EVENT, waiting::onUseBlock);
@@ -113,6 +115,11 @@ public class QuakecraftWaiting
     private void addPlayer(@NotNull ServerPlayerEntity player)
     {
         this.spawnPlayer(player);
+    }
+
+    private void removePlayer(@NotNull ServerPlayerEntity player)
+    {
+        Quakecraft.removeSpeed(player);
     }
 
     private @NotNull ActionResult onPlayerDeath(@NotNull ServerPlayerEntity player, @NotNull DamageSource source)

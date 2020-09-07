@@ -29,13 +29,18 @@ import java.util.function.Predicate;
  * Represents constants used in Quakecraft.
  *
  * @author LambdAurora
- * @version 1.0.0
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class QuakecraftConstants
 {
-    public static int RESPAWN_SECONDS = 5;
-    public static int RESPAWN_TICKS   = RESPAWN_SECONDS * 20;
+    public static final int RESPAWN_SECONDS = 5;
+    public static final int RESPAWN_TICKS   = RESPAWN_SECONDS * 20;
+
+    /**
+     * Represents the dash velocity.
+     */
+    public static final double DASH_VELOCITY = 1.2;
 
     public static final Predicate<Entity> PLAYER_PREDICATE = entity -> entity instanceof ServerPlayerEntity
             && ((ServerPlayerEntity) entity).interactionManager.getGameMode() != GameMode.SPECTATOR;
