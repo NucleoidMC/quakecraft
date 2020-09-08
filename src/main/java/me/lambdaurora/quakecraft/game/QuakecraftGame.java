@@ -55,7 +55,7 @@ import java.util.Set;
  * Represents the Quakecraft running game.
  *
  * @author LambdAurora
- * @version 1.2.0
+ * @version 1.2.1
  * @since 1.0.0
  */
 public class QuakecraftGame
@@ -238,7 +238,7 @@ public class QuakecraftGame
     {
         LivingEntity attacker = player.getAttacker();
         if (attacker != null) {
-            QuakecraftPlayer other = this.participants.get(attacker.getUuid());
+            QuakecraftPlayer other = this.participants.get(attacker);
             if (other != null) {
                 ((ServerPlayerEntity) attacker).playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER, 2.f, 5.f);
                 other.incrementKills();
