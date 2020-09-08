@@ -11,6 +11,7 @@ version = "${project.mod_version}+${project.minecraft_version}"
 archivesBaseName = project.archives_base_name + '-fabric'
 
 minecraft {
+    accessWidener "src/main/resources/quakecraft.accesswidener"
 }
 
 repositories {
@@ -93,6 +94,8 @@ task shadowRemapJar(type: RemapJarTask) {
     input = file("${project.buildDir}/libs/$archivesBaseName-$version-dev.jar")
     archiveName = "${archivesBaseName}-${version}.jar"
     addNestedDependencies = true
+
+    remapAccessWidener = true
 }
 
 build.dependsOn shadowRemapJar

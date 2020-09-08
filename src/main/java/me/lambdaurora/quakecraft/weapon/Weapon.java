@@ -19,7 +19,6 @@ package me.lambdaurora.quakecraft.weapon;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -31,7 +30,7 @@ import xyz.nucleoid.plasmid.util.ItemStackBuilder;
  * Represents a weapon.
  *
  * @author LambdAurora
- * @version 1.1.0
+ * @version 1.2.0
  * @since 1.0.0
  */
 public class Weapon
@@ -63,6 +62,12 @@ public class Weapon
         return this.secondaryCooldown >= 0;
     }
 
+    /**
+     * Returns whether the specified item stack matches this weapon or not.
+     *
+     * @param stack The item stack.
+     * @return True if the item stack matches this weapon, else false.
+     */
     public boolean matchesStack(@NotNull ItemStack stack)
     {
         return !stack.isEmpty()
@@ -77,18 +82,6 @@ public class Weapon
      */
     public void tick(@NotNull ItemStack stack)
     {
-        if (this.hasSecondaryAction()) {
-            CompoundTag itemTag = stack.getOrCreateTag();
-            int currentCooldown = itemTag.getInt("secondary_cooldown");
-            if (currentCooldown > 0) {
-                currentCooldown--;
-                itemTag.putInt("secondary_cooldown", currentCooldown);
-            }
-
-            if (stack.getMaxDamage() != 0) {
-                stack.setDamage(stack.getMaxDamage() - (int) ((float) currentCooldown / (float) this.secondaryCooldown * (float) stack.getMaxDamage()));
-            }
-        }
     }
 
     public @NotNull ActionResult onPrimary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
@@ -96,7 +89,7 @@ public class Weapon
         return ActionResult.PASS;
     }
 
-    public @NotNull ActionResult onSecondary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
+    public @NotNull ActionResult onSecondary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull ItemStack stack)
     {
         return ActionResult.PASS;
     }
@@ -114,8 +107,6 @@ public class Weapon
      */
     public final @NotNull ItemStack build()
     {
-        ItemStack stack = this.stackBuilder().build();
-        stack.getOrCreateTag().putInt("secondary_cooldown", 0);
-        return stack;
+        return this.stackBuilder().build();
     }
 }

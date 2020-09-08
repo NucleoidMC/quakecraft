@@ -19,19 +19,17 @@ package me.lambdaurora.quakecraft.weapon;
 
 import me.lambdaurora.quakecraft.entity.GrenadeEntity;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameWorld;
-import xyz.nucleoid.plasmid.util.ItemStackBuilder;
 
 /**
  * Represents a grenade weapon.
  *
  * @author LambdAurora
- * @version 1.1.0
+ * @version 1.2.0
  * @since 1.0.0
  */
 public class GrenadeWeapon extends Weapon
@@ -44,19 +42,10 @@ public class GrenadeWeapon extends Weapon
     @Override
     public @NotNull ActionResult onPrimary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
-        ItemStack heldStack = player.getStackInHand(hand);
-
-        GrenadeEntity grenade = new GrenadeEntity(world.getWorld(), player, 60);
-        grenade.setItem(heldStack);
+        GrenadeEntity grenade = new GrenadeEntity(world.getWorld(), player, 40);
         grenade.setProperties(player, player.pitch, player.yaw, 0.f, 1.5f, 1.f);
         world.getWorld().spawnEntity(grenade);
 
         return super.onPrimary(world, player, hand);
-    }
-
-    @Override
-    public @NotNull ItemStackBuilder stackBuilder()
-    {
-        return super.stackBuilder().setCount(64);
     }
 }

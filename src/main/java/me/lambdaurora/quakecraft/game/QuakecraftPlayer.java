@@ -17,14 +17,13 @@
 
 package me.lambdaurora.quakecraft.game;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.lambdaurora.quakecraft.Quakecraft;
 import me.lambdaurora.quakecraft.QuakecraftConstants;
 import me.lambdaurora.quakecraft.weapon.Weapon;
 import me.lambdaurora.quakecraft.weapon.Weapons;
+import me.lambdaurora.quakecraft.weapon.inventory.WeaponManager;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
@@ -38,29 +37,26 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.plasmid.game.GameWorld;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 /**
  * Represents a Quakecraft player.
  *
  * @author LambdAurora
- * @version 1.1.0
+ * @version 1.2.0
  * @since 1.0.0
  */
 public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
 {
-    private final ServerWorld            world;
-    public final  UUID                   uuid;
-    public final  String                 name;
-    private final Set<Weapon>            weapons          = new HashSet<>();
-    private final Map<Weapon, ItemStack> weaponStacks     = new Object2ObjectOpenHashMap<>();
-    private       ServerPlayerEntity     player;
-    private       long                   respawnTime      = -1;
-    private       int                    kills            = 0;
-    private       int                    killsWithinATick = 0;
+    private final ServerWorld        world;
+    public final  UUID               uuid;
+    public final  String             name;
+    private final WeaponManager      weapons          = new WeaponManager();
+    private       ServerPlayerEntity player;
+    private       long               respawnTime      = -1;
+    private       boolean            performPrimaryAttack;
+    private       int                kills            = 0;
+    private       int                killsWithinATick = 0;
 
     private boolean left = false;
 
@@ -124,19 +120,16 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         this.player.setGameMode(GameMode.ADVENTURE);
         this.player.inventory.clear();
 
-        this.weaponStacks.clear();
-        for (Weapon weapon : this.weapons) {
-            ItemStack stack = weapon.build();
-            this.weaponStacks.put(weapon, stack);
-            this.player.inventory.insertStack(stack);
-        }
+        this.weapons.insertStacks(this.player);
         this.syncInventory();
 
         this.player.setVelocity(0, 0, 0);
 
         Quakecraft.applySpeed(this.player);
 
-        this.player.addStatusEffect(new StatusEffectInstance(StatusEffects.DOLPHINS_GRACE, 60 * 60 * 20));
+        this.player.addStatusEffect(new StatusEffectInstance(StatusEffects.DOLPHINS_GRACE, 60 * 60 * 20, 0, false, false));
+
+        this.performPrimaryAttack = false;
     }
 
     public void tick(@NotNull GameWorld world)
@@ -154,7 +147,23 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
 
         this.killsWithinATick = 0;
 
-        this.weaponStacks.forEach(Weapon::tick);
+        this.weapons.tick();
+        Weapon heldWeapon = this.weapons.get(this.player.getMainHandStack());
+        if (heldWeapon != null) {
+            int secondaryCooldown = this.weapons.getSecondaryCooldown(heldWeapon);
+            if (secondaryCooldown > 0) {
+                String bar = "▊▊▊▊▊▊▊▊▊▊";
+                int progress = (int) (secondaryCooldown / (double) heldWeapon.secondaryCooldown * bar.length());
+                this.player.sendMessage(new LiteralText("[").formatted(Formatting.GRAY)
+                        .append(new LiteralText(bar.substring(progress)).formatted(Formatting.GREEN))
+                        .append(new LiteralText(bar.substring(0, progress)).formatted(Formatting.RED))
+                        .append("]"), true);
+            }
+        }
+
+        this.syncInventory();
+
+        this.performPrimaryAttack = false;
     }
 
     /**
@@ -197,15 +206,19 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
 
     public int onItemUse(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
-        ItemStack heldStack = player.getStackInHand(hand);
+        this.performPrimaryAttack = true;
 
-        for (Weapon weapon : this.weapons) {
-            if (weapon.matchesStack(heldStack)) {
-                weapon.onPrimary(world, player, hand);
-            }
-        }
+        return this.weapons.onPrimary(world, player, hand);
+    }
 
-        return -1;
+    public void onSecondary(@NotNull GameWorld world)
+    {
+        this.weapons.onSecondary(world, this.player);
+    }
+
+    public boolean isPerformingPrimaryAttack()
+    {
+        return this.performPrimaryAttack;
     }
 
     /**

@@ -20,8 +20,10 @@ package me.lambdaurora.quakecraft.weapon;
 import me.lambdaurora.quakecraft.QuakecraftConstants;
 import me.lambdaurora.quakecraft.util.RayUtils;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -33,7 +35,7 @@ import xyz.nucleoid.plasmid.game.GameWorld;
  * Represents a weapon that shoot.
  *
  * @author LambdAurora
- * @version 1.1.0
+ * @version 1.2.0
  * @since 1.0.0
  */
 public class ShooterWeapon extends Weapon
@@ -61,13 +63,14 @@ public class ShooterWeapon extends Weapon
     }
 
     @Override
-    public @NotNull ActionResult onSecondary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
+    public @NotNull ActionResult onSecondary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull ItemStack stack)
     {
         Vec3d rotationVec = player.getRotationVec(1.0F);
-        player.setVelocity(rotationVec.multiply(QuakecraftConstants.DASH_VELOCITY));
+        double yVelocity = player.getVelocity().y;
+        player.setVelocity(new Vec3d(rotationVec.x * QuakecraftConstants.DASH_VELOCITY, yVelocity, rotationVec.z * QuakecraftConstants.DASH_VELOCITY));
         player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
 
-        player.playSound(SoundEvents.ENTITY_BAT_TAKEOFF, 1.0F, 1.0F);
-        return super.onSecondary(world, player, hand);
+        player.playSound(SoundEvents.ENTITY_BAT_TAKEOFF, SoundCategory.MASTER, 1.0F, 0.5F);
+        return super.onSecondary(world, player, stack);
     }
 }

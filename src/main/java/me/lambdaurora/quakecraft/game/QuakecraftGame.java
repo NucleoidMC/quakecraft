@@ -20,11 +20,14 @@ package me.lambdaurora.quakecraft.game;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.lambdaurora.quakecraft.Quakecraft;
+import me.lambdaurora.quakecraft.entity.GrenadeEntity;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -52,7 +55,7 @@ import java.util.Set;
  * Represents the Quakecraft running game.
  *
  * @author LambdAurora
- * @version 1.1.0
+ * @version 1.2.0
  * @since 1.0.0
  */
 public class QuakecraftGame
@@ -219,10 +222,14 @@ public class QuakecraftGame
 
     private boolean onDamage(ServerPlayerEntity player, DamageSource source, float amount)
     {
-        if (source.isExplosive() && source.getAttacker() instanceof ServerPlayerEntity && source.getAttacker() != player) {
-            player.setAttacker((LivingEntity) source.getAttacker());
-            ((ServerPlayerEntity) source.getAttacker()).setAttacking(player);
-            player.kill();
+        if (source.isExplosive() && source.getSource() instanceof GrenadeEntity) {
+            GrenadeEntity grenade = (GrenadeEntity) source.getSource();
+            Entity attacker = grenade.getOwner();
+            if (attacker instanceof ServerPlayerEntity && attacker != player) {
+                player.setAttacker((LivingEntity) attacker);
+                ((ServerPlayerEntity) attacker).setAttacking(player);
+                player.kill();
+            }
         }
         return source.isExplosive() && !(source.getAttacker() instanceof ServerPlayerEntity);
     }
@@ -253,6 +260,18 @@ public class QuakecraftGame
 
     private void onSwingHand(@NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
+        if (Thread.currentThread() != player.getServer().getThread())
+            return;
+        if (hand == Hand.OFF_HAND) {
+            // Attack cannot be in OFF_HAND
+            return;
+        }
+        QuakecraftPlayer participant = this.getParticipant(player);
+        if (participant == null)
+            return;
+        if (!participant.isPerformingPrimaryAttack()) {
+            participant.onSecondary(this.world);
+        }
     }
 
     private ActionResult onUseBlock(ServerPlayerEntity playerEntity, Hand hand, BlockHitResult blockHitResult)
@@ -274,7 +293,11 @@ public class QuakecraftGame
             if (participant != null) {
                 int result = participant.onItemUse(this.world, player, hand);
                 if (result != -1) {
-                    player.playSound(SoundEvents.ENTITY_HORSE_SADDLE, 2.f, 1.f);
+                    this.world.getPlayerSet().forEach(other -> {
+                        if (player.squaredDistanceTo(other) <= 16.f) {
+                            other.networkHandler.sendPacket(new PlaySoundS2CPacket(SoundEvents.ENTITY_HORSE_SADDLE, SoundCategory.MASTER, player.getX(), player.getY(), player.getZ(), 2.f, 1.f));
+                        }
+                    });
                     cooldown.set(heldStack.getItem(), result);
                     return TypedActionResult.success(ItemStack.EMPTY);
                 }

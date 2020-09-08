@@ -18,6 +18,7 @@
       "me.lambdaurora.quakecraft.Quakecraft"
     ]
   },
+  "accessWidener": "quakecraft.accesswidener",
   "mixins": [
     "quakecraft.mixins.json"
   ],
