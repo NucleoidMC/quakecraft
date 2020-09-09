@@ -47,30 +47,27 @@ import xyz.nucleoid.plasmid.game.player.JoinResult;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Represents the Quakecraft running game.
  *
  * @author LambdAurora
- * @version 1.2.2
+ * @version 1.3.0
  * @since 1.0.0
  */
 public class QuakecraftGame
 {
-    private final QuakecraftConfig                                       config;
-    private final QuakecraftMap                                          map;
-    public final  GameWorld                                              world;
-    private final QuakecraftSpawnLogic                                   spawnLogic;
-    private final QuakecraftScoreboard                                   scoreboard;
-    private final Object2ObjectMap<ServerPlayerEntity, QuakecraftPlayer> participants;
-    private       boolean                                                running = false;
-    private       boolean                                                end     = false;
-    private       int                                                    time;
-    private       int                                                    endTime = 10 * 20;
+    private final QuakecraftConfig                         config;
+    private final QuakecraftMap                            map;
+    public final  GameWorld                                world;
+    private final QuakecraftSpawnLogic                     spawnLogic;
+    private final QuakecraftScoreboard                     scoreboard;
+    private final Object2ObjectMap<UUID, QuakecraftPlayer> participants;
+    private       boolean                                  running = false;
+    private       boolean                                  end     = false;
+    private       int                                      time;
+    private       int                                      endTime = 10 * 20;
 
     private Set<QuakecraftPlayer> winners = new HashSet<>();
 
@@ -85,7 +82,7 @@ public class QuakecraftGame
         this.participants = new Object2ObjectOpenHashMap<>();
 
         for (ServerPlayerEntity player : participants) {
-            this.participants.put(player, new QuakecraftPlayer(player));
+            this.participants.put(player.getUuid(), new QuakecraftPlayer(player));
         }
 
         this.time = this.config.time;
@@ -239,7 +236,7 @@ public class QuakecraftGame
     {
         LivingEntity attacker = player.getAttacker();
         if (attacker != null) {
-            QuakecraftPlayer other = this.participants.get(attacker);
+            QuakecraftPlayer other = this.participants.get(attacker.getUuid());
             if (other != null) {
                 ((ServerPlayerEntity) attacker).playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER, 2.f, 5.f);
                 other.incrementKills();
@@ -338,7 +335,7 @@ public class QuakecraftGame
 
     public @Nullable QuakecraftPlayer getParticipant(@NotNull ServerPlayerEntity player)
     {
-        return this.participants.get(player);
+        return this.participants.get(player.getUuid());
     }
 
     public @NotNull Optional<QuakecraftPlayer> getOptParticipant(@NotNull ServerPlayerEntity player)

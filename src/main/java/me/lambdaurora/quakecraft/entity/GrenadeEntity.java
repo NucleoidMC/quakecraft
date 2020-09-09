@@ -113,7 +113,8 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity
     public void detonate()
     {
         this.remove();
-        this.getEntityWorld().createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), 2.f, Explosion.DestructionType.NONE);
+        this.getEntityWorld().createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.5f : 1.5f,
+                Explosion.DestructionType.NONE);
     }
 
     @Override
@@ -138,6 +139,10 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity
             if (this.world.isClient) {
                 this.world.addParticle(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5D, this.getZ(), 0.0D, 0.0D, 0.0D);
             }
+        }
+
+        if (this.isCritical()) {
+            CritableEntity.spawnCritParticles(this.world, this.getX(), this.getY(), this.getZ(), this.getVelocity());
         }
 
         if (!this.leftOwner) {
@@ -193,6 +198,6 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity
     @Override
     public void rollCritical()
     {
-        this.setCritical(this.random.nextBoolean());
+        this.setCritical(this.random.nextInt(6) == 0);
     }
 }

@@ -29,7 +29,7 @@ import xyz.nucleoid.plasmid.game.GameWorld;
  * Represents a grenade weapon.
  *
  * @author LambdAurora
- * @version 1.2.0
+ * @version 1.3.0
  * @since 1.0.0
  */
 public class GrenadeWeapon extends Weapon
@@ -44,6 +44,7 @@ public class GrenadeWeapon extends Weapon
     {
         GrenadeEntity grenade = new GrenadeEntity(world.getWorld(), player, 40);
         grenade.setProperties(player, player.pitch, player.yaw, 0.f, 1.5f, 1.f);
+        grenade.rollCritical();
         world.getWorld().spawnEntity(grenade);
 
         return super.onPrimary(world, player, hand);

@@ -17,7 +17,10 @@
 
 package me.lambdaurora.quakecraft.weapon;
 
+import me.lambdaurora.quakecraft.entity.RocketEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -41,6 +44,13 @@ public class RocketLauncherWeapon extends Weapon
     @Override
     public @NotNull ActionResult onPrimary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
+        RocketEntity rocket = new RocketEntity(world.getWorld(), player, 0, 0, 0);
+        rocket.setProperties(player, player.pitch, player.yaw, 0.f, 1.5f, 1.f);
+        rocket.setVelocity(rocket.getVelocity().multiply(0.75));
+        rocket.setItem(new ItemStack(Items.FIRE_CHARGE));
+        rocket.rollCritical();
+        world.getWorld().spawnEntity(rocket);
+
         return super.onPrimary(world, player, hand);
     }
 }

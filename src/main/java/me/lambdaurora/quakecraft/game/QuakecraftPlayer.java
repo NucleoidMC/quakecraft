@@ -67,6 +67,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         this.uuid = player.getUuid();
         this.name = player.getEntityName();
         this.weapons.add(Weapons.ADVANCED_SHOOTER);
+        this.weapons.add(Weapons.ROCKET_LAUNCHER);
         this.weapons.add(Weapons.GRENADE_LAUNCHER);
         this.player = player;
     }

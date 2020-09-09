@@ -17,6 +17,12 @@
 
 package me.lambdaurora.quakecraft.entity;
 
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Represents a projectile entity that can deal critical damage.
  *
@@ -31,4 +37,25 @@ public interface CritableEntity
     void setCritical(boolean critical);
 
     void rollCritical();
+
+    static void spawnCritParticles(@NotNull World world, double x, double y, double z, Vec3d velocity)
+    {
+        for (int i = 0; i < 4; i++) {
+            if (world.isClient()) {
+                world.addParticle(ParticleTypes.CRIT,
+                        x + velocity.getX() * i / 4.0D,
+                        y + velocity.getY() * i / 4.0D,
+                        z + velocity.getZ() * i / 4.0D,
+                        -velocity.getX(), -velocity.getY() + 0.2D, -velocity.getZ());
+            } else {
+                ((ServerWorld) world).spawnParticles(ParticleTypes.CRIT,
+                        x + velocity.getX() * i / 4.0,
+                        y + velocity.getY() * i / 4.0,
+                        z + velocity.getZ() * i / 4.0,
+                        1,
+                        -velocity.getX(), -velocity.getY() + 0.2, -velocity.getZ(),
+                        0.5);
+            }
+        }
+    }
 }

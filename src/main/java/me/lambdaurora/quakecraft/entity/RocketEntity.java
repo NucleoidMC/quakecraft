@@ -18,10 +18,12 @@
 package me.lambdaurora.quakecraft.entity;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.projectile.FireballEntity;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
+import net.minecraft.world.explosion.Explosion;
 
 /**
  * Represents a rocket entity.
@@ -39,6 +41,35 @@ public class RocketEntity extends FireballEntity implements CritableEntity
         super(world, owner, velocityX, velocityY, velocityZ);
     }
 
+    public void detonate()
+    {
+        this.remove();
+        this.getEntityWorld().createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.5f : 1.5f,
+                Explosion.DestructionType.NONE);
+    }
+
+    @Override
+    public void tick()
+    {
+        super.tick();
+
+        if (this.isCritical()) {
+            CritableEntity.spawnCritParticles(this.world, this.getX(), this.getY(), this.getZ(), this.getVelocity());
+        }
+    }
+
+    @Override
+    protected boolean isBurning()
+    {
+        return false;
+    }
+
+    @Override
+    protected float getDrag()
+    {
+        return 1.f;
+    }
+
     @Override
     protected void onCollision(HitResult hitResult)
     {
@@ -46,13 +77,22 @@ public class RocketEntity extends FireballEntity implements CritableEntity
             this.onEntityHit((EntityHitResult) hitResult);
         }
 
-
+        this.detonate();
     }
 
     @Override
     protected void onEntityHit(EntityHitResult entityHitResult)
     {
         super.onEntityHit(entityHitResult);
+    }
+
+    @Override
+    public boolean damage(DamageSource source, float amount)
+    {
+        if (this.isInvulnerableTo(source))
+            return false;
+        this.detonate();
+        return true;
     }
 
     @Override
@@ -70,6 +110,6 @@ public class RocketEntity extends FireballEntity implements CritableEntity
     @Override
     public void rollCritical()
     {
-        this.setCritical(this.random.nextBoolean());
+        this.setCritical(this.random.nextInt(4) == 0);
     }
 }
