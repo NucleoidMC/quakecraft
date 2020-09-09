@@ -42,16 +42,17 @@ import java.util.UUID;
  * Represents a grenade entity.
  *
  * @author LambdAurora
- * @version 1.2.0
+ * @version 1.3.0
  * @since 1.0.0
  */
-public class GrenadeEntity extends ArmorStandEntity
+public class GrenadeEntity extends ArmorStandEntity implements CritableEntity
 {
     private final int     lifetime;
     private       UUID    ownerUuid;
     private       int     ownerEntityId;
     private       boolean leftOwner = false;
     private       int     life      = 0;
+    private       boolean critical  = false;
 
     public GrenadeEntity(@NotNull World world, @NotNull LivingEntity owner, int lifetime)
     {
@@ -90,6 +91,8 @@ public class GrenadeEntity extends ArmorStandEntity
         this.setVelocity(f, g, h, modifierZ, modifierXYZ);
         Vec3d vec3d = user.getVelocity();
         this.setVelocity(this.getVelocity().add(vec3d.x, user.isOnGround() ? 0.0D : vec3d.y, vec3d.z));
+
+        this.rollCritical();
     }
 
     public void setVelocity(double x, double y, double z, float speed, float divergence)
@@ -173,5 +176,23 @@ public class GrenadeEntity extends ArmorStandEntity
     protected void onEntityHit(@NotNull EntityHitResult hitResult)
     {
         this.detonate();
+    }
+
+    @Override
+    public boolean isCritical()
+    {
+        return this.critical;
+    }
+
+    @Override
+    public void setCritical(boolean critical)
+    {
+        this.critical = critical;
+    }
+
+    @Override
+    public void rollCritical()
+    {
+        this.setCritical(this.random.nextBoolean());
     }
 }

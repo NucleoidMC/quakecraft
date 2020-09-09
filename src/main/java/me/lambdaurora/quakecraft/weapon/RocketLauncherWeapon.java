@@ -17,19 +17,30 @@
 
 package me.lambdaurora.quakecraft.weapon;
 
-import net.minecraft.item.Items;
+import net.minecraft.item.Item;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import org.jetbrains.annotations.NotNull;
+import xyz.nucleoid.plasmid.game.GameWorld;
 
-public final class Weapons
+/**
+ * Represents a rocket launcher.
+ *
+ * @author LambdAurora
+ * @version 1.3.0
+ * @since 1.3.0
+ */
+public class RocketLauncherWeapon extends Weapon
 {
-    private Weapons()
+    public RocketLauncherWeapon(@NotNull Item item, int primaryCooldown)
     {
-        throw new UnsupportedOperationException("Weapons only contains static definitions.");
+        super(item, primaryCooldown);
     }
 
-    public static final ShooterWeapon BASE_SHOOTER     = new ShooterWeapon(Items.STONE_HOE, 2 * 20 + 10, 4 * 20);
-    public static final ShooterWeapon ADVANCED_SHOOTER = new ShooterWeapon(Items.IRON_HOE, 25, 4 * 20);
-
-    public static final RocketLauncherWeapon ROCKET_LAUNCHER_ = new RocketLauncherWeapon(Items.IRON_AXE, 20);
-
-    public static final GrenadeWeapon GRENADE_LAUNCHER = new GrenadeWeapon(Items.BLAZE_ROD, 45);
+    @Override
+    public @NotNull ActionResult onPrimary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
+    {
+        return super.onPrimary(world, player, hand);
+    }
 }

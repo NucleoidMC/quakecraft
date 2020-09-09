@@ -44,7 +44,7 @@ import java.util.UUID;
  * Represents a Quakecraft player.
  *
  * @author LambdAurora
- * @version 1.2.2
+ * @version 1.3.0
  * @since 1.0.0
  */
 public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
@@ -67,7 +67,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         this.uuid = player.getUuid();
         this.name = player.getEntityName();
         this.weapons.add(Weapons.ADVANCED_SHOOTER);
-        this.weapons.add(Weapons.BASE_GRENADE);
+        this.weapons.add(Weapons.GRENADE_LAUNCHER);
         this.player = player;
     }
 

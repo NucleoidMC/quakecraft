@@ -15,21 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package me.lambdaurora.quakecraft.weapon;
+package me.lambdaurora.quakecraft.entity;
 
-import net.minecraft.item.Items;
-
-public final class Weapons
+/**
+ * Represents a projectile entity that can deal critical damage.
+ *
+ * @author LambdAurora
+ * @version 1.3.0
+ * @since 1.3.0
+ */
+public interface CritableEntity
 {
-    private Weapons()
-    {
-        throw new UnsupportedOperationException("Weapons only contains static definitions.");
-    }
+    boolean isCritical();
 
-    public static final ShooterWeapon BASE_SHOOTER     = new ShooterWeapon(Items.STONE_HOE, 2 * 20 + 10, 4 * 20);
-    public static final ShooterWeapon ADVANCED_SHOOTER = new ShooterWeapon(Items.IRON_HOE, 25, 4 * 20);
+    void setCritical(boolean critical);
 
-    public static final RocketLauncherWeapon ROCKET_LAUNCHER_ = new RocketLauncherWeapon(Items.IRON_AXE, 20);
-
-    public static final GrenadeWeapon GRENADE_LAUNCHER = new GrenadeWeapon(Items.BLAZE_ROD, 45);
+    void rollCritical();
 }
