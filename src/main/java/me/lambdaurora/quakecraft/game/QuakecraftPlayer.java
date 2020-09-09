@@ -17,6 +17,7 @@
 
 package me.lambdaurora.quakecraft.game;
 
+import me.lambdaurora.quakecraft.PlayerAction;
 import me.lambdaurora.quakecraft.Quakecraft;
 import me.lambdaurora.quakecraft.QuakecraftConstants;
 import me.lambdaurora.quakecraft.weapon.Weapon;
@@ -43,7 +44,7 @@ import java.util.UUID;
  * Represents a Quakecraft player.
  *
  * @author LambdAurora
- * @version 1.2.0
+ * @version 1.2.2
  * @since 1.0.0
  */
 public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
@@ -54,7 +55,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
     private final WeaponManager      weapons          = new WeaponManager();
     private       ServerPlayerEntity player;
     private       long               respawnTime      = -1;
-    private       boolean            performPrimaryAttack;
+    private       PlayerAction       lastAction       = PlayerAction.NONE;
     private       int                kills            = 0;
     private       int                killsWithinATick = 0;
 
@@ -129,7 +130,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
 
         this.player.addStatusEffect(new StatusEffectInstance(StatusEffects.DOLPHINS_GRACE, 60 * 60 * 20, 0, false, false));
 
-        this.performPrimaryAttack = false;
+        this.lastAction = PlayerAction.NONE;
     }
 
     public void tick(@NotNull GameWorld world)
@@ -162,8 +163,6 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         }
 
         this.syncInventory();
-
-        this.performPrimaryAttack = false;
     }
 
     /**
@@ -206,7 +205,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
 
     public int onItemUse(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
-        this.performPrimaryAttack = true;
+        this.lastAction = PlayerAction.USE;
 
         return this.weapons.onPrimary(world, player, hand);
     }
@@ -216,9 +215,25 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         this.weapons.onSecondary(world, this.player);
     }
 
-    public boolean isPerformingPrimaryAttack()
+    public void onSwingHand(@NotNull GameWorld world)
     {
-        return this.performPrimaryAttack;
+        // Mmmhh yes attack prediction, really not fun to implement.
+        if (this.lastAction.isUse()) {
+            this.lastAction = PlayerAction.NONE;
+            return;
+        }
+
+        this.onSecondary(world);
+    }
+
+    public @NotNull PlayerAction getLastAction()
+    {
+        return this.lastAction;
+    }
+
+    void setLastAction(@NotNull PlayerAction action)
+    {
+        this.lastAction = action;
     }
 
     /**

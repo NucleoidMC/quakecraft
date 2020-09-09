@@ -19,6 +19,7 @@ package me.lambdaurora.quakecraft.game;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import me.lambdaurora.quakecraft.PlayerAction;
 import me.lambdaurora.quakecraft.Quakecraft;
 import me.lambdaurora.quakecraft.entity.GrenadeEntity;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
@@ -55,7 +56,7 @@ import java.util.Set;
  * Represents the Quakecraft running game.
  *
  * @author LambdAurora
- * @version 1.2.1
+ * @version 1.2.2
  * @since 1.0.0
  */
 public class QuakecraftGame
@@ -262,6 +263,7 @@ public class QuakecraftGame
     {
         if (Thread.currentThread() != player.getServer().getThread())
             return;
+
         if (hand == Hand.OFF_HAND) {
             // Attack cannot be in OFF_HAND
             return;
@@ -269,13 +271,18 @@ public class QuakecraftGame
         QuakecraftPlayer participant = this.getParticipant(player);
         if (participant == null)
             return;
-        if (!participant.isPerformingPrimaryAttack()) {
-            participant.onSecondary(this.world);
-        }
+        participant.onSwingHand(this.world);
     }
 
-    private ActionResult onUseBlock(ServerPlayerEntity playerEntity, Hand hand, BlockHitResult blockHitResult)
+    private ActionResult onUseBlock(ServerPlayerEntity player, Hand hand, BlockHitResult hitResult)
     {
+        QuakecraftPlayer participant = this.getParticipant(player);
+        if (participant != null) {
+            if (participant.getLastAction() == PlayerAction.USE_BLOCK_AND_ITEM)
+                participant.setLastAction(PlayerAction.NONE);
+            else
+                participant.setLastAction(PlayerAction.USE_BLOCK);
+        }
         return ActionResult.FAIL;
     }
 
@@ -287,10 +294,10 @@ public class QuakecraftGame
 
         ItemStack heldStack = player.getStackInHand(hand);
 
-        ItemCooldownManager cooldown = player.getItemCooldownManager();
-        if (!cooldown.isCoolingDown(heldStack.getItem())) {
-            QuakecraftPlayer participant = this.getParticipant(player);
-            if (participant != null) {
+        QuakecraftPlayer participant = this.getParticipant(player);
+        if (participant != null) {
+            ItemCooldownManager cooldown = player.getItemCooldownManager();
+            if (!cooldown.isCoolingDown(heldStack.getItem())) {
                 int result = participant.onItemUse(this.world, player, hand);
                 if (result != -1) {
                     this.world.getPlayerSet().forEach(other -> {
@@ -299,11 +306,15 @@ public class QuakecraftGame
                         }
                     });
                     cooldown.set(heldStack.getItem(), result);
+
                     return TypedActionResult.success(ItemStack.EMPTY);
                 }
+            } else {
+                // No swing
+                if (participant.getLastAction() == PlayerAction.USE_BLOCK)
+                    participant.setLastAction(PlayerAction.USE_BLOCK_AND_ITEM);
             }
         }
-
         return TypedActionResult.pass(ItemStack.EMPTY);
     }
 
