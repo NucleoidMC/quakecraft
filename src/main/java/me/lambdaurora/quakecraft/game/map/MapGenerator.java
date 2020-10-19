@@ -20,7 +20,6 @@ package me.lambdaurora.quakecraft.game.map;
 import me.lambdaurora.quakecraft.Quakecraft;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import org.aperlambda.lambdacommon.utils.Pair;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameOpenException;
@@ -30,7 +29,6 @@ import xyz.nucleoid.plasmid.util.BlockBounds;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
 public class MapGenerator
 {
@@ -53,12 +51,12 @@ public class MapGenerator
                 }
             }
 
-            List<Pair<BlockPos, Direction>> spawns = new ArrayList<>();
+            List<Pair<BlockPos, Integer>> spawns = new ArrayList<>();
 
-            this.loadSpawns(template.getRegions("spawn_north"), spawns, Direction.NORTH);
-            this.loadSpawns(template.getRegions("spawn_east"), spawns, Direction.EAST);
-            this.loadSpawns(template.getRegions("spawn_south"), spawns, Direction.SOUTH);
-            this.loadSpawns(template.getRegions("spawn_west"), spawns, Direction.WEST);
+            template.getTemplateRegions("spawn").forEach(playerSpawn -> {
+                int direction = playerSpawn.getData().getInt("direction");
+                spawns.add(Pair.of(new BlockPos(playerSpawn.getBounds().offset(QuakecraftMap.ORIGIN).getCenter()), direction));
+            });
 
             if (spawns.size() == 0) {
                 Quakecraft.get().logger.error("No player spawns are defined on the map! The game will not work.");
@@ -71,11 +69,5 @@ public class MapGenerator
 
             return map;
         });
-    }
-
-    private void loadSpawns(@NotNull Stream<BlockBounds> stream, @NotNull List<Pair<BlockPos, Direction>> spawns, @NotNull Direction direction)
-    {
-        stream.map(s -> new BlockPos(s.offset(QuakecraftMap.ORIGIN).getCenter()))
-                .forEach(s -> spawns.add(Pair.of(s, direction)));
     }
 }

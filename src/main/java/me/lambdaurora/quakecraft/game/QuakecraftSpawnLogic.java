@@ -62,8 +62,8 @@ public class QuakecraftSpawnLogic
     {
         int index = this.spawnCache.rollNextSpawn();
 
-        Pair<BlockPos, Direction> spawnPos = this.map.getSpawn(index);
-        player.teleport(this.world.getWorld(), spawnPos.getFirst().getX(), spawnPos.getFirst().getY(), spawnPos.getFirst().getZ(), spawnPos.getSecond().asRotation(), 0.f);
+        Pair<BlockPos, Integer> spawnPos = this.map.getSpawn(index);
+        player.teleport(this.world.getWorld(), spawnPos.getFirst().getX(), spawnPos.getFirst().getY(), spawnPos.getFirst().getZ(), spawnPos.getSecond(), 0.f);
     }
 
     public void resetWaitingPlayer(@NotNull ServerPlayerEntity player)

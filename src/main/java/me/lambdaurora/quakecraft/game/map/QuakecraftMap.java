@@ -41,9 +41,9 @@ public class QuakecraftMap
     public static final BlockPos                        ORIGIN = new BlockPos(0, 150, 0); // @TODO BlockPos.ORIGIN when having own maps
     private final       MapTemplate                     template;
     public final        BlockBounds                     waitingSpawn;
-    private final       List<Pair<BlockPos, Direction>> spawns;
+    private final       List<Pair<BlockPos, Integer>> spawns;
 
-    public QuakecraftMap(@NotNull MapTemplate template, @NotNull BlockBounds waitingSpawn, @NotNull List<Pair<BlockPos, Direction>> spawns)
+    public QuakecraftMap(@NotNull MapTemplate template, @NotNull BlockBounds waitingSpawn, @NotNull List<Pair<BlockPos, Integer>> spawns)
     {
         this.template = template;
         this.waitingSpawn = waitingSpawn;
@@ -66,7 +66,7 @@ public class QuakecraftMap
      * @param index The index of the spawn.
      * @return The spawn position.
      */
-    public Pair<BlockPos, Direction> getSpawn(int index)
+    public Pair<BlockPos, Integer> getSpawn(int index)
     {
         return this.spawns.get(index);
     }
