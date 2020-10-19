@@ -24,6 +24,7 @@ import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameWorld;
 
@@ -31,14 +32,14 @@ import xyz.nucleoid.plasmid.game.GameWorld;
  * Represents a rocket launcher.
  *
  * @author LambdAurora
- * @version 1.3.0
+ * @version 1.4.0
  * @since 1.3.0
  */
 public class RocketLauncherWeapon extends Weapon
 {
-    public RocketLauncherWeapon(@NotNull Item item, int primaryCooldown)
+    public RocketLauncherWeapon(@NotNull Identifier id, @NotNull Item item, @NotNull Settings settings)
     {
-        super(item, primaryCooldown);
+        super(id, item, settings);
     }
 
     @Override

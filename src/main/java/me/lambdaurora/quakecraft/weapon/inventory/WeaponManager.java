@@ -80,7 +80,7 @@ public final class WeaponManager
     public void insertStacks(@NotNull ServerPlayerEntity player)
     {
         for (Weapon weapon : this.weapons) {
-            player.inventory.insertStack(weapon.build());
+            player.inventory.insertStack(weapon.build(player));
         }
     }
 

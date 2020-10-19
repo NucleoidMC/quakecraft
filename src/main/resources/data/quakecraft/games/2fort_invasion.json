@@ -1,0 +1,10 @@
+{
+  "type": "quakecraft:quakecraft",
+  "map": {
+    "id": "quakecraft:2fort_invasion"
+  },
+  "players": {
+    "min": 6,
+    "max": 16
+  }
+}

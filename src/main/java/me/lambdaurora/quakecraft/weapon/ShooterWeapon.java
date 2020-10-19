@@ -27,6 +27,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameWorld;
@@ -35,14 +36,14 @@ import xyz.nucleoid.plasmid.game.GameWorld;
  * Represents a weapon that shoot.
  *
  * @author LambdAurora
- * @version 1.2.0
+ * @version 1.4.0
  * @since 1.0.0
  */
 public class ShooterWeapon extends Weapon
 {
-    public ShooterWeapon(@NotNull Item item, int primaryCooldown, int secondaryCooldown)
+    public ShooterWeapon(@NotNull Identifier id, @NotNull Item item, @NotNull Settings settings)
     {
-        super(item, primaryCooldown, secondaryCooldown);
+        super(id, item, settings);
     }
 
     @Override

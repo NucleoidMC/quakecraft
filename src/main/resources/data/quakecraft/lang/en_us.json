@@ -9,5 +9,10 @@
   "quakecraft.game.special.kills.3": "Triple-kill by %s!",
   "quakecraft.game.special.kills.4": "Quadruple-kill by %s!",
   "quakecraft.game.special.kills.5": "Quintuple-kill by %s!",
-  "quakecraft.game.special.kills.lot": "%s killed too many people!"
+  "quakecraft.game.special.kills.lot": "%s killed too many people!",
+
+  "weapon.quakecraft.base_railgun": "Base Railgun",
+  "weapon.quakecraft.advanced_railgun": "Advanced Railgun",
+  "weapon.quakecraft.grenade_launcher": "Grenade Launcher",
+  "weapon.quakecraft.rocket_launcher": "Rocket Launcher"
 }

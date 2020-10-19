@@ -22,6 +22,7 @@ import net.minecraft.item.Item;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameWorld;
 
@@ -29,14 +30,14 @@ import xyz.nucleoid.plasmid.game.GameWorld;
  * Represents a grenade weapon.
  *
  * @author LambdAurora
- * @version 1.3.0
+ * @version 1.4.0
  * @since 1.0.0
  */
 public class GrenadeWeapon extends Weapon
 {
-    public GrenadeWeapon(@NotNull Item item, int cooldown)
+    public GrenadeWeapon(@NotNull Identifier id, @NotNull Item item, @NotNull Settings settings)
     {
-        super(item, cooldown);
+        super(id, item, settings);
     }
 
     @Override

@@ -17,11 +17,15 @@
 
 package me.lambdaurora.quakecraft.weapon;
 
+import fr.catcore.server.translations.api.LocalizableText;
+import fr.catcore.server.translations.api.LocalizationTarget;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.util.ItemStackBuilder;
@@ -30,25 +34,28 @@ import xyz.nucleoid.plasmid.util.ItemStackBuilder;
  * Represents a weapon.
  *
  * @author LambdAurora
- * @version 1.2.0
+ * @version 1.4.0
  * @since 1.0.0
  */
 public class Weapon
 {
-    public final Item item;
-    public final int  primaryCooldown;
-    public final int  secondaryCooldown;
+    public final Identifier identifier;
+    public final Item       item;
+    public final int        primaryCooldown;
+    public final int        secondaryCooldown;
+    public final int        reloadCooldown;
+    public final int        clipSize;
+    public final int        ammoSize;
 
-    public Weapon(@NotNull Item item, int primaryCooldown)
+    public Weapon(@NotNull Identifier id, @NotNull Item item, @NotNull Settings settings)
     {
-        this(item, primaryCooldown, -1);
-    }
-
-    public Weapon(@NotNull Item item, int primaryCooldown, int secondaryCooldown)
-    {
+        this.identifier = id;
         this.item = item;
-        this.primaryCooldown = primaryCooldown;
-        this.secondaryCooldown = secondaryCooldown;
+        this.primaryCooldown = settings.primaryCooldown;
+        this.secondaryCooldown = settings.secondaryCooldown;
+        this.reloadCooldown = settings.reloadCooldown;
+        this.clipSize = settings.clipSize;
+        this.ammoSize = settings.ammoSize;
     }
 
     /**
@@ -60,6 +67,17 @@ public class Weapon
     public boolean hasSecondaryAction()
     {
         return this.secondaryCooldown >= 0;
+    }
+
+    /**
+     * Returns whether this weapon requires ammo or not.
+     *
+     * @return True if the weapon requires ammo, else false.
+     * @since 1.4.0
+     */
+    public boolean doesRequireAmmo()
+    {
+        return this.ammoSize > 0;
     }
 
     /**
@@ -105,8 +123,49 @@ public class Weapon
      *
      * @return The item stack.
      */
-    public final @NotNull ItemStack build()
+    public final @NotNull ItemStack build(@NotNull ServerPlayerEntity player)
     {
-        return this.stackBuilder().build();
+        return this.stackBuilder()
+                .setName(((LocalizableText) new TranslatableText("weapon." + this.identifier.getNamespace() + "." + this.identifier.getPath())
+                        .styled(style -> style.withItalic(false))).asLocalizedFor(((LocalizationTarget) player)))
+                .build();
+    }
+
+    public static class Settings
+    {
+        private final int primaryCooldown;
+        private       int secondaryCooldown = -1;
+        private       int reloadCooldown    = -1;
+        private       int clipSize          = -1;
+        private       int ammoSize          = -1;
+
+        public Settings(int primaryCooldown)
+        {
+            this.primaryCooldown = primaryCooldown;
+        }
+
+        public @NotNull Settings secondaryCooldown(int secondaryCooldown)
+        {
+            this.secondaryCooldown = secondaryCooldown;
+            return this;
+        }
+
+        public @NotNull Settings reloadCooldown(int reloadCooldown)
+        {
+            this.reloadCooldown = reloadCooldown;
+            return this;
+        }
+
+        public @NotNull Settings clipSize(int clipSize)
+        {
+            this.clipSize = clipSize;
+            return this;
+        }
+
+        public @NotNull Settings ammoSize(int ammoSize)
+        {
+            this.ammoSize = ammoSize;
+            return this;
+        }
     }
 }

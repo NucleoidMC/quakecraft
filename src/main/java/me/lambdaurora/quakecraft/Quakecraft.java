@@ -43,7 +43,7 @@ import java.util.List;
  * Represents the Quakecraft minigame mod.
  *
  * @author LambdAurora
- * @version 1.1.0
+ * @version 1.4.0
  * @since 1.0.0
  */
 public class Quakecraft implements ModInitializer
@@ -91,6 +91,11 @@ public class Quakecraft implements ModInitializer
     public static @NotNull Quakecraft get()
     {
         return INSTANCE;
+    }
+
+    public static @NotNull Identifier mc(@NotNull String name)
+    {
+        return new Identifier(NAMESPACE, name);
     }
 
     /**
