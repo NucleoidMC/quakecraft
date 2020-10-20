@@ -45,14 +45,14 @@ import java.util.concurrent.CompletableFuture;
  * Represents a Quakecraft wait-room.
  *
  * @author LambdAurora
- * @version 1.1.0
+ * @version 1.4.2
  * @since 1.0.0
  */
 public class QuakecraftWaiting
 {
-    private final GameWorld            world;
-    private final QuakecraftMap        map;
-    private final QuakecraftConfig     config;
+    private final GameWorld world;
+    private final QuakecraftMap map;
+    private final QuakecraftConfig config;
     private final QuakecraftSpawnLogic spawnLogic;
 
     private QuakecraftWaiting(@NotNull GameWorld world, @NotNull QuakecraftMap map, @NotNull QuakecraftConfig config)
@@ -72,7 +72,7 @@ public class QuakecraftWaiting
             BubbleWorldConfig worldConfig = new BubbleWorldConfig()
                     .setGenerator(map.asGenerator(context.getServer()))
                     .setDefaultGameMode(GameMode.SPECTATOR)
-                    .setTimeOfDay(config.timeOfDay);
+                    .setTimeOfDay(config.time);
 
             return context.openWorld(worldConfig).thenApply(gameWorld -> {
                 QuakecraftWaiting waiting = new QuakecraftWaiting(gameWorld, map, config);

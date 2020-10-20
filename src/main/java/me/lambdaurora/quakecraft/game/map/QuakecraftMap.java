@@ -19,7 +19,6 @@ package me.lambdaurora.quakecraft.game.map;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import org.aperlambda.lambdacommon.utils.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -33,15 +32,15 @@ import java.util.List;
  * Represents the Quakecraft map.
  *
  * @author LambdAurora
- * @version 1.0.0
+ * @version 1.4.2
  * @since 1.0.0
  */
 public class QuakecraftMap
 {
-    public static final BlockPos                        ORIGIN = new BlockPos(0, 150, 0); // @TODO BlockPos.ORIGIN when having own maps
-    private final       MapTemplate                     template;
-    public final        BlockBounds                     waitingSpawn;
-    private final       List<Pair<BlockPos, Integer>> spawns;
+    public static final BlockPos ORIGIN = BlockPos.ORIGIN;
+    private final MapTemplate template;
+    public final BlockBounds waitingSpawn;
+    private final List<Pair<BlockPos, Integer>> spawns;
 
     public QuakecraftMap(@NotNull MapTemplate template, @NotNull BlockBounds waitingSpawn, @NotNull List<Pair<BlockPos, Integer>> spawns)
     {
