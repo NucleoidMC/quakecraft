@@ -37,7 +37,7 @@ import java.util.List;
  */
 public class QuakecraftMap
 {
-    public static final BlockPos ORIGIN = BlockPos.ORIGIN;
+    public static final BlockPos ORIGIN = new BlockPos(0, 32, 0);
     private final MapTemplate template;
     public final BlockBounds waitingSpawn;
     private final List<Pair<BlockPos, Integer>> spawns;
