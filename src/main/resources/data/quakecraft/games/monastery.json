@@ -1,0 +1,10 @@
+{
+  "type": "quakecraft:quakecraft",
+  "map": {
+    "id": "quakecraft:monastery"
+  },
+  "players": {
+    "min": 6,
+    "max": 16
+  }
+}
