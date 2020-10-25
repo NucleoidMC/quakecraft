@@ -25,13 +25,16 @@ import org.jetbrains.annotations.NotNull;
 public class MapConfig
 {
     public static final Codec<MapConfig> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Identifier.CODEC.fieldOf("id").forGetter(config -> config.id)
+            Identifier.CODEC.fieldOf("id").forGetter(config -> config.id),
+            Codec.INT.optionalFieldOf("time", 6000).forGetter(config -> config.time)
     ).apply(instance, MapConfig::new));
 
     public final Identifier id;
+    public final int time;
 
-    public MapConfig(@NotNull Identifier id)
+    public MapConfig(@NotNull Identifier id, int time)
     {
         this.id = id;
+        this.time = time;
     }
 }
