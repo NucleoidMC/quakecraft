@@ -36,7 +36,7 @@ import xyz.nucleoid.plasmid.game.GameWorld;
  * Represents a weapon that shoot.
  *
  * @author LambdAurora
- * @version 1.4.0
+ * @version 1.4.5
  * @since 1.0.0
  */
 public class ShooterWeapon extends Weapon
@@ -49,15 +49,16 @@ public class ShooterWeapon extends Weapon
     @Override
     public @NotNull ActionResult onPrimary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
-        RayUtils.drawRay(world, player, 80.0);
-
-        if (RayUtils.raycastEntities(player, 80.0, 0.5, QuakecraftConstants.PLAYER_PREDICATE,
+        double result = RayUtils.raycastEntities(player, 80.0, 0.25, QuakecraftConstants.PLAYER_PREDICATE,
                 entity -> {
                     ServerPlayerEntity hitPlayer = (ServerPlayerEntity) entity;
                     hitPlayer.setAttacker(player);
                     player.setAttacking(hitPlayer);
                     hitPlayer.kill();
-                }))
+                });
+        RayUtils.drawRay(world, player, Math.abs(result));
+
+        if (result < 0.0)
             return ActionResult.SUCCESS;
 
         return super.onPrimary(world, player, hand);

@@ -29,7 +29,7 @@ import net.minecraft.world.explosion.Explosion;
  * Represents a rocket entity.
  *
  * @author LambdAurora
- * @version 1.3.0
+ * @version 1.4.5
  * @since 1.3.0
  */
 public class RocketEntity extends FireballEntity implements CritableEntity
@@ -44,7 +44,7 @@ public class RocketEntity extends FireballEntity implements CritableEntity
     public void detonate()
     {
         this.remove();
-        this.getEntityWorld().createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.5f : 1.5f,
+        this.getEntityWorld().createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.75f : 1.75f,
                 Explosion.DestructionType.NONE);
     }
 

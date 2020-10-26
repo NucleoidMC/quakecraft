@@ -39,7 +39,7 @@ import java.util.function.Predicate;
  * Represents a ray utilities class.
  *
  * @author LambdAurora, Gegy
- * @version 1.0.0
+ * @version 1.4.5
  * @since 1.0.0
  */
 public final class RayUtils
@@ -49,7 +49,17 @@ public final class RayUtils
         throw new UnsupportedOperationException("RayUtils only contains static definitions.");
     }
 
-    public static boolean raycastEntities(@NotNull Entity source, double range, double margin, @NotNull Predicate<Entity> predicate, @NotNull Consumer<Entity> consumer)
+    /**
+     * Casts a ray through entities and stops if the range is hit or a block is hit.
+     *
+     * @param source The source entity.
+     * @param range The maximum range.
+     * @param margin The margin of entity detection.
+     * @param predicate The predicate to determine if the entity should be hit or not.
+     * @param consumer The consumer of hit entities.
+     * @return The absolute distance between the source and the most far hit. The sign bit is used as a boolean to represent a success or not.
+     */
+    public static double raycastEntities(@NotNull Entity source, double range, double margin, @NotNull Predicate<Entity> predicate, @NotNull Consumer<Entity> consumer)
     {
         World world = source.getEntityWorld();
 
@@ -65,11 +75,13 @@ public final class RayUtils
 
         BlockHitResult blockHitResult = null;
         double blockDistance = -1.0;
+        double distance = -1.0;
 
         boolean success = false;
 
         for (Entity entity : world.getOtherEntities(source, testBox, predicate)) {
             Box targetBox = entity.getBoundingBox().expand(Math.max(entity.getTargetingMargin(), margin));
+            double entityDistance = source.squaredDistanceTo(entity);
 
             if (targetBox.contains(origin) || targetBox.raycast(origin, target).isPresent()) {
                 if (blockHitResult == null) {
@@ -81,16 +93,22 @@ public final class RayUtils
                         blockDistance = source.squaredDistanceTo(blockHitResult.getPos());
                     }
 
-                    if (source.squaredDistanceTo(entity) > blockDistance)
+                    if (entityDistance > blockDistance)
                         continue;
                 }
 
                 success = true;
                 consumer.accept(entity);
+
+                if (entityDistance > distance)
+                    distance = entityDistance;
             }
         }
 
-        return success;
+        if (distance < 0.0) distance = range;
+        else distance = Math.sqrt(distance);
+
+        return success ? -distance : distance;
     }
 
     /**
@@ -149,6 +167,7 @@ public final class RayUtils
 
     public static void drawRay(@NotNull GameWorld world, @NotNull Entity source, double range)
     {
+        System.out.println(range);
         Vec3d origin = source.getCameraPosVec(1.f).subtract(0, 0.5, 0);
         Vec3d delta = source.getRotationVec(1.f).multiply(range);
 

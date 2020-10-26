@@ -53,21 +53,21 @@ import java.util.*;
  * Represents the Quakecraft running game.
  *
  * @author LambdAurora
- * @version 1.3.0
+ * @version 1.4.5
  * @since 1.0.0
  */
 public class QuakecraftGame
 {
-    private final QuakecraftConfig                         config;
-    private final QuakecraftMap                            map;
-    public final  GameWorld                                world;
-    private final QuakecraftSpawnLogic                     spawnLogic;
-    private final QuakecraftScoreboard                     scoreboard;
+    private final QuakecraftConfig config;
+    private final QuakecraftMap map;
+    public final GameWorld world;
+    private final QuakecraftSpawnLogic spawnLogic;
+    private final QuakecraftScoreboard scoreboard;
     private final Object2ObjectMap<UUID, QuakecraftPlayer> participants;
-    private       boolean                                  running = false;
-    private       boolean                                  end     = false;
-    private       int                                      time;
-    private       int                                      endTime = 10 * 20;
+    private boolean running = false;
+    private boolean end = false;
+    private int time;
+    private int endTime = 10 * 20;
 
     private Set<QuakecraftPlayer> winners = new HashSet<>();
 
@@ -91,9 +91,9 @@ public class QuakecraftGame
     /**
      * Opens the game.
      *
-     * @param config     The game configuration.
-     * @param world      The game world.
-     * @param map        The game map.
+     * @param config The game configuration.
+     * @param world The game world.
+     * @param map The game map.
      * @param spawnLogic The game spawn logic.
      */
     public static void open(@NotNull QuakecraftConfig config, @NotNull GameWorld world, @NotNull QuakecraftMap map, @NotNull QuakecraftSpawnLogic spawnLogic)
@@ -220,13 +220,21 @@ public class QuakecraftGame
 
     private boolean onDamage(ServerPlayerEntity player, DamageSource source, float amount)
     {
-        if (source.isExplosive() && source.getSource() instanceof GrenadeEntity) {
-            GrenadeEntity grenade = (GrenadeEntity) source.getSource();
-            Entity attacker = grenade.getOwner();
-            if (attacker instanceof ServerPlayerEntity && attacker != player) {
-                player.setAttacker((LivingEntity) attacker);
-                ((ServerPlayerEntity) attacker).setAttacking(player);
-                player.kill();
+        if (source.isExplosive()) {
+            Entity attacker = null;
+            if (source.getSource() instanceof GrenadeEntity) {
+                GrenadeEntity grenade = (GrenadeEntity) source.getSource();
+                attacker = grenade.getOwner();
+            } else if (source.getSource() instanceof ServerPlayerEntity) {
+                attacker = source.getSource();
+            }
+
+            if (attacker != null) {
+                if (attacker instanceof ServerPlayerEntity && attacker != player) {
+                    player.setAttacker((LivingEntity) attacker);
+                    ((ServerPlayerEntity) attacker).setAttacking(player);
+                    player.kill();
+                }
             }
         }
         return source.isExplosive() && !(source.getAttacker() instanceof ServerPlayerEntity);
