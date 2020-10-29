@@ -20,6 +20,7 @@ package me.lambdaurora.quakecraft.game;
 import me.lambdaurora.quakecraft.Quakecraft;
 import me.lambdaurora.quakecraft.game.map.MapGenerator;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -28,6 +29,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.game.GameOpenContext;
@@ -45,7 +47,7 @@ import java.util.concurrent.CompletableFuture;
  * Represents a Quakecraft wait-room.
  *
  * @author LambdAurora
- * @version 1.4.3
+ * @version 1.4.6
  * @since 1.0.0
  */
 public class QuakecraftWaiting
@@ -94,6 +96,7 @@ public class QuakecraftWaiting
 
                     game.on(UseBlockListener.EVENT, waiting::onUseBlock);
                     game.on(UseItemListener.EVENT, waiting::onUseItem);
+                    game.on(AttackEntityListener.EVENT, waiting::onAttackEntity);
                 });
             });
         });
@@ -143,5 +146,12 @@ public class QuakecraftWaiting
         }
 
         return TypedActionResult.pass(ItemStack.EMPTY);
+    }
+
+    private @NotNull ActionResult onAttackEntity(ServerPlayerEntity player, Hand hand, Entity entity, EntityHitResult entityHitResult)
+    {
+        if (player.interactionManager.getGameMode() == GameMode.SPECTATOR)
+            return ActionResult.PASS;
+        return ActionResult.FAIL;
     }
 }

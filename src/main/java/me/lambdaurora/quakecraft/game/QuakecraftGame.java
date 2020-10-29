@@ -38,6 +38,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,7 +54,7 @@ import java.util.*;
  * Represents the Quakecraft running game.
  *
  * @author LambdAurora
- * @version 1.4.5
+ * @version 1.4.6
  * @since 1.0.0
  */
 public class QuakecraftGame
@@ -126,6 +127,7 @@ public class QuakecraftGame
             game.on(UseBlockListener.EVENT, active::onUseBlock);
             game.on(UseItemListener.EVENT, active::onUseItem);
             game.on(HandSwingListener.EVENT, active::onSwingHand);
+            game.on(AttackEntityListener.EVENT, active::onAttackEntity);
         });
     }
 
@@ -321,6 +323,13 @@ public class QuakecraftGame
             }
         }
         return TypedActionResult.pass(ItemStack.EMPTY);
+    }
+
+    private @NotNull ActionResult onAttackEntity(ServerPlayerEntity player, Hand hand, Entity entity, EntityHitResult entityHitResult)
+    {
+        if (player.interactionManager.getGameMode() == GameMode.SPECTATOR)
+            return ActionResult.PASS;
+        return ActionResult.FAIL;
     }
 
     private void spawnParticipant(@NotNull ServerPlayerEntity player)
