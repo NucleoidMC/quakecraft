@@ -1,23 +1,24 @@
 /*
- *  Copyright (c) 2020 LambdAurora <aurora42lambda@gmail.com>
+ * Copyright (c) 2020 LambdAurora <aurora42lambda@gmail.com>
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package me.lambdaurora.quakecraft.game;
 
 import me.lambdaurora.quakecraft.Quakecraft;
+import me.lambdaurora.quakecraft.game.map.MapSpawn;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -26,7 +27,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameMode;
 import org.aperlambda.lambdacommon.utils.Pair;
@@ -35,21 +36,22 @@ import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.util.BlockBounds;
 import xyz.nucleoid.plasmid.util.ItemStackBuilder;
 
+import java.util.Comparator;
 import java.util.Random;
 
 /**
  * Represents the Quakecraft spawn logic.
  *
  * @author LambdAurora
- * @version 1.1.0
+ * @version 1.4.7
  * @since 1.0.0
  */
 public class QuakecraftSpawnLogic
 {
-    private static final Random        RANDOM = new Random();
-    private final        GameWorld     world;
-    private final        QuakecraftMap map;
-    private final        SpawnCache    spawnCache;
+    private static final Random RANDOM = new Random();
+    private final GameWorld world;
+    private final QuakecraftMap map;
+    private final SpawnCache spawnCache;
 
     public QuakecraftSpawnLogic(@NotNull GameWorld world, @NotNull QuakecraftMap map)
     {
@@ -60,10 +62,31 @@ public class QuakecraftSpawnLogic
 
     public void spawnPlayer(@NotNull ServerPlayerEntity player)
     {
-        int index = this.spawnCache.rollNextSpawn();
+        MapSpawn spawn = null;
+        int spawnIndex = -1;
+        int lowestPlayers = this.world.getPlayerCount();
+        for (int i = 0; i < this.map.getSpawnCount(); i++) {
+            if (this.spawnCache.contains(i))
+                continue;
+            MapSpawn currentSpawn = this.map.getSpawn(i);
 
-        Pair<BlockPos, Integer> spawnPos = this.map.getSpawn(index);
-        player.teleport(this.world.getWorld(), spawnPos.getFirst().getX(), spawnPos.getFirst().getY(), spawnPos.getFirst().getZ(), spawnPos.getSecond(), 0.f);
+            Box box = new Box(currentSpawn.getPos().add(-16, -5, -16), currentSpawn.getPos().add(16, 5, 16));
+            int playersNearSpawn = (int) world.getPlayers().stream().filter(p -> box.contains(p.getPos())).count();
+            if (playersNearSpawn < lowestPlayers) {
+                lowestPlayers = playersNearSpawn;
+                spawn = currentSpawn;
+                spawnIndex = i;
+            }
+        }
+
+        if (spawnIndex == -1) {
+            spawnIndex = this.spawnCache.rollNextSpawn();
+            spawn = this.map.getSpawn(spawnIndex);
+        } else {
+            this.spawnCache.push(spawnIndex);
+        }
+
+        player.teleport(this.world.getWorld(), spawn.getPos().getX(), spawn.getPos().getY(), spawn.getPos().getZ(), spawn.getDirection(), 0.f);
     }
 
     public void resetWaitingPlayer(@NotNull ServerPlayerEntity player)
@@ -84,7 +107,7 @@ public class QuakecraftSpawnLogic
      *
      * @param player The player to spawn.
      */
-    public void spawnWaitingPlayer(@NotNull ServerPlayerEntity player)
+    public final void spawnWaitingPlayer(@NotNull ServerPlayerEntity player)
     {
         ServerWorld world = this.world.getWorld();
 
@@ -107,8 +130,8 @@ public class QuakecraftSpawnLogic
      */
     public class SpawnCache
     {
-        private final int   size;
-        private       int[] lastSpawns;
+        private final int size;
+        private int[] lastSpawns;
 
         public SpawnCache(int size)
         {

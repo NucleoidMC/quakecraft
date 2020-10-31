@@ -4,6 +4,7 @@ plugins {
     id 'fabric-loom' version '0.4-SNAPSHOT'
     id 'java-library'
     id 'maven-publish'
+    id 'net.minecrell.licenser' version '0.4.1'
 }
 
 group = project.maven_group
@@ -55,14 +56,14 @@ tasks.withType(JavaCompile) {
 processResources {
     inputs.property "version", project.version
 
-	from(sourceSets.main.resources.srcDirs) {
-		include "fabric.mod.json"
-		expand "version": project.version
-	}
+    from(sourceSets.main.resources.srcDirs) {
+        include "fabric.mod.json"
+        expand "version": project.version
+    }
 
-	from(sourceSets.main.resources.srcDirs) {
-		exclude "fabric.mod.json"
-	}
+    from(sourceSets.main.resources.srcDirs) {
+        exclude "fabric.mod.json"
+    }
 }
 
 java {
@@ -74,6 +75,11 @@ java {
 
 jar {
     from "LICENSE"
+}
+
+license {
+    header file('HEADER')
+    include '**/*.java'
 }
 
 task shadowJar(type: Jar) {

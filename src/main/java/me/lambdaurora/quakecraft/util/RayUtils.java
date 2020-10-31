@@ -1,18 +1,18 @@
 /*
- *  Copyright (c) 2020 LambdAurora <aurora42lambda@gmail.com>
+ * Copyright (c) 2020 LambdAurora <aurora42lambda@gmail.com>
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package me.lambdaurora.quakecraft.util;
@@ -39,7 +39,7 @@ import java.util.function.Predicate;
  * Represents a ray utilities class.
  *
  * @author LambdAurora, Gegy
- * @version 1.4.5
+ * @version 1.4.7
  * @since 1.0.0
  */
 public final class RayUtils
@@ -167,7 +167,6 @@ public final class RayUtils
 
     public static void drawRay(@NotNull GameWorld world, @NotNull Entity source, double range)
     {
-        System.out.println(range);
         Vec3d origin = source.getCameraPosVec(1.f).subtract(0, 0.5, 0);
         Vec3d delta = source.getRotationVec(1.f).multiply(range);
 
