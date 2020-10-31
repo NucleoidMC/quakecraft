@@ -20,6 +20,7 @@ package me.lambdaurora.quakecraft.entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.projectile.FireballEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
@@ -29,7 +30,7 @@ import net.minecraft.world.explosion.Explosion;
  * Represents a rocket entity.
  *
  * @author LambdAurora
- * @version 1.4.5
+ * @version 1.4.9
  * @since 1.3.0
  */
 public class RocketEntity extends FireballEntity implements CritableEntity
@@ -74,6 +75,12 @@ public class RocketEntity extends FireballEntity implements CritableEntity
     protected void onCollision(HitResult hitResult)
     {
         if (hitResult.getType() == HitResult.Type.ENTITY) {
+            if (((EntityHitResult) hitResult).getEntity() instanceof RocketEntity) {
+                ((EntityHitResult) hitResult).getEntity().remove();
+                this.detonate();
+                return;
+            }
+
             this.onEntityHit((EntityHitResult) hitResult);
         }
 
@@ -90,6 +97,8 @@ public class RocketEntity extends FireballEntity implements CritableEntity
     public boolean damage(DamageSource source, float amount)
     {
         if (this.isInvulnerableTo(source))
+            return false;
+        if (source.isExplosive() && source.getSource() instanceof ServerPlayerEntity && source.getSource() == this.getOwner())
             return false;
         this.detonate();
         return true;
