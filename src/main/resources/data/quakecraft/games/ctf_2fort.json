@@ -1,0 +1,14 @@
+{
+  "type": "quakecraft:quakecraft",
+  "map": {
+    "id": "quakecraft:2fort"
+  },
+  "players": {
+    "min": 6,
+    "max": 16
+  },
+  "teams": [
+    { "key": "red", "display": "Red", "color": "red" },
+    { "key": "blue", "display": "Blue", "color": "blue" }
+  ]
+}

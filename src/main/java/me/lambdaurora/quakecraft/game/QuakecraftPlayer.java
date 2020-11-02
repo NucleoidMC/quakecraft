@@ -37,6 +37,7 @@ import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.player.GameTeam;
 
 import java.util.UUID;
 
@@ -44,24 +45,25 @@ import java.util.UUID;
  * Represents a Quakecraft player.
  *
  * @author LambdAurora
- * @version 1.3.0
+ * @version 1.5.0
  * @since 1.0.0
  */
 public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
 {
-    private final ServerWorld        world;
-    public final  UUID               uuid;
-    public final  String             name;
-    private final WeaponManager      weapons          = new WeaponManager();
-    private       ServerPlayerEntity player;
-    private       long               respawnTime      = -1;
-    private       PlayerAction       lastAction       = PlayerAction.NONE;
-    private       int                kills            = 0;
-    private       int                killsWithinATick = 0;
+    private final ServerWorld world;
+    public final UUID uuid;
+    public final String name;
+    private final WeaponManager weapons = new WeaponManager();
+    private ServerPlayerEntity player;
+    private long respawnTime = -1;
+    private PlayerAction lastAction = PlayerAction.NONE;
+    private int kills = 0;
+    private int killsWithinATick = 0;
+    private GameTeam team;
 
     private boolean left = false;
 
-    public QuakecraftPlayer(@NotNull ServerPlayerEntity player)
+    public QuakecraftPlayer(@NotNull ServerPlayerEntity player, GameTeam team)
     {
         this.world = player.getServerWorld();
         this.uuid = player.getUuid();
@@ -70,6 +72,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         this.weapons.add(Weapons.ROCKET_LAUNCHER);
         this.weapons.add(Weapons.GRENADE_LAUNCHER);
         this.player = player;
+        this.team = team;
     }
 
     public int getKills()
@@ -87,10 +90,19 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         return this.kills >= 24;
     }
 
+    public @Nullable GameTeam getTeam()
+    {
+        return this.team;
+    }
+
     public boolean hasTeam()
     {
-        // @TODO team management
-        return false;
+        return this.team != null;
+    }
+
+    public void setTeam(@Nullable GameTeam team)
+    {
+        this.team = team;
     }
 
     public boolean hasLeft()

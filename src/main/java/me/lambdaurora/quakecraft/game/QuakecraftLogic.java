@@ -17,6 +17,9 @@
 
 package me.lambdaurora.quakecraft.game;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import me.lambdaurora.quakecraft.Quakecraft;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameMode;
@@ -25,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * Represents an instance of Quakecraft.
@@ -39,12 +42,18 @@ public abstract class QuakecraftLogic
     private final GameWorld world;
     private final QuakecraftConfig config;
     private final QuakecraftMap map;
+    protected final Object2ObjectMap<UUID, QuakecraftPlayer> participants = new Object2ObjectOpenHashMap<>();
 
-    public QuakecraftLogic(@NotNull GameWorld world, @NotNull QuakecraftConfig config, @NotNull QuakecraftMap map)
+    public QuakecraftLogic(@NotNull GameWorld world, @NotNull QuakecraftConfig config, @NotNull QuakecraftMap map,
+                           @NotNull Set<ServerPlayerEntity> participants)
     {
         this.world = world;
         this.config = config;
         this.map = map;
+
+        for (ServerPlayerEntity player : participants) {
+            this.participants.put(player.getUuid(), new QuakecraftPlayer(player, null));
+        }
     }
 
     /**
@@ -83,6 +92,14 @@ public abstract class QuakecraftLogic
         return this.map;
     }
 
+    protected void onOpen() {
+        Quakecraft.get().addActiveGame(this);
+    }
+
+    protected void onClose() {
+        Quakecraft.get().removeActiveGame(this);
+    }
+
     public void tick()
     {
         this.map.tick();
@@ -96,6 +113,24 @@ public abstract class QuakecraftLogic
      */
     public boolean canOpenDoor(@NotNull QuakecraftDoor door, @NotNull ServerPlayerEntity player)
     {
-        return this.world.containsPlayer(player) && player.interactionManager.getGameMode() != GameMode.SPECTATOR;
+        if (!this.world.containsPlayer(player) || player.interactionManager.getGameMode() == GameMode.SPECTATOR)
+            return false;
+        GameTeam team = this.getOptParticipant(player).map(QuakecraftPlayer::getTeam).orElse(null);
+        return door.getTeam() == null || team == null || team == door.getTeam() || door.getExitDetectionBounds().contains(player.getBlockPos());
+    }
+
+    public @Nullable QuakecraftPlayer getParticipant(@NotNull ServerPlayerEntity player)
+    {
+        return this.participants.get(player.getUuid());
+    }
+
+    public @NotNull Optional<QuakecraftPlayer> getOptParticipant(@NotNull ServerPlayerEntity player)
+    {
+        return Optional.ofNullable(this.getParticipant(player));
+    }
+
+    public @NotNull Collection<QuakecraftPlayer> getParticipants()
+    {
+        return this.participants.values();
     }
 }

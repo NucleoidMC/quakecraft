@@ -17,8 +17,7 @@
 
 package me.lambdaurora.quakecraft.game;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import com.google.common.collect.Multimap;
 import me.lambdaurora.quakecraft.PlayerAction;
 import me.lambdaurora.quakecraft.Quakecraft;
 import me.lambdaurora.quakecraft.entity.GrenadeEntity;
@@ -44,11 +43,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.game.event.*;
+import xyz.nucleoid.plasmid.game.player.GameTeam;
 import xyz.nucleoid.plasmid.game.player.JoinResult;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Represents the Quakecraft running game.
@@ -61,7 +62,6 @@ public class QuakecraftGame extends QuakecraftLogic
 {
     private final QuakecraftSpawnLogic spawnLogic;
     private final QuakecraftScoreboard scoreboard;
-    private final Object2ObjectMap<UUID, QuakecraftPlayer> participants;
     private boolean running = false;
     private boolean end = false;
     private int time;
@@ -72,14 +72,9 @@ public class QuakecraftGame extends QuakecraftLogic
     private QuakecraftGame(@NotNull QuakecraftConfig config, @NotNull GameWorld world, @NotNull QuakecraftMap map, @NotNull QuakecraftSpawnLogic spawnLogic,
                            @NotNull Set<ServerPlayerEntity> participants)
     {
-        super(world, config, map);
+        super(world, config, map, participants);
         this.spawnLogic = spawnLogic;
         this.scoreboard = new QuakecraftScoreboard(this);
-        this.participants = new Object2ObjectOpenHashMap<>();
-
-        for (ServerPlayerEntity player : participants) {
-            this.participants.put(player.getUuid(), new QuakecraftPlayer(player));
-        }
 
         this.time = this.getConfig().time;
     }
@@ -91,10 +86,14 @@ public class QuakecraftGame extends QuakecraftLogic
      * @param world The game world.
      * @param map The game map.
      * @param spawnLogic The game spawn logic.
+     * @param players The players affected to teams.
      */
-    public static void open(@NotNull QuakecraftConfig config, @NotNull GameWorld world, @NotNull QuakecraftMap map, @NotNull QuakecraftSpawnLogic spawnLogic)
+    public static void open(@NotNull QuakecraftConfig config, @NotNull GameWorld world, @NotNull QuakecraftMap map, @NotNull QuakecraftSpawnLogic spawnLogic,
+                            @Nullable Multimap<GameTeam, ServerPlayerEntity> players)
     {
         QuakecraftGame active = new QuakecraftGame(config, world, map, spawnLogic, world.getPlayers());
+        if (players != null)
+            active.assignTeams(players);
         map.postInit(active);
         world.openGame(game -> {
             game.setRule(GameRule.CRAFTING, RuleResult.DENY);
@@ -126,8 +125,10 @@ public class QuakecraftGame extends QuakecraftLogic
         });
     }
 
-    private void onOpen()
+    @Override
+    protected void onOpen()
     {
+        super.onOpen();
         for (ServerPlayerEntity player : this.getWorld().getPlayers()) {
             this.spawnParticipant(player);
             Quakecraft.get().addActivePlayer(player);
@@ -136,8 +137,10 @@ public class QuakecraftGame extends QuakecraftLogic
         this.running = true;
     }
 
-    private void onClose()
+    @Override
+    protected void onClose()
     {
+        super.onClose();
         this.scoreboard.close();
     }
 
@@ -160,7 +163,7 @@ public class QuakecraftGame extends QuakecraftLogic
             });
             this.time--;
 
-            if (activePlayer[0] <= 1) {
+            if (activePlayer[0] <= 0) {
                 this.getWorld().getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.end.not_enough_players").formatted(Formatting.RED));
                 this.getWorld().close();
             }
@@ -193,6 +196,11 @@ public class QuakecraftGame extends QuakecraftLogic
         }
 
         this.scoreboard.update();
+    }
+
+    private void assignTeams(Multimap<GameTeam, ServerPlayerEntity> players)
+    {
+        players.forEach((team, player) -> this.getOptParticipant(player).ifPresent(p -> p.setTeam(team)));
     }
 
     private void onWin(@NotNull QuakecraftPlayer winner)
@@ -345,20 +353,5 @@ public class QuakecraftGame extends QuakecraftLogic
     public int getTime()
     {
         return this.time;
-    }
-
-    public @Nullable QuakecraftPlayer getParticipant(@NotNull ServerPlayerEntity player)
-    {
-        return this.participants.get(player.getUuid());
-    }
-
-    public @NotNull Optional<QuakecraftPlayer> getOptParticipant(@NotNull ServerPlayerEntity player)
-    {
-        return Optional.ofNullable(this.getParticipant(player));
-    }
-
-    public @NotNull Collection<QuakecraftPlayer> getParticipants()
-    {
-        return this.participants.values();
     }
 }

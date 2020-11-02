@@ -85,7 +85,9 @@ public final class RayUtils
 
             if (targetBox.contains(origin) || targetBox.raycast(origin, target).isPresent()) {
                 if (blockHitResult == null) {
+                    ((RayAccessor) source).quakecraft$setRaycasting(true);
                     blockHitResult = world.raycast(new RaycastContext(origin, target, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, source));
+                    ((RayAccessor) source).quakecraft$setRaycasting(false);
                 }
 
                 if (blockHitResult.getType() != HitResult.Type.MISS) {
@@ -114,18 +116,18 @@ public final class RayUtils
     /**
      * Thanks FarmyFeud (https://github.com/NucleoidMC/farmy-feud/blob/1.16.2/src/main/java/xyz/nucleoid/farmyfeud/game/active/EntityRayTrace.java)
      */
-    public static @Nullable EntityHitResult raycastEntity(@NotNull Entity sourceEntity, double range, double margin, Predicate<Entity> predicate)
+    public static @Nullable EntityHitResult raycastEntity(@NotNull Entity source, double range, double margin, Predicate<Entity> predicate)
     {
-        World world = sourceEntity.getEntityWorld();
+        World world = source.getEntityWorld();
 
-        Vec3d origin = sourceEntity.getCameraPosVec(1.0F);
-        Vec3d delta = sourceEntity.getRotationVec(1.0F).multiply(range);
+        Vec3d origin = source.getCameraPosVec(1.0F);
+        Vec3d delta = source.getRotationVec(1.0F).multiply(range);
 
         Vec3d target = origin.add(delta);
 
         double testMargin = Math.max(1.0, margin);
 
-        Box testBox = sourceEntity.getBoundingBox()
+        Box testBox = source.getBoundingBox()
                 .stretch(delta)
                 .expand(testMargin, testMargin, testMargin);
 
@@ -133,7 +135,7 @@ public final class RayUtils
         Entity hitEntity = null;
         Vec3d hitPoint = null;
 
-        for (Entity entity : world.getOtherEntities(sourceEntity, testBox, predicate)) {
+        for (Entity entity : world.getOtherEntities(source, testBox, predicate)) {
             Box targetBox = entity.getBoundingBox().expand(Math.max(entity.getTargetingMargin(), margin));
 
             Optional<Vec3d> traceResult = targetBox.raycast(origin, target);
@@ -157,7 +159,9 @@ public final class RayUtils
             return null;
         }
 
-        BlockHitResult blockHitResult = world.raycast(new RaycastContext(origin, target, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, sourceEntity));
+        ((RayAccessor) source).quakecraft$setRaycasting(true);
+        BlockHitResult blockHitResult = world.raycast(new RaycastContext(origin, target, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, source));
+        ((RayAccessor) source).quakecraft$setRaycasting(false);
         if (blockHitResult.getType() != HitResult.Type.MISS) {
             return null;
         }
@@ -172,7 +176,9 @@ public final class RayUtils
 
         Vec3d target = origin.add(delta);
 
+        ((RayAccessor) source).quakecraft$setRaycasting(true);
         BlockHitResult blockHitResult = world.getWorld().raycast(new RaycastContext(origin, target, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, source));
+        ((RayAccessor) source).quakecraft$setRaycasting(false);
         if (blockHitResult.getType() != HitResult.Type.MISS) {
             target = blockHitResult.getPos();
         }
@@ -186,7 +192,9 @@ public final class RayUtils
 
         Vec3d end = target.getCameraPosVec(1.f).subtract(0, 0.5, 0);
 
+        ((RayAccessor) source).quakecraft$setRaycasting(true);
         BlockHitResult blockHitResult = world.getWorld().raycast(new RaycastContext(origin, end, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, source));
+        ((RayAccessor) source).quakecraft$setRaycasting(false);
         if (blockHitResult.getType() != HitResult.Type.MISS) {
             end = blockHitResult.getPos();
         }

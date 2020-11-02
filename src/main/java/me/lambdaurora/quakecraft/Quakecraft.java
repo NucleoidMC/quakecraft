@@ -18,6 +18,7 @@
 package me.lambdaurora.quakecraft;
 
 import me.lambdaurora.quakecraft.game.QuakecraftConfig;
+import me.lambdaurora.quakecraft.game.QuakecraftLogic;
 import me.lambdaurora.quakecraft.game.QuakecraftWaiting;
 import me.lambdaurora.quakecraft.mixin.FireworkRocketEntityAccessor;
 import net.fabricmc.api.ModInitializer;
@@ -43,15 +44,16 @@ import java.util.List;
  * Represents the Quakecraft minigame mod.
  *
  * @author LambdAurora
- * @version 1.4.0
+ * @version 1.5.0
  * @since 1.0.0
  */
 public class Quakecraft implements ModInitializer
 {
-    public static final String                   NAMESPACE     = "quakecraft";
-    private static      Quakecraft               INSTANCE;
-    public final        Logger                   logger        = LogManager.getLogger(NAMESPACE);
-    private final       List<ServerPlayerEntity> activePlayers = new ArrayList<>();
+    public static final String NAMESPACE = "quakecraft";
+    private static Quakecraft INSTANCE;
+    public final Logger logger = LogManager.getLogger(NAMESPACE);
+    private final List<QuakecraftLogic> activeGames = new ArrayList<>();
+    private final List<ServerPlayerEntity> activePlayers = new ArrayList<>();
 
     @Override
     public void onInitialize()
@@ -86,6 +88,21 @@ public class Quakecraft implements ModInitializer
     public boolean isPlayerActive(@NotNull ServerPlayerEntity player)
     {
         return this.activePlayers.contains(player);
+    }
+
+    public void addActiveGame(@NotNull QuakecraftLogic game)
+    {
+        this.activeGames.add(game);
+    }
+
+    public void removeActiveGame(@NotNull QuakecraftLogic game)
+    {
+        this.activeGames.remove(game);
+    }
+
+    public List<QuakecraftLogic> getActiveGames()
+    {
+        return this.activeGames;
     }
 
     public static @NotNull Quakecraft get()

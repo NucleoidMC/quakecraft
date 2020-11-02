@@ -98,7 +98,7 @@ public class RocketEntity extends FireballEntity implements CritableEntity
     {
         if (this.isInvulnerableTo(source))
             return false;
-        if (source.isExplosive() && source.getSource() instanceof ServerPlayerEntity && source.getSource() == this.getOwner())
+        if (source.isExplosive())
             return false;
         this.detonate();
         return true;

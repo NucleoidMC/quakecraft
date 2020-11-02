@@ -17,6 +17,8 @@
 
 package me.lambdaurora.quakecraft.game;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import me.lambdaurora.quakecraft.Quakecraft;
 import me.lambdaurora.quakecraft.game.map.MapGenerator;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
@@ -32,11 +34,14 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.plasmid.game.GameOpenContext;
 import xyz.nucleoid.plasmid.game.GameWaitingLobby;
 import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.game.StartResult;
 import xyz.nucleoid.plasmid.game.event.*;
+import xyz.nucleoid.plasmid.game.player.GameTeam;
+import xyz.nucleoid.plasmid.game.player.TeamAllocator;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
 import xyz.nucleoid.plasmid.world.bubble.BubbleWorldConfig;
@@ -47,7 +52,7 @@ import java.util.concurrent.CompletableFuture;
  * Represents a Quakecraft wait-room.
  *
  * @author LambdAurora
- * @version 1.4.6
+ * @version 1.5.0
  * @since 1.0.0
  */
 public class QuakecraftWaiting
@@ -104,7 +109,8 @@ public class QuakecraftWaiting
 
     private StartResult requestStart()
     {
-        QuakecraftGame.open(this.config, this.world, this.map, this.spawnLogic);
+        Multimap<GameTeam, ServerPlayerEntity> players = this.allocatePlayers();
+        QuakecraftGame.open(this.config, this.world, this.map, this.spawnLogic, players);
         return StartResult.OK;
     }
 
@@ -152,5 +158,15 @@ public class QuakecraftWaiting
         if (player.interactionManager.getGameMode() == GameMode.SPECTATOR)
             return ActionResult.PASS;
         return ActionResult.FAIL;
+    }
+
+    private @Nullable Multimap<GameTeam, ServerPlayerEntity> allocatePlayers()
+    {
+        if (this.config.teams.size() == 0) {
+            return null;
+        }
+        TeamAllocator<GameTeam, ServerPlayerEntity> allocator = new TeamAllocator<>(this.config.teams);
+        this.world.getPlayers().forEach(player -> allocator.add(player, null));
+        return allocator.build();
     }
 }
