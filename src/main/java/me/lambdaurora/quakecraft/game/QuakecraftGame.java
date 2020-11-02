@@ -54,14 +54,11 @@ import java.util.*;
  * Represents the Quakecraft running game.
  *
  * @author LambdAurora
- * @version 1.4.6
+ * @version 1.5.0
  * @since 1.0.0
  */
-public class QuakecraftGame
+public class QuakecraftGame extends QuakecraftLogic
 {
-    private final QuakecraftConfig config;
-    private final QuakecraftMap map;
-    public final GameWorld world;
     private final QuakecraftSpawnLogic spawnLogic;
     private final QuakecraftScoreboard scoreboard;
     private final Object2ObjectMap<UUID, QuakecraftPlayer> participants;
@@ -75,9 +72,7 @@ public class QuakecraftGame
     private QuakecraftGame(@NotNull QuakecraftConfig config, @NotNull GameWorld world, @NotNull QuakecraftMap map, @NotNull QuakecraftSpawnLogic spawnLogic,
                            @NotNull Set<ServerPlayerEntity> participants)
     {
-        this.config = config;
-        this.world = world;
-        this.map = map;
+        super(world, config, map);
         this.spawnLogic = spawnLogic;
         this.scoreboard = new QuakecraftScoreboard(this);
         this.participants = new Object2ObjectOpenHashMap<>();
@@ -86,7 +81,7 @@ public class QuakecraftGame
             this.participants.put(player.getUuid(), new QuakecraftPlayer(player));
         }
 
-        this.time = this.config.time;
+        this.time = this.getConfig().time;
     }
 
     /**
@@ -100,7 +95,7 @@ public class QuakecraftGame
     public static void open(@NotNull QuakecraftConfig config, @NotNull GameWorld world, @NotNull QuakecraftMap map, @NotNull QuakecraftSpawnLogic spawnLogic)
     {
         QuakecraftGame active = new QuakecraftGame(config, world, map, spawnLogic, world.getPlayers());
-
+        map.postInit(active);
         world.openGame(game -> {
             game.setRule(GameRule.CRAFTING, RuleResult.DENY);
             game.setRule(GameRule.PORTALS, RuleResult.DENY);
@@ -133,7 +128,7 @@ public class QuakecraftGame
 
     private void onOpen()
     {
-        for (ServerPlayerEntity player : this.world.getPlayers()) {
+        for (ServerPlayerEntity player : this.getWorld().getPlayers()) {
             this.spawnParticipant(player);
             Quakecraft.get().addActivePlayer(player);
         }
@@ -146,15 +141,17 @@ public class QuakecraftGame
         this.scoreboard.close();
     }
 
-    private void tick()
+    @Override
+    public void tick()
     {
+        super.tick();
         if (this.running) {
             int[] activePlayer = new int[]{0};
             this.participants.forEach((uuid, participant) -> {
                 if (participant.hasLeft())
                     return;
 
-                participant.tick(this.world);
+                participant.tick(this.getWorld());
                 activePlayer[0]++;
 
                 if (participant.hasWon()) {
@@ -164,13 +161,13 @@ public class QuakecraftGame
             this.time--;
 
             if (activePlayer[0] <= 1) {
-                this.world.getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.end.not_enough_players").formatted(Formatting.RED));
-                this.world.close();
+                this.getWorld().getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.end.not_enough_players").formatted(Formatting.RED));
+                this.getWorld().close();
             }
 
             if (this.time <= 0) {
-                this.world.getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.end.nobody_won").formatted(Formatting.RED));
-                this.world.close();
+                this.getWorld().getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.end.nobody_won").formatted(Formatting.RED));
+                this.getWorld().close();
             }
 
             if (this.end) {
@@ -186,13 +183,13 @@ public class QuakecraftGame
                         if (mcPlayer == null)
                             return;
 
-                        Quakecraft.spawnFirework(this.world.getWorld(), mcPlayer.getX(), mcPlayer.getY(), mcPlayer.getZ(), new int[]{15435844, 11743532}, false, -1);
+                        Quakecraft.spawnFirework(this.getWorld().getWorld(), mcPlayer.getX(), mcPlayer.getY(), mcPlayer.getZ(), new int[]{15435844, 11743532}, false, -1);
                     }
                 });
             }
 
             if (this.endTime == 0)
-                this.world.close();
+                this.getWorld().close();
         }
 
         this.scoreboard.update();
@@ -200,7 +197,7 @@ public class QuakecraftGame
 
     private void onWin(@NotNull QuakecraftPlayer winner)
     {
-        this.world.getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.end.win", winner.getDisplayName()).formatted(Formatting.GREEN));
+        this.getWorld().getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.end.win", winner.getDisplayName()).formatted(Formatting.GREEN));
         this.end = true;
         this.running = false;
         this.winners.add(winner);
@@ -250,7 +247,7 @@ public class QuakecraftGame
             if (other != null) {
                 ((ServerPlayerEntity) attacker).playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER, 2.f, 5.f);
                 other.incrementKills();
-                this.world.getPlayerSet().sendMessage(
+                this.getWorld().getPlayerSet().sendMessage(
                         new TranslatableText("quakecraft.game.kill", attacker.getDisplayName(), player.getDisplayName()).formatted(Formatting.GRAY)
                 );
 
@@ -278,7 +275,7 @@ public class QuakecraftGame
         QuakecraftPlayer participant = this.getParticipant(player);
         if (participant == null)
             return;
-        participant.onSwingHand(this.world);
+        participant.onSwingHand(this.getWorld());
     }
 
     private ActionResult onUseBlock(ServerPlayerEntity player, Hand hand, BlockHitResult hitResult)
@@ -305,9 +302,9 @@ public class QuakecraftGame
         if (participant != null) {
             ItemCooldownManager cooldown = player.getItemCooldownManager();
             if (!cooldown.isCoolingDown(heldStack.getItem())) {
-                int result = participant.onItemUse(this.world, player, hand);
+                int result = participant.onItemUse(this.getWorld(), player, hand);
                 if (result != -1) {
-                    this.world.getPlayerSet().forEach(other -> {
+                    this.getWorld().getPlayerSet().forEach(other -> {
                         if (player.squaredDistanceTo(other) <= 16.f) {
                             other.networkHandler.sendPacket(new PlaySoundS2CPacket(SoundEvents.ENTITY_HORSE_SADDLE, SoundCategory.MASTER, player.getX(), player.getY(), player.getZ(), 2.f, 1.f));
                         }

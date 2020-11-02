@@ -7,5 +7,6 @@
   "players": {
     "min": 6,
     "max": 16
-  }
+  },
+  "teams": []
 }

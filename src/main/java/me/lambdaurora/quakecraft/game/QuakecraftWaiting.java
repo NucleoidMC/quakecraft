@@ -108,7 +108,6 @@ public class QuakecraftWaiting
         return StartResult.OK;
     }
 
-
     private void spawnPlayer(@NotNull ServerPlayerEntity player)
     {
         this.spawnLogic.resetWaitingPlayer(player);

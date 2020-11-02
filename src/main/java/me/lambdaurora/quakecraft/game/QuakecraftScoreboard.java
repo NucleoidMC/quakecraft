@@ -41,7 +41,7 @@ public class QuakecraftScoreboard implements AutoCloseable
     public QuakecraftScoreboard(@NotNull QuakecraftGame game)
     {
         this.sidebar = SidebarWidget.open(new LiteralText("Quakecraft").formatted(Formatting.GOLD),
-                game.world.getPlayerSet());
+                game.getWorld().getPlayerSet());
         this.game = game;
     }
 

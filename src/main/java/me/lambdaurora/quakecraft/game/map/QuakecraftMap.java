@@ -17,23 +17,27 @@
 
 package me.lambdaurora.quakecraft.game.map;
 
+import me.lambdaurora.quakecraft.game.QuakecraftDoor;
+import me.lambdaurora.quakecraft.game.QuakecraftLogic;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
-import org.aperlambda.lambdacommon.utils.Pair;
 import org.jetbrains.annotations.NotNull;
+import xyz.nucleoid.plasmid.game.GameWorld;
 import xyz.nucleoid.plasmid.game.map.template.MapTemplate;
 import xyz.nucleoid.plasmid.game.map.template.TemplateChunkGenerator;
 import xyz.nucleoid.plasmid.util.BlockBounds;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
  * Represents the Quakecraft map.
  *
  * @author LambdAurora
- * @version 1.4.7
+ * @version 1.5.0
  * @since 1.0.0
  */
 public class QuakecraftMap
@@ -42,6 +46,7 @@ public class QuakecraftMap
     private final MapTemplate template;
     public final BlockBounds waitingSpawn;
     private final List<MapSpawn> spawns;
+    private final List<QuakecraftDoor> doors = new ArrayList<>();
 
     public QuakecraftMap(@NotNull MapTemplate template, @NotNull BlockBounds waitingSpawn, @NotNull List<MapSpawn> spawns)
     {
@@ -79,6 +84,17 @@ public class QuakecraftMap
     public Stream<MapSpawn> streamSpawns()
     {
         return this.spawns.stream();
+    }
+
+    public void tick()
+    {
+        this.doors.forEach(QuakecraftDoor::tick);
+    }
+
+    public void postInit(@NotNull QuakecraftLogic game)
+    {
+        this.template.getTemplateRegions("door").map(region -> QuakecraftDoor.fromRegion(game, region).orElse(null))
+                .filter(Objects::nonNull).forEach(this.doors::add);
     }
 
     public @NotNull ChunkGenerator asGenerator(@NotNull MinecraftServer server)
