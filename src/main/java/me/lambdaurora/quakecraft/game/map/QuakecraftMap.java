@@ -17,15 +17,18 @@
 
 package me.lambdaurora.quakecraft.game.map;
 
+import me.lambdaurora.quakecraft.block.TeamBarrierBlock;
 import me.lambdaurora.quakecraft.game.QuakecraftDoor;
 import me.lambdaurora.quakecraft.game.QuakecraftLogic;
+import net.minecraft.block.BlockState;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import org.jetbrains.annotations.NotNull;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.plasmid.game.map.template.MapTemplate;
 import xyz.nucleoid.plasmid.game.map.template.TemplateChunkGenerator;
+import xyz.nucleoid.plasmid.game.player.GameTeam;
 import xyz.nucleoid.plasmid.util.BlockBounds;
 
 import java.util.ArrayList;
@@ -37,7 +40,7 @@ import java.util.stream.Stream;
  * Represents the Quakecraft map.
  *
  * @author LambdAurora
- * @version 1.5.0
+ * @version 1.5.2
  * @since 1.0.0
  */
 public class QuakecraftMap
@@ -86,6 +89,20 @@ public class QuakecraftMap
         return this.spawns.stream();
     }
 
+    /**
+     * Returns the door activation bounds.
+     *
+     * @param id The identifier of the door activation bounds.
+     * @return The bounds if found, else null.
+     */
+    public @Nullable BlockBounds getDoorActivationBounds(@NotNull String id)
+    {
+        return this.template.getTemplateRegions("door_activation")
+                .filter(region -> id.equals(region.getData().getString("id")))
+                .map(region -> region.getBounds().offset(ORIGIN))
+                .findFirst().orElse(null);
+    }
+
     public void tick()
     {
         this.doors.forEach(QuakecraftDoor::tick);
@@ -95,6 +112,16 @@ public class QuakecraftMap
     {
         this.template.getTemplateRegions("door").map(region -> QuakecraftDoor.fromRegion(game, region).orElse(null))
                 .filter(Objects::nonNull).forEach(this.doors::add);
+
+        if (game.getTeams().size() != 0) {
+            this.template.getTemplateRegions("team_barrier").forEach(region -> {
+                GameTeam team = game.getTeam(region.getData().getString("team"));
+                if (team != null) {
+                    BlockState state = TeamBarrierBlock.of(team).getDefaultState();
+                    region.getBounds().offset(ORIGIN).iterate().forEach(pos -> game.getWorld().getWorld().setBlockState(pos, state, 0b0111010));
+                }
+            });
+        }
     }
 
     public @NotNull ChunkGenerator asGenerator(@NotNull MinecraftServer server)

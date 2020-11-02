@@ -163,7 +163,7 @@ public class QuakecraftGame extends QuakecraftLogic
             });
             this.time--;
 
-            if (activePlayer[0] <= 0) {
+            if (activePlayer[0] <= 1) {
                 this.getWorld().getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.end.not_enough_players").formatted(Formatting.RED));
                 this.getWorld().close();
             }

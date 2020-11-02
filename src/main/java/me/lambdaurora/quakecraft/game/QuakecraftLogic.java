@@ -34,7 +34,7 @@ import java.util.*;
  * Represents an instance of Quakecraft.
  *
  * @author LambdAurora
- * @version 1.5.0
+ * @version 1.5.2
  * @since 1.5.0
  */
 public abstract class QuakecraftLogic
@@ -116,7 +116,7 @@ public abstract class QuakecraftLogic
         if (!this.world.containsPlayer(player) || player.interactionManager.getGameMode() == GameMode.SPECTATOR)
             return false;
         GameTeam team = this.getOptParticipant(player).map(QuakecraftPlayer::getTeam).orElse(null);
-        return door.getTeam() == null || team == null || team == door.getTeam() || door.getExitDetectionBounds().contains(player.getBlockPos());
+        return door.getTeam() == null || team == null || team == door.getTeam();
     }
 
     public @Nullable QuakecraftPlayer getParticipant(@NotNull ServerPlayerEntity player)

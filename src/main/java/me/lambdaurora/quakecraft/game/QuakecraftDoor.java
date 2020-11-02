@@ -19,8 +19,8 @@ package me.lambdaurora.quakecraft.game;
 
 import me.lambdaurora.quakecraft.block.TeamBarrierBlock;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
+import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -31,7 +31,6 @@ import xyz.nucleoid.plasmid.game.map.template.TemplateRegion;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
 import xyz.nucleoid.plasmid.util.BlockBounds;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,7 +38,7 @@ import java.util.Optional;
  * Represents a door which opens/closes automatically.
  *
  * @author LambdAurora
- * @version 1.5.0
+ * @version 1.5.2
  * @since 1.5.0
  */
 public class QuakecraftDoor
@@ -48,8 +47,7 @@ public class QuakecraftDoor
     private final TemplateRegion region;
     private final BlockBounds bounds;
     private final BlockBounds detectionBounds;
-    private final BlockBounds exitDetectionBounds;
-    private final Direction facing;
+    private final Direction.Axis axis;
     private final BlockState openState;
     private final BlockState closedState;
     private final GameTeam team;
@@ -58,16 +56,15 @@ public class QuakecraftDoor
 
     public QuakecraftDoor(@NotNull QuakecraftLogic game,
                           @NotNull TemplateRegion region,
-                          @NotNull BlockBounds bounds, @NotNull BlockBounds detectionBounds, @NotNull BlockBounds exitDetectionBounds,
-                          @NotNull Direction facing, @NotNull BlockState closedState,
+                          @NotNull BlockBounds bounds, @NotNull BlockBounds detectionBounds,
+                          @NotNull Direction.Axis axis, @NotNull BlockState closedState,
                           @Nullable GameTeam team)
     {
         this.game = game;
         this.region = region;
         this.bounds = bounds;
         this.detectionBounds = detectionBounds;
-        this.exitDetectionBounds = exitDetectionBounds;
-        this.facing = facing;
+        this.axis = axis;
         this.openState = TeamBarrierBlock.of(team).getDefaultState();
         this.closedState = closedState;
         this.team = team;
@@ -106,13 +103,13 @@ public class QuakecraftDoor
     }
 
     /**
-     * Returns the bounds where any players should open the door to be able to exit.
+     * Returns the axis of the door.
      *
-     * @return The exit detection bounds.
+     * @return The axis of the door.
      */
-    public @NotNull BlockBounds getExitDetectionBounds()
+    public Direction.Axis getAxis()
     {
-        return this.exitDetectionBounds;
+        return this.axis;
     }
 
     /**
@@ -123,6 +120,16 @@ public class QuakecraftDoor
     public GameTeam getTeam()
     {
         return this.team;
+    }
+
+    /**
+     * Returns whether the door is open or not.
+     *
+     * @return True if the door is open, else false.
+     */
+    public boolean isOpen()
+    {
+        return this.open;
     }
 
     public void tick()
@@ -163,17 +170,29 @@ public class QuakecraftDoor
     {
         BlockBounds bounds = region.getBounds().offset(QuakecraftMap.ORIGIN);
 
-        String serializedDirection = region.getData().getString("facing");
-        Direction facing = Arrays.stream(Direction.values()).filter(direction -> direction.getName().equals(serializedDirection)).findFirst().orElse(null);
-        if (facing == null)
+        Direction.Axis axis = Direction.Axis.fromName(region.getData().getString("axis"));
+        if (axis == null)
             return Optional.empty();
 
-        int distance = region.getData().getInt("distance");
-        if (distance == 0)
-            return Optional.empty();
+        BlockBounds detectionBounds = null;
 
-        BlockPos min = bounds.getMin().offset(facing.getOpposite(), distance);
-        BlockPos max = bounds.getMax().offset(facing, distance);
+        if (region.getData().contains("activation", NbtType.STRING)) {
+            detectionBounds = game.getMap().getDoorActivationBounds(region.getData().getString("activation"));
+        }
+
+        if (detectionBounds == null && region.getData().contains("distance", NbtType.INT)) {
+            int distance = region.getData().getInt("distance");
+            if (distance == 0)
+                return Optional.empty();
+
+            BlockPos min = bounds.getMin().offset(Direction.from(axis, Direction.AxisDirection.NEGATIVE), distance);
+            BlockPos max = bounds.getMax().offset(Direction.from(axis, Direction.AxisDirection.POSITIVE), distance);
+
+            detectionBounds = new BlockBounds(min, max);
+        }
+
+        if (detectionBounds == null)
+            return Optional.empty();
 
         // A block must be explicitly defined.
         if (!region.getData().getCompound("block").contains("Name"))
@@ -182,8 +201,7 @@ public class QuakecraftDoor
 
         GameTeam team = game.getTeam(region.getData().getString("team"));
 
-        QuakecraftDoor door = new QuakecraftDoor(game, region, bounds, new BlockBounds(min, max), new BlockBounds(bounds.getMin(), max),
-                facing, closedState, team);
+        QuakecraftDoor door = new QuakecraftDoor(game, region, bounds, detectionBounds, axis, closedState, team);
         door.close();
         return Optional.of(door);
     }
