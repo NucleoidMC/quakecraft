@@ -70,9 +70,10 @@ public class TeamBarrierBlock extends Block implements FakeBlock
                             GameTeam team = game.getOptParticipant(player).map(QuakecraftPlayer::getTeam).orElse(null);
                             if (team != null) {
                                 if (team != this.team) {
-                                return VoxelShapes.fullCube();
-                            } else {
-                                return VoxelShapes.empty();
+                                    return VoxelShapes.fullCube();
+                                } else {
+                                    return VoxelShapes.empty();
+                                }
                             }
                         }
                     }
