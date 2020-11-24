@@ -29,10 +29,10 @@ import java.util.Comparator;
  * Represents the Quakecraft scoreboard.
  *
  * @author LambdAurora
- * @version 1.6.0
+ * @version 1.6.1
  * @since 1.0.0
  */
-public class QuakecraftScoreboard implements AutoCloseable
+public class QuakecraftScoreboard
 {
     private final QuakecraftGame game;
     private final SidebarWidget sidebar;
@@ -72,11 +72,5 @@ public class QuakecraftScoreboard implements AutoCloseable
                 }
             });
         });
-    }
-
-    @Override
-    public void close()
-    {
-        this.sidebar.close();
     }
 }

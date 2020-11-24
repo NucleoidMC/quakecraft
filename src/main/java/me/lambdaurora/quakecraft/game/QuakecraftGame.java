@@ -56,7 +56,7 @@ import java.util.Set;
  * Represents the Quakecraft running game.
  *
  * @author LambdAurora
- * @version 1.6.0
+ * @version 1.6.1
  * @since 1.0.0
  */
 public class QuakecraftGame extends QuakecraftLogic
@@ -92,11 +92,12 @@ public class QuakecraftGame extends QuakecraftLogic
     public static void open(@NotNull QuakecraftConfig config, @NotNull GameLogic logic, @NotNull QuakecraftMap map, @NotNull QuakecraftSpawnLogic spawnLogic,
                             @Nullable Multimap<GameTeam, ServerPlayerEntity> players)
     {
-        QuakecraftGame active = new QuakecraftGame(config, logic, map, spawnLogic);
-        if (players != null)
-            active.assignTeams(players);
-        map.postInit(active);
         logic.getSpace().openGame(game -> {
+            QuakecraftGame active = new QuakecraftGame(config, game, map, spawnLogic);
+            if (players != null)
+                active.assignTeams(players);
+            map.postInit(active);
+
             game.setRule(GameRule.CRAFTING, RuleResult.DENY);
             game.setRule(GameRule.PORTALS, RuleResult.DENY);
             game.setRule(GameRule.PVP, RuleResult.DENY);
@@ -134,15 +135,14 @@ public class QuakecraftGame extends QuakecraftLogic
             this.spawnParticipant(player);
             Quakecraft.get().addActivePlayer(player);
         }
-        this.scoreboard.update();
         this.running = true;
+        this.scoreboard.update();
     }
 
     @Override
     protected void onClose()
     {
         super.onClose();
-        this.scoreboard.close();
     }
 
     @Override
@@ -164,7 +164,7 @@ public class QuakecraftGame extends QuakecraftLogic
             });
             this.time--;
 
-            if (activePlayer[0] <= 0) {
+            if (activePlayer[0] <= 1) {
                 this.getSpace().getPlayers().sendMessage(new TranslatableText("quakecraft.game.end.not_enough_players").formatted(Formatting.RED));
                 this.getSpace().close();
             }
