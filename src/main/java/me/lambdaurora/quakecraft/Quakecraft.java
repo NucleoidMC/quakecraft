@@ -44,7 +44,7 @@ import java.util.List;
  * Represents the Quakecraft minigame mod.
  *
  * @author LambdAurora
- * @version 1.5.0
+ * @version 1.6.0
  * @since 1.0.0
  */
 public class Quakecraft implements ModInitializer
@@ -68,7 +68,7 @@ public class Quakecraft implements ModInitializer
     /**
      * Prints a message to the terminal.
      *
-     * @param info The message to print.
+     * @param info the message to print
      */
     public void log(String info)
     {
@@ -118,12 +118,12 @@ public class Quakecraft implements ModInitializer
     /**
      * Applies the speed modifier to the specified player.
      *
-     * @param player The player.
+     * @param player the player
      * @since 1.1.0
      */
     public static void applySpeed(@NotNull ServerPlayerEntity player)
     {
-        EntityAttributeInstance movementSpeedAttribute = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+        var movementSpeedAttribute = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
         if (movementSpeedAttribute != null) {
             movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
             movementSpeedAttribute.addTemporaryModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
@@ -133,12 +133,12 @@ public class Quakecraft implements ModInitializer
     /**
      * Removes the speed modifier to the specified player.
      *
-     * @param player The player.
+     * @param player the player
      * @since 1.1.0
      */
     public static void removeSpeed(@NotNull ServerPlayerEntity player)
     {
-        EntityAttributeInstance movementSpeedAttribute = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+        var movementSpeedAttribute = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
         if (movementSpeedAttribute != null) {
             movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
         }
@@ -146,19 +146,19 @@ public class Quakecraft implements ModInitializer
 
     public static void spawnFirework(@NotNull ServerWorld world, double x, double y, double z, int[] colors, boolean silent, int lifetime)
     {
-        ItemStack fireworkStack = new ItemStack(Items.FIREWORK_ROCKET);
+        var fireworkStack = new ItemStack(Items.FIREWORK_ROCKET);
 
-        CompoundTag tag = fireworkStack.getOrCreateSubTag("Fireworks");
+        var tag = fireworkStack.getOrCreateSubTag("Fireworks");
         tag.putByte("Flight", (byte) 0);
 
-        ListTag explosions = new ListTag();
-        CompoundTag explosion = new CompoundTag();
+        var explosions = new ListTag();
+        var explosion = new CompoundTag();
         explosion.putByte("Type", (byte) 0);
         explosion.putIntArray("Colors", colors);
         explosions.add(explosion);
         tag.put("Explosions", explosions);
 
-        FireworkRocketEntity firework = new FireworkRocketEntity(world, x, y, z, fireworkStack);
+        var firework = new FireworkRocketEntity(world, x, y, z, fireworkStack);
         firework.setSilent(silent);
         if (lifetime >= 0)
             ((FireworkRocketEntityAccessor) firework).setLifeTime(lifetime);

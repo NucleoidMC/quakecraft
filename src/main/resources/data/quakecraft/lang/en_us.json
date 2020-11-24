@@ -11,6 +11,8 @@
   "quakecraft.game.special.kills.5": "Quintuple-kill by %s!",
   "quakecraft.game.special.kills.lot": "%s killed too many people!",
 
+  "quakecraft.error.load_map": "Failed to load the map \"%s\"",
+
   "weapon.quakecraft.base_railgun": "Base Railgun",
   "weapon.quakecraft.advanced_railgun": "Advanced Railgun",
   "weapon.quakecraft.grenade_launcher": "Grenade Launcher",

@@ -25,15 +25,14 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.GameSpace;
 
 /**
  * Represents a rocket launcher.
  *
  * @author LambdAurora
- * @version 1.4.5
+ * @version 1.6.0
  * @since 1.3.0
  */
 public class RocketLauncherWeapon extends Weapon
@@ -44,14 +43,14 @@ public class RocketLauncherWeapon extends Weapon
     }
 
     @Override
-    public @NotNull ActionResult onPrimary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
+    public @NotNull ActionResult onPrimary(@NotNull GameSpace world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
-        RocketEntity rocket = new RocketEntity(world.getWorld(), player, 0, 0, 0);
+        var rocket = new RocketEntity(world.getWorld(), player, 0, 0, 0);
 
-        Vec3d origin = player.getCameraPosVec(1.0F);
-        Vec3d delta = player.getRotationVec(1.0F).multiply(0.25);
+        var origin = player.getCameraPosVec(1.0F);
+        var delta = player.getRotationVec(1.0F).multiply(0.25);
 
-        Vec3d target = origin.add(delta);
+        var target = origin.add(delta);
         rocket.setPos(target.getX(), target.getY(), target.getZ());
 
         rocket.setProperties(player, player.pitch, player.yaw, 0.f, 1.5f, 1.f);

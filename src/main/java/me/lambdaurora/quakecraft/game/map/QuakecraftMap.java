@@ -22,13 +22,13 @@ import me.lambdaurora.quakecraft.game.QuakecraftDoor;
 import me.lambdaurora.quakecraft.game.QuakecraftLogic;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.plasmid.game.map.template.MapTemplate;
-import xyz.nucleoid.plasmid.game.map.template.TemplateChunkGenerator;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
+import xyz.nucleoid.plasmid.map.template.MapTemplate;
+import xyz.nucleoid.plasmid.map.template.TemplateChunkGenerator;
+import xyz.nucleoid.plasmid.map.template.TemplateRegion;
 import xyz.nucleoid.plasmid.util.BlockBounds;
 
 import java.util.ArrayList;
@@ -40,12 +40,11 @@ import java.util.stream.Stream;
  * Represents the Quakecraft map.
  *
  * @author LambdAurora
- * @version 1.5.2
+ * @version 1.6.0
  * @since 1.0.0
  */
 public class QuakecraftMap
 {
-    public static final BlockPos ORIGIN = new BlockPos(0, 32, 0);
     private final MapTemplate template;
     public final BlockBounds waitingSpawn;
     private final List<MapSpawn> spawns;
@@ -61,7 +60,7 @@ public class QuakecraftMap
     /**
      * Returns the spawn count.
      *
-     * @return The spawn count.
+     * @return the spawn count
      */
     public int getSpawnCount()
     {
@@ -71,8 +70,8 @@ public class QuakecraftMap
     /**
      * Returns a spawn assigned to the specified index.
      *
-     * @param index The index of the spawn.
-     * @return The spawn position.
+     * @param index the index of the spawn
+     * @return the spawn position
      */
     public MapSpawn getSpawn(int index)
     {
@@ -82,7 +81,7 @@ public class QuakecraftMap
     /**
      * Streams the spawns.
      *
-     * @return The spawn stream.
+     * @return the spawn stream
      */
     public Stream<MapSpawn> streamSpawns()
     {
@@ -92,14 +91,14 @@ public class QuakecraftMap
     /**
      * Returns the door activation bounds.
      *
-     * @param id The identifier of the door activation bounds.
-     * @return The bounds if found, else null.
+     * @param id the identifier of the door activation bounds
+     * @return the bounds if found, else {@code null}
      */
     public @Nullable BlockBounds getDoorActivationBounds(@NotNull String id)
     {
-        return this.template.getTemplateRegions("door_activation")
+        return this.template.getMetadata().getRegions("door_activation")
                 .filter(region -> id.equals(region.getData().getString("id")))
-                .map(region -> region.getBounds().offset(ORIGIN))
+                .map(TemplateRegion::getBounds)
                 .findFirst().orElse(null);
     }
 
@@ -110,15 +109,15 @@ public class QuakecraftMap
 
     public void postInit(@NotNull QuakecraftLogic game)
     {
-        this.template.getTemplateRegions("door").map(region -> QuakecraftDoor.fromRegion(game, region).orElse(null))
+        this.template.getMetadata().getRegions("door").map(region -> QuakecraftDoor.fromRegion(game, region).orElse(null))
                 .filter(Objects::nonNull).forEach(this.doors::add);
 
         if (game.getTeams().size() != 0) {
-            this.template.getTemplateRegions("team_barrier").forEach(region -> {
+            this.template.getMetadata().getRegions("team_barrier").forEach(region -> {
                 GameTeam team = game.getTeam(region.getData().getString("team"));
                 if (team != null) {
                     BlockState state = TeamBarrierBlock.of(team).getDefaultState();
-                    region.getBounds().offset(ORIGIN).iterate().forEach(pos -> game.getWorld().getWorld().setBlockState(pos, state, 0b0111010));
+                    region.getBounds().forEach(pos -> game.getSpace().getWorld().setBlockState(pos, state, 0b0111010));
                 }
             });
         }
@@ -126,6 +125,6 @@ public class QuakecraftMap
 
     public @NotNull ChunkGenerator asGenerator(@NotNull MinecraftServer server)
     {
-        return new TemplateChunkGenerator(server, this.template, ORIGIN);
+        return new TemplateChunkGenerator(server, this.template);
     }
 }

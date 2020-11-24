@@ -22,48 +22,59 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.lambdaurora.quakecraft.Quakecraft;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.GameLogic;
+import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Represents an instance of Quakecraft.
  *
  * @author LambdAurora
- * @version 1.5.2
+ * @version 1.6.0
  * @since 1.5.0
  */
 public abstract class QuakecraftLogic
 {
-    private final GameWorld world;
+    private final GameSpace space;
     private final QuakecraftConfig config;
     private final QuakecraftMap map;
     protected final Object2ObjectMap<UUID, QuakecraftPlayer> participants = new Object2ObjectOpenHashMap<>();
+    private GameStage stage;
 
-    public QuakecraftLogic(@NotNull GameWorld world, @NotNull QuakecraftConfig config, @NotNull QuakecraftMap map,
-                           @NotNull Set<ServerPlayerEntity> participants)
+    public QuakecraftLogic(@NotNull GameLogic logic, @NotNull QuakecraftConfig config, @NotNull QuakecraftMap map)
     {
-        this.world = world;
+        this.space = logic.getSpace();
         this.config = config;
         this.map = map;
+        this.stage = GameStage.ROUND_START;
 
-        for (ServerPlayerEntity player : participants) {
-            this.participants.put(player.getUuid(), new QuakecraftPlayer(player, null));
-        }
+        this.getSpace().getPlayers().forEach(player ->
+                this.participants.put(player.getUuid(), new QuakecraftPlayer(player, null))
+        );
     }
 
     /**
-     * Returns the game world.
+     * Returns the game space.
      *
-     * @return The world.
+     * @return the game space
      */
-    public GameWorld getWorld()
+    public GameSpace getSpace()
     {
-        return this.world;
+        return this.space;
+    }
+
+    public ServerWorld getWorld()
+    {
+        return this.getSpace().getWorld();
     }
 
     public QuakecraftConfig getConfig()
@@ -92,11 +103,13 @@ public abstract class QuakecraftLogic
         return this.map;
     }
 
-    protected void onOpen() {
+    protected void onOpen()
+    {
         Quakecraft.get().addActiveGame(this);
     }
 
-    protected void onClose() {
+    protected void onClose()
+    {
         Quakecraft.get().removeActiveGame(this);
     }
 
@@ -107,13 +120,14 @@ public abstract class QuakecraftLogic
 
     /**
      * Returns whether a player can open the specified door.
-     * @param door The door.
-     * @param player The player.
-     * @return True if the player can open the door, else false.
+     *
+     * @param door the door
+     * @param player the player
+     * @return {@code true} if the player can open the door, else {@code false}
      */
     public boolean canOpenDoor(@NotNull QuakecraftDoor door, @NotNull ServerPlayerEntity player)
     {
-        if (!this.world.containsPlayer(player) || player.interactionManager.getGameMode() == GameMode.SPECTATOR)
+        if (!this.getSpace().containsPlayer(player) || player.interactionManager.getGameMode() == GameMode.SPECTATOR)
             return false;
         GameTeam team = this.getOptParticipant(player).map(QuakecraftPlayer::getTeam).orElse(null);
         return door.getTeam() == null || team == null || team == door.getTeam();

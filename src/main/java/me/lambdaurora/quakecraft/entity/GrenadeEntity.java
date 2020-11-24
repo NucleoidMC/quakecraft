@@ -42,17 +42,17 @@ import java.util.UUID;
  * Represents a grenade entity.
  *
  * @author LambdAurora
- * @version 1.3.0
+ * @version 1.6.0
  * @since 1.0.0
  */
 public class GrenadeEntity extends ArmorStandEntity implements CritableEntity
 {
-    private final int     lifetime;
-    private       UUID    ownerUuid;
-    private       int     ownerEntityId;
-    private       boolean leftOwner = false;
-    private       int     life      = 0;
-    private       boolean critical  = false;
+    private final int lifetime;
+    private UUID ownerUuid;
+    private int ownerEntityId;
+    private boolean leftOwner = false;
+    private int life = 0;
+    private boolean critical = false;
 
     public GrenadeEntity(@NotNull World world, @NotNull LivingEntity owner, int lifetime)
     {
@@ -89,7 +89,7 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity
         float g = -MathHelper.sin((pitch + roll) * 0.017453292F);
         float h = MathHelper.cos(yaw * 0.017453292F) * MathHelper.cos(pitch * 0.017453292F);
         this.setVelocity(f, g, h, modifierZ, modifierXYZ);
-        Vec3d vec3d = user.getVelocity();
+        var vec3d = user.getVelocity();
         this.setVelocity(this.getVelocity().add(vec3d.x, user.isOnGround() ? 0.0D : vec3d.y, vec3d.z));
 
         this.rollCritical();
@@ -97,7 +97,7 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity
 
     public void setVelocity(double x, double y, double z, float speed, float divergence)
     {
-        Vec3d vec3d = (new Vec3d(x, y, z)).normalize()
+        var vec3d = (new Vec3d(x, y, z)).normalize()
                 .add(this.random.nextGaussian() * 0.007499999832361937D * (double) divergence,
                         this.random.nextGaussian() * 0.007499999832361937D * (double) divergence,
                         this.random.nextGaussian() * 0.007499999832361937D * (double) divergence)
@@ -149,7 +149,7 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity
             this.leftOwner = this.checkOwnerLeft();
         }
 
-        EntityHitResult hitResult = ProjectileUtil.getEntityCollision(this.getEntityWorld(), this, this.getPos(), this.getPos().add(this.getVelocity()),
+        var hitResult = ProjectileUtil.getEntityCollision(this.getEntityWorld(), this, this.getPos(), this.getPos().add(this.getVelocity()),
                 this.getBoundingBox().stretch(this.getVelocity()).expand(1.0D), entity -> {
                     if (!entity.isSpectator() && entity.isAlive() && entity.collides()) {
                         Entity entity2 = this.getOwner();
@@ -165,11 +165,11 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity
 
     private boolean checkOwnerLeft()
     {
-        Entity entity = this.getOwner();
-        if (entity != null) {
-            for (Entity other : this.world.getOtherEntities(this, this.getBoundingBox().stretch(this.getVelocity()).expand(1.0D),
+        var owner = this.getOwner();
+        if (owner != null) {
+            for (var other : this.world.getOtherEntities(this, this.getBoundingBox().stretch(this.getVelocity()).expand(1.0D),
                     other -> !other.isSpectator() && other.collides())) {
-                if (other.getRootVehicle() == entity.getRootVehicle()) {
+                if (other.getRootVehicle() == owner.getRootVehicle()) {
                     return false;
                 }
             }

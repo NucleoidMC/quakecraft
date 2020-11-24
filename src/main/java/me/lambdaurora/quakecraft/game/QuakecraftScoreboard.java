@@ -20,29 +20,27 @@ package me.lambdaurora.quakecraft.game;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
+import xyz.nucleoid.plasmid.widget.GlobalWidgets;
 import xyz.nucleoid.plasmid.widget.SidebarWidget;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 
 /**
  * Represents the Quakecraft scoreboard.
  *
  * @author LambdAurora
- * @version 1.0.0
+ * @version 1.6.0
  * @since 1.0.0
  */
 public class QuakecraftScoreboard implements AutoCloseable
 {
-    private final SidebarWidget  sidebar;
     private final QuakecraftGame game;
+    private final SidebarWidget sidebar;
 
-    public QuakecraftScoreboard(@NotNull QuakecraftGame game)
+    public QuakecraftScoreboard(@NotNull QuakecraftGame game, GlobalWidgets widgets)
     {
-        this.sidebar = SidebarWidget.open(new LiteralText("Quakecraft").formatted(Formatting.GOLD),
-                game.getWorld().getPlayerSet());
         this.game = game;
+        this.sidebar = widgets.addSidebar(new LiteralText("Quakecraft").formatted(Formatting.GOLD));
     }
 
     /**
@@ -50,32 +48,30 @@ public class QuakecraftScoreboard implements AutoCloseable
      */
     public void update()
     {
-        List<String> lines = new ArrayList<>();
+        this.sidebar.set(content -> {
+            var seconds = this.game.getTime() / 20;
+            content.writeLine(String.format("Time left: %s%d:%d", Formatting.GREEN, seconds / 60, seconds % 60));
+            content.writeLine("");
 
-        int seconds = this.game.getTime() / 20;
-        lines.add(String.format("Time left: %s%d:%d", Formatting.GREEN, seconds / 60, seconds % 60));
-        lines.add("");
-
-        this.game.getParticipants().stream().sorted(Comparator.reverseOrder()).forEach(player -> {
-            if (player.hasLeft()) {
-                lines.add(String.format("%s%s%s%s: %s%d",
-                        Formatting.GRAY,
-                        Formatting.STRIKETHROUGH,
-                        player.name,
-                        Formatting.RESET,
-                        Formatting.AQUA,
-                        player.getKills()));
-            } else {
-                lines.add(String.format("%s%s%s: %s%d",
-                        Formatting.GRAY,
-                        player.name,
-                        Formatting.RESET,
-                        Formatting.AQUA,
-                        player.getKills()));
-            }
+            this.game.getParticipants().stream().sorted(Comparator.reverseOrder()).forEach(player -> {
+                if (player.hasLeft()) {
+                    content.writeLine(String.format("%s%s%s%s: %s%d",
+                            Formatting.GRAY,
+                            Formatting.STRIKETHROUGH,
+                            player.name,
+                            Formatting.RESET,
+                            Formatting.AQUA,
+                            player.getKills()));
+                } else {
+                    content.writeLine(String.format("%s%s%s: %s%d",
+                            Formatting.GRAY,
+                            player.name,
+                            Formatting.RESET,
+                            Formatting.AQUA,
+                            player.getKills()));
+                }
+            });
         });
-
-        this.sidebar.set(lines.toArray(new String[0]));
     }
 
     @Override

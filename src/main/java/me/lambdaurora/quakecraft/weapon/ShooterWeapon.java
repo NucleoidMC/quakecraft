@@ -30,13 +30,13 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.GameSpace;
 
 /**
  * Represents a weapon that shoot.
  *
  * @author LambdAurora
- * @version 1.4.5
+ * @version 1.6.0
  * @since 1.0.0
  */
 public class ShooterWeapon extends Weapon
@@ -47,9 +47,9 @@ public class ShooterWeapon extends Weapon
     }
 
     @Override
-    public @NotNull ActionResult onPrimary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
+    public @NotNull ActionResult onPrimary(@NotNull GameSpace world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
-        double result = RayUtils.raycastEntities(player, 80.0, 0.25, QuakecraftConstants.PLAYER_PREDICATE,
+        var result = RayUtils.raycastEntities(player, 80.0, 0.25, QuakecraftConstants.PLAYER_PREDICATE,
                 entity -> {
                     ServerPlayerEntity hitPlayer = (ServerPlayerEntity) entity;
                     hitPlayer.setAttacker(player);
@@ -65,10 +65,10 @@ public class ShooterWeapon extends Weapon
     }
 
     @Override
-    public @NotNull ActionResult onSecondary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull ItemStack stack)
+    public @NotNull ActionResult onSecondary(@NotNull GameSpace world, @NotNull ServerPlayerEntity player, @NotNull ItemStack stack)
     {
-        Vec3d rotationVec = player.getRotationVec(1.0F);
-        double yVelocity = player.getVelocity().y;
+        var rotationVec = player.getRotationVec(1.0F);
+        var yVelocity = player.getVelocity().y;
         player.setVelocity(new Vec3d(rotationVec.x * QuakecraftConstants.DASH_VELOCITY, yVelocity, rotationVec.z * QuakecraftConstants.DASH_VELOCITY));
         player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
 

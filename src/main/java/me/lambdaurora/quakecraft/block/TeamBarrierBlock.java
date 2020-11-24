@@ -18,13 +18,11 @@
 package me.lambdaurora.quakecraft.block;
 
 import me.lambdaurora.quakecraft.Quakecraft;
-import me.lambdaurora.quakecraft.game.QuakecraftLogic;
 import me.lambdaurora.quakecraft.game.QuakecraftPlayer;
 import me.lambdaurora.quakecraft.util.RayAccessor;
 import me.lambdaurora.quakecraft.util.UsefulEntityShapeContext;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;
-import net.minecraft.entity.Entity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
@@ -40,7 +38,7 @@ import xyz.nucleoid.plasmid.game.player.GameTeam;
  * The block collisions only with players of a different team.
  *
  * @author LambdAurora
- * @version 1.5.0
+ * @version 1.6.0
  * @since 1.5.0
  */
 public class TeamBarrierBlock extends Block implements FakeBlock
@@ -60,14 +58,14 @@ public class TeamBarrierBlock extends Block implements FakeBlock
             return VoxelShapes.empty();
 
         if (context instanceof UsefulEntityShapeContext) {
-            Entity entity = ((UsefulEntityShapeContext) context).quakecraft$getEntity();
+            var entity = ((UsefulEntityShapeContext) context).quakecraft$getEntity();
             if (entity instanceof ServerPlayerEntity && !((RayAccessor) entity).quakecraft$isRaycasting()) {
-                ServerPlayerEntity player = (ServerPlayerEntity) entity;
-                Quakecraft quakecraft = Quakecraft.get();
+                var player = (ServerPlayerEntity) entity;
+                var quakecraft = Quakecraft.get();
                 if (quakecraft.isPlayerActive(player)) {
-                    for (QuakecraftLogic game : quakecraft.getActiveGames()) {
-                        if (game.getTeams().size() != 0 && game.getWorld().containsPlayer(player)) {
-                            GameTeam team = game.getOptParticipant(player).map(QuakecraftPlayer::getTeam).orElse(null);
+                    for (var game : quakecraft.getActiveGames()) {
+                        if (game.getTeams().size() != 0 && game.getSpace().containsPlayer(player)) {
+                            var team = game.getOptParticipant(player).map(QuakecraftPlayer::getTeam).orElse(null);
                             if (team != null) {
                                 if (team != this.team) {
                                     return VoxelShapes.fullCube();

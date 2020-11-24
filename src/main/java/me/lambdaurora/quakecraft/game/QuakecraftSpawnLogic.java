@@ -30,32 +30,30 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameMode;
-import org.aperlambda.lambdacommon.utils.Pair;
 import org.jetbrains.annotations.NotNull;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.util.BlockBounds;
 import xyz.nucleoid.plasmid.util.ItemStackBuilder;
 
-import java.util.Comparator;
 import java.util.Random;
 
 /**
  * Represents the Quakecraft spawn logic.
  *
  * @author LambdAurora
- * @version 1.4.7
+ * @version 1.6.0
  * @since 1.0.0
  */
 public class QuakecraftSpawnLogic
 {
     private static final Random RANDOM = new Random();
-    private final GameWorld world;
+    private final GameSpace space;
     private final QuakecraftMap map;
     private final SpawnCache spawnCache;
 
-    public QuakecraftSpawnLogic(@NotNull GameWorld world, @NotNull QuakecraftMap map)
+    public QuakecraftSpawnLogic(@NotNull GameSpace space, @NotNull QuakecraftMap map)
     {
-        this.world = world;
+        this.space = space;
         this.map = map;
         this.spawnCache = new SpawnCache(map.getSpawnCount() / 2);
     }
@@ -64,14 +62,14 @@ public class QuakecraftSpawnLogic
     {
         MapSpawn spawn = null;
         int spawnIndex = -1;
-        int lowestPlayers = this.world.getPlayerCount();
+        int lowestPlayers = this.space.getPlayerCount();
         for (int i = 0; i < this.map.getSpawnCount(); i++) {
             if (this.spawnCache.contains(i))
                 continue;
-            MapSpawn currentSpawn = this.map.getSpawn(i);
+            var currentSpawn = this.map.getSpawn(i);
 
-            Box box = new Box(currentSpawn.getPos().add(-16, -5, -16), currentSpawn.getPos().add(16, 5, 16));
-            int playersNearSpawn = (int) world.getPlayers().stream().filter(p -> box.contains(p.getPos())).count();
+            var box = new Box(currentSpawn.getPos().add(-16, -5, -16), currentSpawn.getPos().add(16, 5, 16));
+            int playersNearSpawn = (int) space.getPlayers().stream().filter(p -> box.contains(p.getPos())).count();
             if (playersNearSpawn < lowestPlayers) {
                 lowestPlayers = playersNearSpawn;
                 spawn = currentSpawn;
@@ -86,7 +84,7 @@ public class QuakecraftSpawnLogic
             this.spawnCache.push(spawnIndex);
         }
 
-        player.teleport(this.world.getWorld(), spawn.getPos().getX(), spawn.getPos().getY(), spawn.getPos().getZ(), spawn.getDirection(), 0.f);
+        player.teleport(this.space.getWorld(), spawn.getPos().getX(), spawn.getPos().getY(), spawn.getPos().getZ(), spawn.getDirection(), 0.f);
     }
 
     public void resetWaitingPlayer(@NotNull ServerPlayerEntity player)
@@ -94,7 +92,7 @@ public class QuakecraftSpawnLogic
         player.setGameMode(GameMode.ADVENTURE);
         player.inventory.clear();
 
-        ItemStack leaveGame = ItemStackBuilder.of(Items.RED_BED)
+        var leaveGame = ItemStackBuilder.of(Items.RED_BED)
                 .setName(new LiteralText("Leave Lobby").styled(style -> style.withItalic(false).withColor(Formatting.YELLOW)))
                 .build();
         player.inventory.insertStack(8, leaveGame);
@@ -105,15 +103,15 @@ public class QuakecraftSpawnLogic
     /**
      * Spawns a player in the waiting room.
      *
-     * @param player The player to spawn.
+     * @param player the player to spawn
      */
     public final void spawnWaitingPlayer(@NotNull ServerPlayerEntity player)
     {
-        ServerWorld world = this.world.getWorld();
+        var world = this.space.getWorld();
 
-        BlockBounds bounds = this.map.waitingSpawn;
-        BlockPos min = bounds.getMin();
-        BlockPos max = bounds.getMax();
+        var bounds = this.map.waitingSpawn;
+        var min = bounds.getMin();
+        var max = bounds.getMax();
 
         double x = MathHelper.nextDouble(player.getRandom(), min.getX(), max.getX());
         double z = MathHelper.nextDouble(player.getRandom(), min.getZ(), max.getZ());
@@ -146,8 +144,8 @@ public class QuakecraftSpawnLogic
         /**
          * Returns whether the spawn index is in the last spawn cache or not.
          *
-         * @param spawn The spawn index to check.
-         * @return True if the spawn index is in the cache, else false.
+         * @param spawn the spawn index to check
+         * @return {@code true} if the spawn index is in the cache, else {@code false}
          */
         public boolean contains(int spawn)
         {
@@ -160,7 +158,7 @@ public class QuakecraftSpawnLogic
         /**
          * Rolls the next spawn.
          *
-         * @return The next spawn index.
+         * @return the next spawn index
          */
         public int rollNextSpawn()
         {
@@ -187,7 +185,7 @@ public class QuakecraftSpawnLogic
         /**
          * Pushes a new last spawn index.
          *
-         * @param spawn The spawn index.
+         * @param spawn the spawn index
          */
         public void push(int spawn)
         {

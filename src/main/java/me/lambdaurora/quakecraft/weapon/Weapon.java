@@ -27,25 +27,25 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.util.ItemStackBuilder;
 
 /**
  * Represents a weapon.
  *
  * @author LambdAurora
- * @version 1.4.0
+ * @version 1.6.0
  * @since 1.0.0
  */
 public class Weapon
 {
     public final Identifier identifier;
-    public final Item       item;
-    public final int        primaryCooldown;
-    public final int        secondaryCooldown;
-    public final int        reloadCooldown;
-    public final int        clipSize;
-    public final int        ammoSize;
+    public final Item item;
+    public final int primaryCooldown;
+    public final int secondaryCooldown;
+    public final int reloadCooldown;
+    public final int clipSize;
+    public final int ammoSize;
 
     public Weapon(@NotNull Identifier id, @NotNull Item item, @NotNull Settings settings)
     {
@@ -61,7 +61,7 @@ public class Weapon
     /**
      * Returns whether the weapon has a secondary action.
      *
-     * @return True if the weapon has a secondary action, else false.
+     * @return {@code true} if the weapon has a secondary action, else {@code false}
      * @since 1.1.0
      */
     public boolean hasSecondaryAction()
@@ -72,7 +72,7 @@ public class Weapon
     /**
      * Returns whether this weapon requires ammo or not.
      *
-     * @return True if the weapon requires ammo, else false.
+     * @return {@code true} if the weapon requires ammo, else {@code false}
      * @since 1.4.0
      */
     public boolean doesRequireAmmo()
@@ -83,8 +83,8 @@ public class Weapon
     /**
      * Returns whether the specified item stack matches this weapon or not.
      *
-     * @param stack The item stack.
-     * @return True if the item stack matches this weapon, else false.
+     * @param stack the item stack
+     * @return {@code true} if the item stack matches this weapon, else {@code false}
      */
     public boolean matchesStack(@NotNull ItemStack stack)
     {
@@ -95,19 +95,19 @@ public class Weapon
     /**
      * Fired each tick.
      *
-     * @param stack The weapon stack.
+     * @param stack the weapon stack
      * @since 1.1.0
      */
     public void tick(@NotNull ItemStack stack)
     {
     }
 
-    public @NotNull ActionResult onPrimary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
+    public @NotNull ActionResult onPrimary(@NotNull GameSpace world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
         return ActionResult.PASS;
     }
 
-    public @NotNull ActionResult onSecondary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull ItemStack stack)
+    public @NotNull ActionResult onSecondary(@NotNull GameSpace world, @NotNull ServerPlayerEntity player, @NotNull ItemStack stack)
     {
         return ActionResult.PASS;
     }
@@ -121,7 +121,7 @@ public class Weapon
     /**
      * Builds the item stack.
      *
-     * @return The item stack.
+     * @return the item stack
      */
     public final @NotNull ItemStack build(@NotNull ServerPlayerEntity player)
     {
@@ -134,10 +134,10 @@ public class Weapon
     public static class Settings
     {
         private final int primaryCooldown;
-        private       int secondaryCooldown = -1;
-        private       int reloadCooldown    = -1;
-        private       int clipSize          = -1;
-        private       int ammoSize          = -1;
+        private int secondaryCooldown = -1;
+        private int reloadCooldown = -1;
+        private int clipSize = -1;
+        private int ammoSize = -1;
 
         public Settings(int primaryCooldown)
         {

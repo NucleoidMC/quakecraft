@@ -27,7 +27,7 @@ public final class Weapons
         throw new UnsupportedOperationException("Weapons only contains static definitions.");
     }
 
-    public static final ShooterWeapon BASE_SHOOTER     = new ShooterWeapon(
+    public static final ShooterWeapon BASE_SHOOTER = new ShooterWeapon(
             Quakecraft.mc("base_railgun"),
             Items.STONE_HOE,
             new Weapon.Settings(2 * 20 + 10).secondaryCooldown(4 * 20)

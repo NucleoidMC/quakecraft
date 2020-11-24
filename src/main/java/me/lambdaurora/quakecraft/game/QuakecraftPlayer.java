@@ -20,7 +20,6 @@ package me.lambdaurora.quakecraft.game;
 import me.lambdaurora.quakecraft.PlayerAction;
 import me.lambdaurora.quakecraft.Quakecraft;
 import me.lambdaurora.quakecraft.QuakecraftConstants;
-import me.lambdaurora.quakecraft.weapon.Weapon;
 import me.lambdaurora.quakecraft.weapon.Weapons;
 import me.lambdaurora.quakecraft.weapon.inventory.WeaponManager;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -36,7 +35,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
 
 import java.util.UUID;
@@ -45,7 +44,7 @@ import java.util.UUID;
  * Represents a Quakecraft player.
  *
  * @author LambdAurora
- * @version 1.5.0
+ * @version 1.6.0
  * @since 1.0.0
  */
 public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
@@ -120,7 +119,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
     /**
      * Resets the player.
      *
-     * @param player The player instance.
+     * @param player the player instance
      */
     public void reset(@NotNull ServerPlayerEntity player)
     {
@@ -146,15 +145,15 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         this.lastAction = PlayerAction.NONE;
     }
 
-    public void tick(@NotNull GameWorld world)
+    public void tick(@NotNull GameSpace world)
     {
         this.kills += this.killsWithinATick;
         if (this.killsWithinATick >= 2) {
             if (this.killsWithinATick <= 5) {
-                world.getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.special.kills." + this.killsWithinATick, this.getDisplayName())
+                world.getPlayers().sendMessage(new TranslatableText("quakecraft.game.special.kills." + this.killsWithinATick, this.getDisplayName())
                         .formatted(Formatting.RED, Formatting.BOLD));
             } else {
-                world.getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.special.kills.lot", this.getDisplayName())
+                world.getPlayers().sendMessage(new TranslatableText("quakecraft.game.special.kills.lot", this.getDisplayName())
                         .formatted(Formatting.RED, Formatting.BOLD));
             }
         }
@@ -162,11 +161,11 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         this.killsWithinATick = 0;
 
         this.weapons.tick();
-        Weapon heldWeapon = this.weapons.get(this.player.getMainHandStack());
+        var heldWeapon = this.weapons.get(this.player.getMainHandStack());
         if (heldWeapon != null) {
             int secondaryCooldown = this.weapons.getSecondaryCooldown(heldWeapon);
             if (secondaryCooldown > 0) {
-                String bar = "▊▊▊▊▊▊▊▊▊▊";
+                var bar = "▊▊▊▊▊▊▊▊▊▊";
                 int progress = (int) (secondaryCooldown / (double) heldWeapon.secondaryCooldown * bar.length());
                 this.player.sendMessage(new LiteralText("[").formatted(Formatting.GRAY)
                         .append(new LiteralText(bar.substring(progress)).formatted(Formatting.GREEN))
@@ -216,19 +215,19 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
         return false;
     }
 
-    public int onItemUse(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
+    public int onItemUse(@NotNull GameSpace world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
         this.lastAction = PlayerAction.USE;
 
         return this.weapons.onPrimary(world, player, hand);
     }
 
-    public void onSecondary(@NotNull GameWorld world)
+    public void onSecondary(@NotNull GameSpace world)
     {
         this.weapons.onSecondary(world, this.player);
     }
 
-    public void onSwingHand(@NotNull GameWorld world)
+    public void onSwingHand(@NotNull GameSpace world)
     {
         // Mmmhh yes attack prediction, really not fun to implement.
         if (this.lastAction.isUse()) {
@@ -252,7 +251,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer>
     /**
      * Returns the display name of the player.
      *
-     * @return The display name.
+     * @return the display name
      */
     public @NotNull Text getDisplayName()
     {

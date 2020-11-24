@@ -18,9 +18,8 @@
 package me.lambdaurora.quakecraft.game;
 
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import me.lambdaurora.quakecraft.Quakecraft;
-import me.lambdaurora.quakecraft.game.map.MapGenerator;
+import me.lambdaurora.quakecraft.game.map.MapBuilder;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
@@ -35,82 +34,69 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.plasmid.game.GameOpenContext;
-import xyz.nucleoid.plasmid.game.GameWaitingLobby;
-import xyz.nucleoid.plasmid.game.GameWorld;
-import xyz.nucleoid.plasmid.game.StartResult;
+import xyz.nucleoid.fantasy.BubbleWorldConfig;
+import xyz.nucleoid.plasmid.game.*;
 import xyz.nucleoid.plasmid.game.event.*;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
 import xyz.nucleoid.plasmid.game.player.TeamAllocator;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
-import xyz.nucleoid.plasmid.world.bubble.BubbleWorldConfig;
-
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Represents a Quakecraft wait-room.
  *
  * @author LambdAurora
- * @version 1.5.0
+ * @version 1.6.0
  * @since 1.0.0
  */
 public class QuakecraftWaiting
 {
-    private final GameWorld world;
+    private final GameLogic logic;
     private final QuakecraftMap map;
     private final QuakecraftConfig config;
     private final QuakecraftSpawnLogic spawnLogic;
 
-    private QuakecraftWaiting(@NotNull GameWorld world, @NotNull QuakecraftMap map, @NotNull QuakecraftConfig config)
+    private QuakecraftWaiting(GameLogic logic, @NotNull QuakecraftMap map, @NotNull QuakecraftConfig config)
     {
-        this.world = world;
+        this.logic = logic;
         this.map = map;
         this.config = config;
-        this.spawnLogic = new QuakecraftSpawnLogic(world, map);
+        this.spawnLogic = new QuakecraftSpawnLogic(logic.getSpace(), map);
     }
 
-    public static @NotNull CompletableFuture<GameWorld> open(@NotNull GameOpenContext<QuakecraftConfig> context)
+    public static @NotNull GameOpenProcedure open(@NotNull GameOpenContext<QuakecraftConfig> context)
     {
-        QuakecraftConfig config = context.getConfig();
-        MapGenerator generator = new MapGenerator(config.map);
+        var config = context.getConfig();
 
-        return generator.create().thenCompose(map -> {
-            BubbleWorldConfig worldConfig = new BubbleWorldConfig()
-                    .setGenerator(map.asGenerator(context.getServer()))
-                    .setDefaultGameMode(GameMode.SPECTATOR)
-                    .setTimeOfDay(config.map.time);
+        var map = new MapBuilder(config.map).create();
+        var worldConfig = new BubbleWorldConfig()
+                .setGenerator(map.asGenerator(context.getServer()))
+                .setDefaultGameMode(GameMode.SPECTATOR)
+                .setTimeOfDay(config.map.time);
 
-            return context.openWorld(worldConfig).thenApply(gameWorld -> {
-                QuakecraftWaiting waiting = new QuakecraftWaiting(gameWorld, map, config);
+        return context.createOpenProcedure(worldConfig, logic -> {
+            QuakecraftWaiting waiting = new QuakecraftWaiting(logic, map, config);
 
-                return GameWaitingLobby.open(gameWorld, config.players, game -> {
-                    game.setRule(GameRule.CRAFTING, RuleResult.DENY);
-                    game.setRule(GameRule.PORTALS, RuleResult.DENY);
-                    game.setRule(GameRule.PVP, RuleResult.DENY);
-                    game.setRule(GameRule.FALL_DAMAGE, RuleResult.DENY);
-                    game.setRule(GameRule.HUNGER, RuleResult.DENY);
-                    game.setRule(GameRule.THROW_ITEMS, RuleResult.DENY);
-                    game.setRule(GameRule.INTERACTION, RuleResult.ALLOW);
+            GameWaitingLobby.applyTo(logic, config.players);
 
-                    game.on(RequestStartListener.EVENT, waiting::requestStart);
+            logic.on(RequestStartListener.EVENT, waiting::requestStart);
 
-                    game.on(PlayerAddListener.EVENT, waiting::addPlayer);
-                    game.on(PlayerRemoveListener.EVENT, waiting::removePlayer);
-                    game.on(PlayerDeathListener.EVENT, waiting::onPlayerDeath);
+            logic.on(PlayerAddListener.EVENT, waiting::addPlayer);
+            logic.on(PlayerRemoveListener.EVENT, waiting::removePlayer);
+            logic.on(PlayerDeathListener.EVENT, waiting::onPlayerDeath);
 
-                    game.on(UseBlockListener.EVENT, waiting::onUseBlock);
-                    game.on(UseItemListener.EVENT, waiting::onUseItem);
-                    game.on(AttackEntityListener.EVENT, waiting::onAttackEntity);
-                });
-            });
+            logic.on(UseBlockListener.EVENT, waiting::onUseBlock);
+            logic.on(UseItemListener.EVENT, waiting::onUseItem);
+            logic.on(AttackEntityListener.EVENT, waiting::onAttackEntity);
+
+            logic.setRule(GameRule.INTERACTION, RuleResult.ALLOW);
         });
     }
 
     private StartResult requestStart()
     {
-        Multimap<GameTeam, ServerPlayerEntity> players = this.allocatePlayers();
-        QuakecraftGame.open(this.config, this.world, this.map, this.spawnLogic, players);
+        var players = this.allocatePlayers();
+        QuakecraftGame.open(this.config, this.logic, this.map, this.spawnLogic, players);
         return StartResult.OK;
     }
 
@@ -143,10 +129,11 @@ public class QuakecraftWaiting
 
     private @NotNull TypedActionResult<ItemStack> onUseItem(@NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
-        ItemStack heldStack = player.getStackInHand(hand);
+        var heldStack = player.getStackInHand(hand);
 
         if (heldStack.getItem().isIn(ItemTags.BEDS)) {
-            this.world.removePlayer(player);
+            // @TODO REMOVE THIS
+            ((ManagedGameSpace) this.logic.getSpace()).removePlayer(player);
             return TypedActionResult.success(heldStack);
         }
 
@@ -165,8 +152,8 @@ public class QuakecraftWaiting
         if (this.config.teams.size() == 0) {
             return null;
         }
-        TeamAllocator<GameTeam, ServerPlayerEntity> allocator = new TeamAllocator<>(this.config.teams);
-        this.world.getPlayers().forEach(player -> allocator.add(player, null));
+        var allocator = new TeamAllocator<GameTeam, ServerPlayerEntity>(this.config.teams);
+        this.logic.getSpace().getPlayers().forEach(player -> allocator.add(player, null));
         return allocator.build();
     }
 }

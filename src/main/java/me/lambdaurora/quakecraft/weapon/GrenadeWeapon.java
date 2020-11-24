@@ -24,13 +24,13 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.GameSpace;
 
 /**
  * Represents a grenade weapon.
  *
  * @author LambdAurora
- * @version 1.4.0
+ * @version 1.6.0
  * @since 1.0.0
  */
 public class GrenadeWeapon extends Weapon
@@ -41,9 +41,9 @@ public class GrenadeWeapon extends Weapon
     }
 
     @Override
-    public @NotNull ActionResult onPrimary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
+    public @NotNull ActionResult onPrimary(@NotNull GameSpace world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
-        GrenadeEntity grenade = new GrenadeEntity(world.getWorld(), player, 40);
+        var grenade = new GrenadeEntity(world.getWorld(), player, 40);
         grenade.setProperties(player, player.pitch, player.yaw, 0.f, 1.5f, 1.f);
         grenade.rollCritical();
         world.getWorld().spawnEntity(grenade);

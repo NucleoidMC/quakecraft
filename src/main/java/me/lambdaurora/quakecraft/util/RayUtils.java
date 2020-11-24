@@ -29,7 +29,7 @@ import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.GameSpace;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -39,7 +39,7 @@ import java.util.function.Predicate;
  * Represents a ray utilities class.
  *
  * @author LambdAurora, Gegy
- * @version 1.4.7
+ * @version 1.6.0
  * @since 1.0.0
  */
 public final class RayUtils
@@ -52,12 +52,12 @@ public final class RayUtils
     /**
      * Casts a ray through entities and stops if the range is hit or a block is hit.
      *
-     * @param source The source entity.
-     * @param range The maximum range.
-     * @param margin The margin of entity detection.
-     * @param predicate The predicate to determine if the entity should be hit or not.
-     * @param consumer The consumer of hit entities.
-     * @return The absolute distance between the source and the most far hit. The sign bit is used as a boolean to represent a success or not.
+     * @param source the source entity
+     * @param range the maximum range
+     * @param margin the margin of entity detection
+     * @param predicate the predicate to determine if the entity should be hit or not
+     * @param consumer the consumer of hit entities
+     * @return the absolute distance between the source and the most far hit. The sign bit is used as a boolean to represent a success or not
      */
     public static double raycastEntities(@NotNull Entity source, double range, double margin, @NotNull Predicate<Entity> predicate, @NotNull Consumer<Entity> consumer)
     {
@@ -169,7 +169,7 @@ public final class RayUtils
         return new EntityHitResult(hitEntity, hitPoint);
     }
 
-    public static void drawRay(@NotNull GameWorld world, @NotNull Entity source, double range)
+    public static void drawRay(@NotNull GameSpace world, @NotNull Entity source, double range)
     {
         Vec3d origin = source.getCameraPosVec(1.f).subtract(0, 0.5, 0);
         Vec3d delta = source.getRotationVec(1.f).multiply(range);
@@ -186,7 +186,7 @@ public final class RayUtils
         drawRay(world, origin, target);
     }
 
-    public static void drawRay(@NotNull GameWorld world, @NotNull Entity source, @NotNull Entity target)
+    public static void drawRay(@NotNull GameSpace world, @NotNull Entity source, @NotNull Entity target)
     {
         Vec3d origin = source.getCameraPosVec(1.f).subtract(0, 0.5, 0);
 
@@ -202,7 +202,7 @@ public final class RayUtils
         drawRay(world, origin, end);
     }
 
-    public static void drawRay(@NotNull GameWorld world, @NotNull Vec3d origin, @NotNull Vec3d target)
+    public static void drawRay(@NotNull GameSpace world, @NotNull Vec3d origin, @NotNull Vec3d target)
     {
         Vec3d delta = target.subtract(origin);
         double length = delta.length();
@@ -217,7 +217,7 @@ public final class RayUtils
 
             ParticleS2CPacket packet = new ParticleS2CPacket(new DustParticleEffect(1.f, 0.647f, 0.f, .75f), false, x, y, z,
                     0.f, 0.f, 0.f, 1.f, 3);
-            world.getPlayerSet().sendPacket(packet);
+            world.getPlayers().sendPacket(packet);
         }
     }
 }

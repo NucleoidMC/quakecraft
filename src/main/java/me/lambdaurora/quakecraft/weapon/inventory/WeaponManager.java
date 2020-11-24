@@ -25,7 +25,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Hand;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.GameSpace;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,12 +34,12 @@ import java.util.List;
  * Represents a weapon manager.
  *
  * @author LambdAurora
- * @version 1.2.0
+ * @version 1.6.0
  * @since 1.2.0
  */
 public final class WeaponManager
 {
-    private final List<Weapon>          weapons            = new ArrayList<>();
+    private final List<Weapon> weapons = new ArrayList<>();
     private final Object2IntMap<Weapon> secondaryCooldowns = new Object2IntOpenHashMap<>();
 
     public WeaponManager()
@@ -66,7 +66,7 @@ public final class WeaponManager
 
     public void tick()
     {
-        for (Weapon weapon : this.weapons) {
+        for (var weapon : this.weapons) {
             if (weapon.hasSecondaryAction()) {
                 int currentCooldown = this.secondaryCooldowns.getInt(weapon);
                 if (currentCooldown > 0) {
@@ -84,7 +84,7 @@ public final class WeaponManager
         }
     }
 
-    public int onPrimary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
+    public int onPrimary(@NotNull GameSpace world, @NotNull ServerPlayerEntity player, @NotNull Hand hand)
     {
         ItemStack heldStack = player.getStackInHand(hand);
 
@@ -98,7 +98,7 @@ public final class WeaponManager
         return -1;
     }
 
-    public void onSecondary(@NotNull GameWorld world, @NotNull ServerPlayerEntity player)
+    public void onSecondary(@NotNull GameSpace world, @NotNull ServerPlayerEntity player)
     {
         ItemStack heldStack = player.getStackInHand(Hand.MAIN_HAND);
 
@@ -121,8 +121,8 @@ public final class WeaponManager
     /**
      * Returns whether the secondary fire of the specified weapon is currently available or not.
      *
-     * @param weapon The weapon.
-     * @return True if the secondary fire is available, else false.
+     * @param weapon the weapon
+     * @return {@code true} if the secondary fire is available, else {@code false}
      */
     public boolean canUseSecondary(@NotNull Weapon weapon)
     {

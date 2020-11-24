@@ -18,7 +18,6 @@
 package me.lambdaurora.quakecraft.game;
 
 import me.lambdaurora.quakecraft.block.TeamBarrierBlock;
-import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtHelper;
@@ -27,18 +26,17 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.plasmid.game.map.template.TemplateRegion;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
+import xyz.nucleoid.plasmid.map.template.TemplateRegion;
 import xyz.nucleoid.plasmid.util.BlockBounds;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
  * Represents a door which opens/closes automatically.
  *
  * @author LambdAurora
- * @version 1.5.2
+ * @version 1.6.0
  * @since 1.5.0
  */
 public class QuakecraftDoor
@@ -47,7 +45,6 @@ public class QuakecraftDoor
     private final TemplateRegion region;
     private final BlockBounds bounds;
     private final BlockBounds detectionBounds;
-    private final Direction.Axis axis;
     private final BlockState openState;
     private final BlockState closedState;
     private final GameTeam team;
@@ -57,14 +54,12 @@ public class QuakecraftDoor
     public QuakecraftDoor(@NotNull QuakecraftLogic game,
                           @NotNull TemplateRegion region,
                           @NotNull BlockBounds bounds, @NotNull BlockBounds detectionBounds,
-                          @NotNull Direction.Axis axis, @NotNull BlockState closedState,
-                          @Nullable GameTeam team)
+                          @NotNull BlockState closedState, @Nullable GameTeam team)
     {
         this.game = game;
         this.region = region;
         this.bounds = bounds;
         this.detectionBounds = detectionBounds;
-        this.axis = axis;
         this.openState = TeamBarrierBlock.of(team).getDefaultState();
         this.closedState = closedState;
         this.team = team;
@@ -73,7 +68,7 @@ public class QuakecraftDoor
     /**
      * Returns the region assigned to this door.
      *
-     * @return The region.
+     * @return the region
      */
     public @NotNull TemplateRegion getRegion()
     {
@@ -85,7 +80,7 @@ public class QuakecraftDoor
      * <p>
      * All positions inside those bounds are replaced with blocks whether the door is closed or not.
      *
-     * @return The bounds of the door.
+     * @return the bounds of the door
      */
     public @NotNull BlockBounds getBounds()
     {
@@ -95,7 +90,7 @@ public class QuakecraftDoor
     /**
      * Returns the detection bounds. The door will open if any allowed player is in the detection bounds.
      *
-     * @return The detection bounds.
+     * @return the detection bounds
      */
     public @NotNull BlockBounds getDetectionBounds()
     {
@@ -103,19 +98,9 @@ public class QuakecraftDoor
     }
 
     /**
-     * Returns the axis of the door.
-     *
-     * @return The axis of the door.
-     */
-    public Direction.Axis getAxis()
-    {
-        return this.axis;
-    }
-
-    /**
      * Returns the team assigned to this door. The team mays be null.
      *
-     * @return The assigned team.
+     * @return the assigned team
      */
     public GameTeam getTeam()
     {
@@ -125,7 +110,7 @@ public class QuakecraftDoor
     /**
      * Returns whether the door is open or not.
      *
-     * @return True if the door is open, else false.
+     * @return {@code true} if the door is open, else {@code false}
      */
     public boolean isOpen()
     {
@@ -134,7 +119,7 @@ public class QuakecraftDoor
 
     public void tick()
     {
-        List<ServerPlayerEntity> players = this.game.getWorld().getWorld().getEntitiesByClass(ServerPlayerEntity.class, this.detectionBounds.toBox(),
+        var players = this.game.getSpace().getWorld().getEntitiesByClass(ServerPlayerEntity.class, this.detectionBounds.toBox(),
                 player -> this.game.canOpenDoor(this, player));
         if (players.size() > 0) {
             if (!this.open) {
@@ -153,7 +138,7 @@ public class QuakecraftDoor
      */
     public void open()
     {
-        this.getBounds().iterate().forEach(pos -> this.game.getWorld().getWorld().setBlockState(pos, this.openState, 0b0111010));
+        this.getBounds().forEach(pos -> this.game.getSpace().getWorld().setBlockState(pos, this.openState, 0b0111010));
         this.open = true;
     }
 
@@ -162,17 +147,13 @@ public class QuakecraftDoor
      */
     public void close()
     {
-        this.getBounds().iterate().forEach(pos -> this.game.getWorld().getWorld().setBlockState(pos, this.closedState, 0b0111010));
+        this.getBounds().forEach(pos -> this.game.getSpace().getWorld().setBlockState(pos, this.closedState, 0b0111010));
         this.open = false;
     }
 
     public static @NotNull Optional<QuakecraftDoor> fromRegion(@NotNull QuakecraftLogic game, @NotNull TemplateRegion region)
     {
-        BlockBounds bounds = region.getBounds().offset(QuakecraftMap.ORIGIN);
-
-        Direction.Axis axis = Direction.Axis.fromName(region.getData().getString("axis"));
-        if (axis == null)
-            return Optional.empty();
+        BlockBounds bounds = region.getBounds();
 
         BlockBounds detectionBounds = null;
 
@@ -183,6 +164,10 @@ public class QuakecraftDoor
         if (detectionBounds == null && region.getData().contains("distance", NbtType.INT)) {
             int distance = region.getData().getInt("distance");
             if (distance == 0)
+                return Optional.empty();
+
+            Direction.Axis axis = Direction.Axis.fromName(region.getData().getString("axis"));
+            if (axis == null)
                 return Optional.empty();
 
             BlockPos min = bounds.getMin().offset(Direction.from(axis, Direction.AxisDirection.NEGATIVE), distance);
@@ -201,7 +186,7 @@ public class QuakecraftDoor
 
         GameTeam team = game.getTeam(region.getData().getString("team"));
 
-        QuakecraftDoor door = new QuakecraftDoor(game, region, bounds, detectionBounds, axis, closedState, team);
+        QuakecraftDoor door = new QuakecraftDoor(game, region, bounds, detectionBounds, closedState, team);
         door.close();
         return Optional.of(door);
     }

@@ -41,12 +41,13 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.plasmid.game.GameWorld;
+import xyz.nucleoid.plasmid.game.GameLogic;
 import xyz.nucleoid.plasmid.game.event.*;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
 import xyz.nucleoid.plasmid.game.player.JoinResult;
 import xyz.nucleoid.plasmid.game.rule.GameRule;
 import xyz.nucleoid.plasmid.game.rule.RuleResult;
+import xyz.nucleoid.plasmid.widget.GlobalWidgets;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -55,7 +56,7 @@ import java.util.Set;
  * Represents the Quakecraft running game.
  *
  * @author LambdAurora
- * @version 1.5.0
+ * @version 1.6.0
  * @since 1.0.0
  */
 public class QuakecraftGame extends QuakecraftLogic
@@ -69,12 +70,12 @@ public class QuakecraftGame extends QuakecraftLogic
 
     private Set<QuakecraftPlayer> winners = new HashSet<>();
 
-    private QuakecraftGame(@NotNull QuakecraftConfig config, @NotNull GameWorld world, @NotNull QuakecraftMap map, @NotNull QuakecraftSpawnLogic spawnLogic,
-                           @NotNull Set<ServerPlayerEntity> participants)
+    private QuakecraftGame(@NotNull QuakecraftConfig config, @NotNull GameLogic logic, @NotNull QuakecraftMap map, @NotNull QuakecraftSpawnLogic spawnLogic)
     {
-        super(world, config, map, participants);
+        super(logic, config, map);
         this.spawnLogic = spawnLogic;
-        this.scoreboard = new QuakecraftScoreboard(this);
+        GlobalWidgets widgets = new GlobalWidgets(logic);
+        this.scoreboard = new QuakecraftScoreboard(this, widgets);
 
         this.time = this.getConfig().time;
     }
@@ -82,20 +83,20 @@ public class QuakecraftGame extends QuakecraftLogic
     /**
      * Opens the game.
      *
-     * @param config The game configuration.
-     * @param world The game world.
-     * @param map The game map.
-     * @param spawnLogic The game spawn logic.
-     * @param players The players affected to teams.
+     * @param config the game configuration
+     * @param logic the game logic
+     * @param map the game map
+     * @param spawnLogic the game spawn logic
+     * @param players the players affected to teams
      */
-    public static void open(@NotNull QuakecraftConfig config, @NotNull GameWorld world, @NotNull QuakecraftMap map, @NotNull QuakecraftSpawnLogic spawnLogic,
+    public static void open(@NotNull QuakecraftConfig config, @NotNull GameLogic logic, @NotNull QuakecraftMap map, @NotNull QuakecraftSpawnLogic spawnLogic,
                             @Nullable Multimap<GameTeam, ServerPlayerEntity> players)
     {
-        QuakecraftGame active = new QuakecraftGame(config, world, map, spawnLogic, world.getPlayers());
+        QuakecraftGame active = new QuakecraftGame(config, logic, map, spawnLogic);
         if (players != null)
             active.assignTeams(players);
         map.postInit(active);
-        world.openGame(game -> {
+        logic.getSpace().openGame(game -> {
             game.setRule(GameRule.CRAFTING, RuleResult.DENY);
             game.setRule(GameRule.PORTALS, RuleResult.DENY);
             game.setRule(GameRule.PVP, RuleResult.DENY);
@@ -129,7 +130,7 @@ public class QuakecraftGame extends QuakecraftLogic
     protected void onOpen()
     {
         super.onOpen();
-        for (ServerPlayerEntity player : this.getWorld().getPlayers()) {
+        for (ServerPlayerEntity player : this.getSpace().getPlayers()) {
             this.spawnParticipant(player);
             Quakecraft.get().addActivePlayer(player);
         }
@@ -154,7 +155,7 @@ public class QuakecraftGame extends QuakecraftLogic
                 if (participant.hasLeft())
                     return;
 
-                participant.tick(this.getWorld());
+                participant.tick(this.getSpace());
                 activePlayer[0]++;
 
                 if (participant.hasWon()) {
@@ -163,14 +164,14 @@ public class QuakecraftGame extends QuakecraftLogic
             });
             this.time--;
 
-            if (activePlayer[0] <= 1) {
-                this.getWorld().getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.end.not_enough_players").formatted(Formatting.RED));
-                this.getWorld().close();
+            if (activePlayer[0] <= 0) {
+                this.getSpace().getPlayers().sendMessage(new TranslatableText("quakecraft.game.end.not_enough_players").formatted(Formatting.RED));
+                this.getSpace().close();
             }
 
             if (this.time <= 0) {
-                this.getWorld().getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.end.nobody_won").formatted(Formatting.RED));
-                this.getWorld().close();
+                this.getSpace().getPlayers().sendMessage(new TranslatableText("quakecraft.game.end.nobody_won").formatted(Formatting.RED));
+                this.getSpace().close();
             }
 
             if (this.end) {
@@ -186,13 +187,13 @@ public class QuakecraftGame extends QuakecraftLogic
                         if (mcPlayer == null)
                             return;
 
-                        Quakecraft.spawnFirework(this.getWorld().getWorld(), mcPlayer.getX(), mcPlayer.getY(), mcPlayer.getZ(), new int[]{15435844, 11743532}, false, -1);
+                        Quakecraft.spawnFirework(this.getSpace().getWorld(), mcPlayer.getX(), mcPlayer.getY(), mcPlayer.getZ(), new int[]{15435844, 11743532}, false, -1);
                     }
                 });
             }
 
             if (this.endTime == 0)
-                this.getWorld().close();
+                this.getSpace().close();
         }
 
         this.scoreboard.update();
@@ -205,7 +206,7 @@ public class QuakecraftGame extends QuakecraftLogic
 
     private void onWin(@NotNull QuakecraftPlayer winner)
     {
-        this.getWorld().getPlayerSet().sendMessage(new TranslatableText("quakecraft.game.end.win", winner.getDisplayName()).formatted(Formatting.GREEN));
+        this.getSpace().getPlayers().sendMessage(new TranslatableText("quakecraft.game.end.win", winner.getDisplayName()).formatted(Formatting.GREEN));
         this.end = true;
         this.running = false;
         this.winners.add(winner);
@@ -225,7 +226,7 @@ public class QuakecraftGame extends QuakecraftLogic
         Quakecraft.get().removeActivePlayer(player);
     }
 
-    private boolean onDamage(ServerPlayerEntity player, DamageSource source, float amount)
+    private ActionResult onDamage(ServerPlayerEntity player, DamageSource source, float amount)
     {
         if (source.isExplosive()) {
             Entity attacker = null;
@@ -244,7 +245,7 @@ public class QuakecraftGame extends QuakecraftLogic
                 }
             }
         }
-        return source.isExplosive() && !(source.getAttacker() instanceof ServerPlayerEntity);
+        return source.isExplosive() && !(source.getAttacker() instanceof ServerPlayerEntity) ? ActionResult.FAIL : ActionResult.PASS;
     }
 
     private @NotNull ActionResult onPlayerDeath(@NotNull ServerPlayerEntity player, @NotNull DamageSource source)
@@ -255,7 +256,7 @@ public class QuakecraftGame extends QuakecraftLogic
             if (other != null) {
                 ((ServerPlayerEntity) attacker).playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER, 2.f, 5.f);
                 other.incrementKills();
-                this.getWorld().getPlayerSet().sendMessage(
+                this.getSpace().getPlayers().sendMessage(
                         new TranslatableText("quakecraft.game.kill", attacker.getDisplayName(), player.getDisplayName()).formatted(Formatting.GRAY)
                 );
 
@@ -283,7 +284,7 @@ public class QuakecraftGame extends QuakecraftLogic
         QuakecraftPlayer participant = this.getParticipant(player);
         if (participant == null)
             return;
-        participant.onSwingHand(this.getWorld());
+        participant.onSwingHand(this.getSpace());
     }
 
     private ActionResult onUseBlock(ServerPlayerEntity player, Hand hand, BlockHitResult hitResult)
@@ -310,9 +311,9 @@ public class QuakecraftGame extends QuakecraftLogic
         if (participant != null) {
             ItemCooldownManager cooldown = player.getItemCooldownManager();
             if (!cooldown.isCoolingDown(heldStack.getItem())) {
-                int result = participant.onItemUse(this.getWorld(), player, hand);
+                int result = participant.onItemUse(this.getSpace(), player, hand);
                 if (result != -1) {
-                    this.getWorld().getPlayerSet().forEach(other -> {
+                    this.getSpace().getPlayers().forEach(other -> {
                         if (player.squaredDistanceTo(other) <= 16.f) {
                             other.networkHandler.sendPacket(new PlaySoundS2CPacket(SoundEvents.ENTITY_HORSE_SADDLE, SoundCategory.MASTER, player.getX(), player.getY(), player.getZ(), 2.f, 1.f));
                         }

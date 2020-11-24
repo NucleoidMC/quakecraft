@@ -4,7 +4,8 @@
     "id": "quakecraft:2fort"
   },
   "players": {
-    "min": 6,
+    "min": 2,
+    "threshold": 6,
     "max": 16
   },
   "teams": []

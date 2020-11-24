@@ -73,7 +73,7 @@ public abstract class LivingEntityMixin extends Entity
     {
         if (this.isTouchingWater() && !this.hasStatusEffect(StatusEffects.DOLPHINS_GRACE)) {
             if (((Object) this) instanceof ServerPlayerEntity && Quakecraft.get().isPlayerActive((ServerPlayerEntity) (Object) this)) {
-                Vec3d vec3d = this.preTravelVelocity.get();
+                var vec3d = this.preTravelVelocity.get();
 
                 if (this.horizontalCollision && this.isClimbing()) {
                     vec3d = new Vec3d(vec3d.x, 0.2D, vec3d.z);
