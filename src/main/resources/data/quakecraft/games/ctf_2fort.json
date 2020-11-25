@@ -1,5 +1,6 @@
 {
   "type": "quakecraft:quakecraft",
+  "name": "Quakecraft CTF 2fort",
   "map": {
     "id": "quakecraft:2fort"
   },

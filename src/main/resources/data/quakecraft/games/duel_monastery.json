@@ -1,5 +1,6 @@
 {
   "type": "quakecraft:quakecraft",
+  "name": "Quakecraft Duel Monastery",
   "map": {
     "id": "quakecraft:monastery"
   },

@@ -20,6 +20,7 @@ package me.lambdaurora.quakecraft.game;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.lambdaurora.quakecraft.Quakecraft;
+import me.lambdaurora.quakecraft.game.environment.QuakecraftDoor;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;

@@ -21,6 +21,7 @@ import com.google.common.collect.Multimap;
 import me.lambdaurora.quakecraft.Quakecraft;
 import me.lambdaurora.quakecraft.game.map.MapBuilder;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
+import me.lambdaurora.quakecraft.mixin.ManagedGameSpaceAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
@@ -75,6 +76,8 @@ public class QuakecraftWaiting
                 .setTimeOfDay(config.map.time);
 
         return context.createOpenProcedure(worldConfig, logic -> {
+            map.init(logic.getSpace().getWorld());
+
             QuakecraftWaiting waiting = new QuakecraftWaiting(logic, map, config);
 
             GameWaitingLobby.applyTo(logic, config.players);
@@ -133,7 +136,7 @@ public class QuakecraftWaiting
 
         if (heldStack.getItem().isIn(ItemTags.BEDS)) {
             // @TODO REMOVE THIS
-            ((ManagedGameSpace) this.logic.getSpace()).removePlayer(player);
+            ((ManagedGameSpaceAccessor) this.logic.getSpace()).quakecraft$onRemovePlayer(player);
             return TypedActionResult.success(heldStack);
         }
 

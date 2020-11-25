@@ -17,12 +17,15 @@
 
 package me.lambdaurora.quakecraft.game.map;
 
+import me.lambdaurora.quakecraft.block.LaunchPadBlock;
 import me.lambdaurora.quakecraft.block.TeamBarrierBlock;
-import me.lambdaurora.quakecraft.game.QuakecraftDoor;
 import me.lambdaurora.quakecraft.game.QuakecraftLogic;
+import me.lambdaurora.quakecraft.game.environment.QuakecraftDoor;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
+import org.aperlambda.lambdacommon.utils.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.plasmid.game.player.GameTeam;
@@ -40,7 +43,7 @@ import java.util.stream.Stream;
  * Represents the Quakecraft map.
  *
  * @author LambdAurora
- * @version 1.6.0
+ * @version 1.6.1
  * @since 1.0.0
  */
 public class QuakecraftMap
@@ -105,6 +108,24 @@ public class QuakecraftMap
     public void tick()
     {
         this.doors.forEach(QuakecraftDoor::tick);
+    }
+
+    public void init(@NotNull ServerWorld world) {
+        this.initLaunchPads(world);
+    }
+
+    private void initLaunchPads(@NotNull ServerWorld world)
+    {
+        this.template.getMetadata().getRegions("launchpad")
+                .map(region -> {
+                    var state = LaunchPadBlock.fromTag(region.getData());
+                    if (state == null)
+                        return null;
+                    return Pair.of(region.getBounds(), state);
+                })
+                .filter(Objects::nonNull)
+                .forEach(region -> region.getFirst()
+                        .forEach(pos -> world.setBlockState(pos, region.getSecond(), 0b0111010)));
     }
 
     public void postInit(@NotNull QuakecraftLogic game)

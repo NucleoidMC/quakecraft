@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "quakecraft:stone_launchpad",
+    "quakecraft:oak_launchpad",
+    "quakecraft:spruce_launchpad",
+    "quakecraft:birch_launchpad",
+    "quakecraft:jungle_launchpad",
+    "quakecraft:acacia_launchpad",
+    "quakecraft:dark_oak_launchpad",
+    "quakecraft:light_weighted_launchpad",
+    "quakecraft:heavy_weighted_launchpad",
+    "quakecraft:crimson_launchpad",
+    "quakecraft:warped_launchpad",
+    "quakecraft:polished_blackstone_launchpad"
+  ]
+}

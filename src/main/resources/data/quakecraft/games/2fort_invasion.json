@@ -1,5 +1,6 @@
 {
   "type": "quakecraft:quakecraft",
+  "name": "Quakecraft F4A 2fort_invasion",
   "map": {
     "id": "quakecraft:2fort_invasion",
     "time": 14000

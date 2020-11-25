@@ -15,9 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package me.lambdaurora.quakecraft.game;
+package me.lambdaurora.quakecraft.game.environment;
 
 import me.lambdaurora.quakecraft.block.TeamBarrierBlock;
+import me.lambdaurora.quakecraft.game.QuakecraftLogic;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtHelper;
@@ -36,7 +37,7 @@ import java.util.Optional;
  * Represents a door which opens/closes automatically.
  *
  * @author LambdAurora
- * @version 1.6.0
+ * @version 1.6.1
  * @since 1.5.0
  */
 public class QuakecraftDoor
@@ -138,7 +139,7 @@ public class QuakecraftDoor
      */
     public void open()
     {
-        this.getBounds().forEach(pos -> this.game.getSpace().getWorld().setBlockState(pos, this.openState, 0b0111010));
+        this.getBounds().forEach(pos -> this.game.getWorld().setBlockState(pos, this.openState, 0b0111010));
         this.open = true;
     }
 
@@ -147,7 +148,7 @@ public class QuakecraftDoor
      */
     public void close()
     {
-        this.getBounds().forEach(pos -> this.game.getSpace().getWorld().setBlockState(pos, this.closedState, 0b0111010));
+        this.getBounds().forEach(pos -> this.game.getWorld().setBlockState(pos, this.closedState, 0b0111010));
         this.open = false;
     }
 
