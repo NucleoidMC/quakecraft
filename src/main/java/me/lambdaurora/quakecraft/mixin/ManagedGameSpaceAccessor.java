@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import xyz.nucleoid.plasmid.game.ManagedGameSpace;
 
-@Mixin(ManagedGameSpace.class)
+@Mixin(value = ManagedGameSpace.class, remap = false)
 public interface ManagedGameSpaceAccessor
 {
     @Invoker("onRemovePlayer")
