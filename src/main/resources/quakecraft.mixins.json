@@ -8,8 +8,7 @@
     "EntityPositionS2CPacketMixin",
     "EntityShapeContextMixin",
     "FireworkRocketEntityAccessor",
-    "LivingEntityMixin",
-    "ManagedGameSpaceAccessor"
+    "LivingEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

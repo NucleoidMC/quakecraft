@@ -21,7 +21,6 @@ import com.google.common.collect.Multimap;
 import me.lambdaurora.quakecraft.Quakecraft;
 import me.lambdaurora.quakecraft.game.map.MapBuilder;
 import me.lambdaurora.quakecraft.game.map.QuakecraftMap;
-import me.lambdaurora.quakecraft.mixin.ManagedGameSpaceAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
@@ -136,7 +135,7 @@ public class QuakecraftWaiting
 
         if (heldStack.getItem().isIn(ItemTags.BEDS)) {
             // @TODO REMOVE THIS
-            ((ManagedGameSpaceAccessor) this.logic.getSpace()).quakecraft$onRemovePlayer(player);
+            ((ManagedGameSpace) this.logic.getSpace()).removePlayer(player);
             return TypedActionResult.success(heldStack);
         }
 
