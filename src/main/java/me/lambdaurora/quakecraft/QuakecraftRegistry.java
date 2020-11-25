@@ -56,4 +56,8 @@ public class QuakecraftRegistry
     {
         return Registry.register(registry, new Identifier(Quakecraft.NAMESPACE, identifier), item);
     }
+
+    public static void init() {
+        Quakecraft.get().log("Registered custom blocks, items...");
+    }
 }

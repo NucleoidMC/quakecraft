@@ -63,6 +63,8 @@ public class Quakecraft implements ModInitializer
     {
         INSTANCE = this;
 
+        QuakecraftRegistry.init();
+
         GameType.register(new Identifier(NAMESPACE, "quakecraft"),
                 QuakecraftWaiting::open,
                 QuakecraftConfig.CODEC);
