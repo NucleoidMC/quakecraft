@@ -134,8 +134,7 @@ public class QuakecraftWaiting
         var heldStack = player.getStackInHand(hand);
 
         if (heldStack.getItem().isIn(ItemTags.BEDS)) {
-            // @TODO REMOVE THIS
-            ((ManagedGameSpace) this.logic.getSpace()).removePlayer(player);
+            this.logic.getSpace().removePlayer(player);
             return TypedActionResult.success(heldStack);
         }
 
