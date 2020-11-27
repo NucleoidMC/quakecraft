@@ -53,10 +53,10 @@ public class QuakecraftScoreboard
             content.writeLine(String.format("Time left: %s%d:%d", Formatting.GREEN, seconds / 60, seconds % 60));
             content.writeLine("");
 
-            this.game.getParticipants().stream().sorted(Comparator.reverseOrder()).forEach(player -> {
+            this.game.getParticipants().stream().sorted(Comparator.reverseOrder()).limit(15).forEach(player -> {
                 String playerName = player.name;
-                if ((playerName + ": 10").length() > 16)
-                    playerName = playerName.substring(0, 12);
+                /*if ((playerName + ": 10").length() > 16)
+                    playerName = playerName.substring(0, 12);*/
                 if (player.hasLeft()) {
                     content.writeLine(String.format("%s%s%s%s: %s%d",
                             Formatting.GRAY,
