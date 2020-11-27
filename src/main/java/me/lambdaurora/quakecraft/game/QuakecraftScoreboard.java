@@ -54,18 +54,21 @@ public class QuakecraftScoreboard
             content.writeLine("");
 
             this.game.getParticipants().stream().sorted(Comparator.reverseOrder()).forEach(player -> {
+                String playerName = player.name;
+                if ((playerName + ": 10").length() > 16)
+                    playerName = playerName.substring(0, 12);
                 if (player.hasLeft()) {
                     content.writeLine(String.format("%s%s%s%s: %s%d",
                             Formatting.GRAY,
                             Formatting.STRIKETHROUGH,
-                            player.name,
+                            playerName,
                             Formatting.RESET,
                             Formatting.AQUA,
                             player.getKills()));
                 } else {
                     content.writeLine(String.format("%s%s%s: %s%d",
                             Formatting.GRAY,
-                            player.name,
+                            playerName,
                             Formatting.RESET,
                             Formatting.AQUA,
                             player.getKills()));
