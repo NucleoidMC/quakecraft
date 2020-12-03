@@ -17,8 +17,6 @@
 
 package me.lambdaurora.quakecraft.weapon;
 
-import fr.catcore.server.translations.api.LocalizableText;
-import fr.catcore.server.translations.api.LocalizationTarget;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -126,8 +124,8 @@ public class Weapon
     public final @NotNull ItemStack build(@NotNull ServerPlayerEntity player)
     {
         return this.stackBuilder()
-                .setName(((LocalizableText) new TranslatableText("weapon." + this.identifier.getNamespace() + "." + this.identifier.getPath())
-                        .styled(style -> style.withItalic(false))).asLocalizedFor(((LocalizationTarget) player)))
+                .setName(new TranslatableText("weapon." + this.identifier.getNamespace() + "." + this.identifier.getPath())
+                        .styled(style -> style.withItalic(false)))
                 .build();
     }
 
