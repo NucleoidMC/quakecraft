@@ -92,7 +92,6 @@ public class LaunchPadBlock extends Block implements FakeBlock
                 angle = 0;
         }
         var vector = getVector(angle, entity.getPitch(1.f), entity.getYaw(1.f), state.get(POWER));
-        System.out.println(vector);
         entity.setVelocity(vector.getX(), vector.getY(), vector.getZ());
         if (entity instanceof ServerPlayerEntity) {
             ((ServerPlayerEntity) entity).networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(entity));
