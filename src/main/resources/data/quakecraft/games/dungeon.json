@@ -1,0 +1,13 @@
+{
+  "type": "quakecraft:quakecraft",
+  "name": "Quakecraft Dungeon",
+  "map": {
+    "id": "quakecraft:dungeon"
+  },
+  "players": {
+    "min": 2,
+    "threshold": 6,
+    "max": 16
+  },
+  "teams": []
+}
