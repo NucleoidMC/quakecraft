@@ -6,8 +6,8 @@
   },
   "players": {
     "min": 2,
-    "threshold": 6,
-    "max": 16
+    "threshold": 4,
+    "max": 8
   },
   "teams": []
 }
