@@ -1,0 +1,21 @@
+{
+  "game.quakecraft.quakecraft": "Quakecraft",
+  "quakecraft.game.end.nobody_won": "Personne n'a gagné !",
+  "quakecraft.game.end.not_enough_players": "Il n'y a pas assez de joueurs pour continuer le jeu.",
+  "quakecraft.game.end.win": "%s a gagné !",
+
+  "quakecraft.game.kill": "%s a tué %s.",
+
+  "quakecraft.game.special.kills.2": "Double-kill de %s !",
+  "quakecraft.game.special.kills.3": "Triple-kill de %s !",
+  "quakecraft.game.special.kills.4": "Quadruple-kill de %s !",
+  "quakecraft.game.special.kills.5": "Quintuple-kill de %s !",
+  "quakecraft.game.special.kills.lot": "%s a tué trop de gens !",
+
+  "quakecraft.error.load_map": "Échec du chargement de la carte \"%s\"",
+
+  "weapon.quakecraft.base_railgun": "Railgun basique",
+  "weapon.quakecraft.advanced_railgun": "Railgun avancé",
+  "weapon.quakecraft.grenade_launcher": "Lance-grenades",
+  "weapon.quakecraft.rocket_launcher": "Lance-roquettes"
+}
