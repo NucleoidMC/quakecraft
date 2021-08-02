@@ -1,20 +1,29 @@
 plugins {
-    id 'fabric-loom' version '0.4-SNAPSHOT'
+    id 'fabric-loom' version '0.9.25'
+    id 'io.github.juuxel.loom-quiltflower' version '1.1.1'
     id 'java-library'
     id 'maven-publish'
-    id 'net.minecrell.licenser' version '0.4.1'
+    id 'org.cadixdev.licenser' version '0.6.1'
 }
 
 group = project.maven_group
 version = "${project.mod_version}+${getMCVersionString()}"
-archivesBaseName = project.archives_base_name + '-fabric'
+archivesBaseName = project.archives_base_name
 
-def getMCVersionString() {
-    if (project.minecraft_version.matches("\\d\\dw\\d\\d[a-z]")) {
+// This field defines the Java version your mod target.
+def targetJavaVersion = 11
+
+boolean isMCVersionNonRelease() {
+    return project.minecraft_version.matches('^\\d\\dw\\d\\d[a-z]$')
+            || project.minecraft_version.matches('\\d+\\.\\d+-(pre|rc)(\\d+)')
+}
+
+String getMCVersionString() {
+    if (isMCVersionNonRelease()) {
         return project.minecraft_version
     }
-    int lastDot = project.minecraft_version.lastIndexOf('.')
-    return project.minecraft_version.substring(0, lastDot)
+    def version = project.minecraft_version.split('\\.')
+    return version[0] + '.' + version[1]
 }
 
 minecraft {
@@ -25,11 +34,13 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven {
-        name = 'AperLambda'
-        url = 'https://aperlambda.github.io/maven'
+        name 'Nucleoid'
+        url 'https://maven.nucleoid.xyz/'
     }
-    maven { url = "https://jitpack.io/" }
-    maven { url = "https://maven.gegy.dev/" }
+    maven {
+        name 'Gegy'
+        url 'https://maven.gegy.dev/'
+    }
 }
 
 configurations {
@@ -47,92 +58,36 @@ dependencies {
 
     // Plasmid.
     modImplementation "xyz.nucleoid:plasmid:${project.plasmid_version}"
-
-    modImplementation('org.aperlambda:lambdajcommon:1.8.1') {
-        // Minecraft already has all that google crap.
-        exclude group: 'com.google.code.gson'
-        exclude group: 'com.google.guava'
-    }
-    include 'org.aperlambda:lambdajcommon:1.8.1'
-}
-
-tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
-}
-
-processResources {
-    inputs.property "version", project.version
-
-    from(sourceSets.main.resources.srcDirs) {
-        include "fabric.mod.json"
-        expand "version": project.version
-    }
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude "fabric.mod.json"
-    }
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.toVersion(targetJavaVersion)
+    targetCompatibility = JavaVersion.toVersion(targetJavaVersion)
 
     withSourcesJar()
 }
 
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = 'UTF-8'
+
+    it.options.release.set(targetJavaVersion)
+}
+
+processResources {
+    inputs.property 'version', project.version
+
+    filesMatching('fabric.mod.json') {
+        expand 'version': project.version
+    }
+}
+
 jar {
-    from "LICENSE"
+    from('LICENSE') {
+        rename { "${it}_${project.archivesBaseName}" }
+    }
 }
 
 license {
     header file('HEADER')
     include '**/*.java'
-}
-
-// Configure the maven publication.
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact(remapJar) {
-                builtBy remapJar
-            }
-            artifact(sourcesJar) {
-                builtBy remapSourcesJar
-            }
-
-            pom {
-                name = "Quakecraft"
-                description = "Minigame designed for Fabric and Plasmid APIs."
-            }
-
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-
-                configurations.shadow.allDependencies.each {
-                    def dependencyNode = dependenciesNode.appendNode('dependency')
-
-                    dependencyNode.appendNode('groupId', it.group)
-                    dependencyNode.appendNode('artifactId', it.name)
-                    dependencyNode.appendNode('version', it.version)
-                    dependencyNode.appendNode('scope', 'compile')
-                }
-            }
-        }
-    }
-
-    repositories {
-        mavenLocal()
-        maven {
-            name = "BuildDirLocal"
-            url = "$buildDir/repo"
-        }
-        maven {
-            name = "GithubPackages"
-            url = uri("https://maven.pkg.github.com/LambdAurora/Quakecraft")
-            credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
-                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
-            }
-        }
-    }
 }
