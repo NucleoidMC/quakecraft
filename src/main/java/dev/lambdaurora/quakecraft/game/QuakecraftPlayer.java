@@ -24,6 +24,7 @@ import dev.lambdaurora.quakecraft.weapon.Weapons;
 import dev.lambdaurora.quakecraft.weapon.inventory.WeaponManager;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
@@ -33,10 +34,9 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.world.GameMode;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.plasmid.game.GameSpace;
-import xyz.nucleoid.plasmid.game.player.GameTeam;
+import xyz.nucleoid.plasmid.game.common.team.GameTeam;
 
 import java.util.UUID;
 
@@ -44,7 +44,7 @@ import java.util.UUID;
  * Represents a Quakecraft player.
  *
  * @author LambdAurora
- * @version 1.6.0
+ * @version 1.7.0
  * @since 1.0.0
  */
 public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
@@ -61,7 +61,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
 
     private boolean left = false;
 
-    public QuakecraftPlayer(@NotNull ServerPlayerEntity player, GameTeam team) {
+    public QuakecraftPlayer(ServerPlayerEntity player, GameTeam team) {
         this.world = player.getServerWorld();
         this.uuid = player.getUuid();
         this.name = player.getEntityName();
@@ -111,16 +111,16 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
      *
      * @param player the player instance
      */
-    public void reset(@NotNull ServerPlayerEntity player) {
+    public void reset(ServerPlayerEntity player) {
         this.player = player;
 
         if (this.left) {
-            this.player.setGameMode(GameMode.SPECTATOR);
+            this.player.changeGameMode(GameMode.SPECTATOR);
             return;
         }
 
-        this.player.setGameMode(GameMode.ADVENTURE);
-        this.player.inventory.clear();
+        this.player.changeGameMode(GameMode.ADVENTURE);
+        this.player.getInventory().clear();
 
         this.weapons.insertStacks(this.player);
         this.syncInventory();
@@ -134,11 +134,12 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
         this.lastAction = PlayerAction.NONE;
     }
 
-    public void tick(@NotNull GameSpace world) {
+    public void tick(GameSpace world) {
         this.kills += this.killsWithinATick;
         if (this.killsWithinATick >= 2) {
             if (this.killsWithinATick <= 5) {
-                world.getPlayers().sendMessage(new TranslatableText("quakecraft.game.special.kills." + this.killsWithinATick, this.getDisplayName())
+                world.getPlayers().sendMessage(new TranslatableText("quakecraft.game.special.kills." + this.killsWithinATick,
+                        this.getDisplayName())
                         .formatted(Formatting.RED, Formatting.BOLD));
             } else {
                 world.getPlayers().sendMessage(new TranslatableText("quakecraft.game.special.kills.lot", this.getDisplayName())
@@ -170,15 +171,19 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
      */
     public void syncInventory() {
         this.player.currentScreenHandler.sendContentUpdates();
-        this.player.playerScreenHandler.onContentChanged(this.player.inventory);
-        this.player.updateCursorStack();
+        this.player.playerScreenHandler.onContentChanged(this.player.getInventory());
+        this.player.networkHandler.sendPacket(
+                new ScreenHandlerSlotUpdateS2CPacket(ScreenHandlerSlotUpdateS2CPacket.UPDATE_CURSOR_SYNC_ID,
+                        this.player.currentScreenHandler.nextRevision(), 0,
+                        this.player.currentScreenHandler.getCursorStack())
+        );
     }
 
     /**
      * Fired when the game ends.
      */
     public void onEnd() {
-        this.player.inventory.clear();
+        this.player.getInventory().clear();
     }
 
     public void onDeath() {
@@ -198,17 +203,17 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
         return false;
     }
 
-    public int onItemUse(@NotNull GameSpace world, @NotNull ServerPlayerEntity player, @NotNull Hand hand) {
+    public int onItemUse(ServerWorld world, ServerPlayerEntity player, Hand hand) {
         this.lastAction = PlayerAction.USE;
 
         return this.weapons.onPrimary(world, player, hand);
     }
 
-    public void onSecondary(@NotNull GameSpace world) {
+    public void onSecondary(ServerWorld world) {
         this.weapons.onSecondary(world, this.player);
     }
 
-    public void onSwingHand(@NotNull GameSpace world) {
+    public void onSwingHand(ServerWorld world) {
         // Mmmhh yes attack prediction, really not fun to implement.
         if (this.lastAction.isUse()) {
             this.lastAction = PlayerAction.NONE;
@@ -218,11 +223,11 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
         this.onSecondary(world);
     }
 
-    public @NotNull PlayerAction getLastAction() {
+    public PlayerAction getLastAction() {
         return this.lastAction;
     }
 
-    void setLastAction(@NotNull PlayerAction action) {
+    void setLastAction(PlayerAction action) {
         this.lastAction = action;
     }
 
@@ -231,7 +236,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
      *
      * @return the display name
      */
-    public @NotNull Text getDisplayName() {
+    public Text getDisplayName() {
         if (this.player != null)
             return this.player.getDisplayName();
 
@@ -243,7 +248,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
     }
 
     @Override
-    public int compareTo(@NotNull QuakecraftPlayer other) {
+    public int compareTo(QuakecraftPlayer other) {
         return Integer.compare(this.getKills(), other.getKills());
     }
 }

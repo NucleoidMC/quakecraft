@@ -21,6 +21,7 @@ import dev.lambdaurora.quakecraft.Quakecraft;
 import dev.lambdaurora.quakecraft.game.QuakecraftPlayer;
 import dev.lambdaurora.quakecraft.util.RayAccessor;
 import dev.lambdaurora.quakecraft.util.UsefulEntityShapeContext;
+import eu.pb4.polymer.block.VirtualBlock;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -29,8 +30,7 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.plasmid.fake.FakeBlock;
-import xyz.nucleoid.plasmid.game.player.GameTeam;
+import xyz.nucleoid.plasmid.game.common.team.GameTeam;
 
 /**
  * Represents a team barrier block.
@@ -38,10 +38,10 @@ import xyz.nucleoid.plasmid.game.player.GameTeam;
  * The block collisions only with players of a different team.
  *
  * @author LambdAurora
- * @version 1.6.3
+ * @version 1.7.0
  * @since 1.5.0
  */
-public class TeamBarrierBlock extends Block implements FakeBlock {
+public class TeamBarrierBlock extends Block implements VirtualBlock {
     private final GameTeam team;
 
     public TeamBarrierBlock(@Nullable GameTeam team) {
@@ -79,13 +79,13 @@ public class TeamBarrierBlock extends Block implements FakeBlock {
     }
 
     @Override
-    public Block asProxy() {
+    public Block getVirtualBlock() {
         return Blocks.AIR;
     }
 
     @Override
-    public BlockState asProxy(BlockState state) {
-        return this.asProxy().getDefaultState();
+    public BlockState getVirtualBlockState(BlockState state) {
+        return this.getVirtualBlock().getDefaultState();
     }
 
     public static TeamBarrierBlock of(@Nullable GameTeam team) {

@@ -29,18 +29,18 @@ import net.minecraft.world.explosion.Explosion;
  * Represents a rocket entity.
  *
  * @author LambdAurora
- * @version 1.4.9
+ * @version 1.7.0
  * @since 1.3.0
  */
 public class RocketEntity extends FireballEntity implements CritableEntity {
     private boolean critical = false;
 
     public RocketEntity(World world, LivingEntity owner, double velocityX, double velocityY, double velocityZ) {
-        super(world, owner, velocityX, velocityY, velocityZ);
+        super(world, owner, velocityX, velocityY, velocityZ, 1);
     }
 
     public void detonate() {
-        this.remove();
+        this.kill();
         this.getEntityWorld().createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.75f : 1.75f,
                 Explosion.DestructionType.NONE);
     }
@@ -68,7 +68,7 @@ public class RocketEntity extends FireballEntity implements CritableEntity {
     protected void onCollision(HitResult hitResult) {
         if (hitResult.getType() == HitResult.Type.ENTITY) {
             if (((EntityHitResult) hitResult).getEntity() instanceof RocketEntity) {
-                ((EntityHitResult) hitResult).getEntity().remove();
+                ((EntityHitResult) hitResult).getEntity().kill();
                 this.detonate();
                 return;
             }

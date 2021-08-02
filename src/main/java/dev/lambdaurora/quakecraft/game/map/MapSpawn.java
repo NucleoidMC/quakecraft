@@ -18,14 +18,13 @@
 package dev.lambdaurora.quakecraft.game.map;
 
 import net.minecraft.util.math.BlockPos;
-import org.jetbrains.annotations.NotNull;
-import xyz.nucleoid.plasmid.map.template.TemplateRegion;
+import xyz.nucleoid.map_templates.TemplateRegion;
 
 /**
  * Represents a spawn.
  *
  * @author LambdAurora
- * @version 1.6.0
+ * @version 1.7.0
  * @since 1.4.7
  */
 public class MapSpawn {
@@ -33,9 +32,9 @@ public class MapSpawn {
     private final BlockPos pos;
     private final int direction;
 
-    public MapSpawn(@NotNull TemplateRegion region) {
+    public MapSpawn(TemplateRegion region) {
         this.region = region;
-        this.pos = new BlockPos(region.getBounds().getCenter());
+        this.pos = new BlockPos(region.getBounds().center());
         this.direction = region.getData().getInt("direction");
     }
 
@@ -44,7 +43,7 @@ public class MapSpawn {
      *
      * @return the region
      */
-    public TemplateRegion getRegion() {
+    public TemplateRegion region() {
         return this.region;
     }
 
@@ -53,7 +52,7 @@ public class MapSpawn {
      *
      * @return the position
      */
-    public BlockPos getPos() {
+    public BlockPos pos() {
         return this.pos;
     }
 
@@ -62,7 +61,7 @@ public class MapSpawn {
      *
      * @return the facing direction
      */
-    public int getDirection() {
+    public int direction() {
         return this.direction;
     }
 }

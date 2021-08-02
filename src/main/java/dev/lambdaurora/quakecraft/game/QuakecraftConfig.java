@@ -20,32 +20,17 @@ package dev.lambdaurora.quakecraft.game;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.lambdaurora.quakecraft.game.map.MapConfig;
-import org.jetbrains.annotations.NotNull;
-import xyz.nucleoid.plasmid.game.config.PlayerConfig;
-import xyz.nucleoid.plasmid.game.player.GameTeam;
+import xyz.nucleoid.plasmid.game.common.config.PlayerConfig;
+import xyz.nucleoid.plasmid.game.common.team.GameTeam;
 
 import java.util.List;
 
-public class QuakecraftConfig {
+public record QuakecraftConfig(MapConfig map, PlayerConfig players,
+                               List<GameTeam> teams, int time) {
     public static final Codec<QuakecraftConfig> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            MapConfig.CODEC.fieldOf("map").forGetter(config -> config.map),
-            PlayerConfig.CODEC.fieldOf("players").forGetter(config -> config.players),
-            GameTeam.CODEC.listOf().fieldOf("teams").forGetter(config -> config.teams),
-            Codec.INT.optionalFieldOf("time", 20 * 60 * 20).forGetter(config -> config.time)
+            MapConfig.CODEC.fieldOf("map").forGetter(QuakecraftConfig::map),
+            PlayerConfig.CODEC.fieldOf("players").forGetter(QuakecraftConfig::players),
+            GameTeam.CODEC.listOf().fieldOf("teams").forGetter(QuakecraftConfig::teams),
+            Codec.INT.optionalFieldOf("time", 20 * 60 * 20).forGetter(QuakecraftConfig::time)
     ).apply(instance, QuakecraftConfig::new));
-
-    public final MapConfig map;
-    public final PlayerConfig players;
-    public final List<GameTeam> teams;
-    public final int time;
-
-    public QuakecraftConfig(@NotNull MapConfig map,
-                            @NotNull PlayerConfig players,
-                            @NotNull List<GameTeam> teams,
-                            int time) {
-        this.map = map;
-        this.players = players;
-        this.teams = teams;
-        this.time = time;
-    }
 }

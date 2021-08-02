@@ -20,8 +20,8 @@ package dev.lambdaurora.quakecraft.game;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
-import xyz.nucleoid.plasmid.widget.GlobalWidgets;
-import xyz.nucleoid.plasmid.widget.SidebarWidget;
+import xyz.nucleoid.plasmid.game.common.GlobalWidgets;
+import xyz.nucleoid.plasmid.game.common.widget.SidebarWidget;
 
 import java.util.Comparator;
 
@@ -29,7 +29,7 @@ import java.util.Comparator;
  * Represents the Quakecraft scoreboard.
  *
  * @author LambdAurora
- * @version 1.6.1
+ * @version 1.7.0
  * @since 1.0.0
  */
 public class QuakecraftScoreboard {
@@ -47,28 +47,25 @@ public class QuakecraftScoreboard {
     public void update() {
         this.sidebar.set(content -> {
             var seconds = this.game.getTime() / 20;
-            content.writeLine(String.format("Time left: %s%d:%d", Formatting.GREEN, seconds / 60, seconds % 60));
-            content.writeLine("");
+            content.add(new LiteralText("Time left: ")
+                    .append(new LiteralText((seconds / 60) + ":" + (seconds % 60)).formatted(Formatting.GREEN))
+            );
+            content.add(LiteralText.EMPTY);
 
             this.game.getParticipants().stream().sorted(Comparator.reverseOrder()).limit(15).forEach(player -> {
                 String playerName = player.name;
                 /*if ((playerName + ": 10").length() > 16)
                     playerName = playerName.substring(0, 12);*/
                 if (player.hasLeft()) {
-                    content.writeLine(String.format("%s%s%s%s: %s%d",
-                            Formatting.GRAY,
-                            Formatting.STRIKETHROUGH,
-                            playerName,
-                            Formatting.RESET,
-                            Formatting.AQUA,
-                            player.getKills()));
+                    content.add(new LiteralText(playerName).formatted(Formatting.GRAY, Formatting.STRIKETHROUGH)
+                            .append(new LiteralText(": ").formatted(Formatting.RESET))
+                            .append(new LiteralText(String.valueOf(player.getKills())).formatted(Formatting.AQUA))
+                    );
                 } else {
-                    content.writeLine(String.format("%s%s%s: %s%d",
-                            Formatting.GRAY,
-                            playerName,
-                            Formatting.RESET,
-                            Formatting.AQUA,
-                            player.getKills()));
+                    content.add(new LiteralText(playerName).formatted(Formatting.GRAY)
+                            .append(new LiteralText(": ").formatted(Formatting.RESET))
+                            .append(new LiteralText(String.valueOf(player.getKills())).formatted(Formatting.AQUA))
+                    );
                 }
             });
         });

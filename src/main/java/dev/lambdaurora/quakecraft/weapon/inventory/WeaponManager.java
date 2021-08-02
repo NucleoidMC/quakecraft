@@ -22,10 +22,9 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Hand;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.plasmid.game.GameSpace;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +33,7 @@ import java.util.List;
  * Represents a weapon manager.
  *
  * @author LambdAurora
- * @version 1.6.0
+ * @version 1.7.0
  * @since 1.2.0
  */
 public final class WeaponManager {
@@ -45,15 +44,15 @@ public final class WeaponManager {
         this.secondaryCooldowns.defaultReturnValue(0);
     }
 
-    public void add(@NotNull Weapon weapon) {
+    public void add(Weapon weapon) {
         this.weapons.add(weapon);
     }
 
-    public @Nullable Weapon get(@NotNull ItemStack stack) {
+    public @Nullable Weapon get(ItemStack stack) {
         if (stack.isEmpty())
             return null;
 
-        for (Weapon weapon : this.weapons) {
+        for (var weapon : this.weapons) {
             if (weapon.matchesStack(stack))
                 return weapon;
         }
@@ -72,16 +71,16 @@ public final class WeaponManager {
         }
     }
 
-    public void insertStacks(@NotNull ServerPlayerEntity player) {
-        for (Weapon weapon : this.weapons) {
-            player.inventory.insertStack(weapon.build(player));
+    public void insertStacks(ServerPlayerEntity player) {
+        for (var weapon : this.weapons) {
+            player.getInventory().insertStack(weapon.build(player));
         }
     }
 
-    public int onPrimary(@NotNull GameSpace world, @NotNull ServerPlayerEntity player, @NotNull Hand hand) {
+    public int onPrimary(ServerWorld world, ServerPlayerEntity player, Hand hand) {
         ItemStack heldStack = player.getStackInHand(hand);
 
-        for (Weapon weapon : this.weapons) {
+        for (var weapon : this.weapons) {
             if (weapon.matchesStack(heldStack)) {
                 weapon.onPrimary(world, player, hand);
                 return weapon.primaryCooldown;
@@ -91,10 +90,10 @@ public final class WeaponManager {
         return -1;
     }
 
-    public void onSecondary(@NotNull GameSpace world, @NotNull ServerPlayerEntity player) {
+    public void onSecondary(ServerWorld world, ServerPlayerEntity player) {
         ItemStack heldStack = player.getStackInHand(Hand.MAIN_HAND);
 
-        for (Weapon weapon : this.weapons) {
+        for (var weapon : this.weapons) {
             if (weapon.matchesStack(heldStack) && weapon.hasSecondaryAction()) {
                 if (this.canUseSecondary(weapon)) {
                     weapon.onSecondary(world, player, heldStack);
@@ -105,7 +104,7 @@ public final class WeaponManager {
         }
     }
 
-    public int getSecondaryCooldown(@NotNull Weapon weapon) {
+    public int getSecondaryCooldown(Weapon weapon) {
         return this.secondaryCooldowns.getInt(weapon);
     }
 
@@ -115,7 +114,7 @@ public final class WeaponManager {
      * @param weapon the weapon
      * @return {@code true} if the secondary fire is available, else {@code false}
      */
-    public boolean canUseSecondary(@NotNull Weapon weapon) {
+    public boolean canUseSecondary(Weapon weapon) {
         return this.getSecondaryCooldown(weapon) == 0;
     }
 }

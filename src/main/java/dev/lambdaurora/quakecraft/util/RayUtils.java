@@ -18,18 +18,17 @@
 package dev.lambdaurora.quakecraft.util;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
 import net.minecraft.particle.DustParticleEffect;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3f;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.plasmid.game.GameSpace;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -39,7 +38,7 @@ import java.util.function.Predicate;
  * Represents a ray utilities class.
  *
  * @author LambdAurora, Gegy
- * @version 1.6.0
+ * @version 1.7.0
  * @since 1.0.0
  */
 public final class RayUtils {
@@ -57,7 +56,7 @@ public final class RayUtils {
      * @param consumer the consumer of hit entities
      * @return the absolute distance between the source and the most far hit. The sign bit is used as a boolean to represent a success or not
      */
-    public static double raycastEntities(@NotNull Entity source, double range, double margin, @NotNull Predicate<Entity> predicate, @NotNull Consumer<Entity> consumer) {
+    public static double raycastEntities(Entity source, double range, double margin, Predicate<Entity> predicate, Consumer<Entity> consumer) {
         World world = source.getEntityWorld();
 
         final Vec3d origin = source.getCameraPosVec(1.0F);
@@ -113,7 +112,7 @@ public final class RayUtils {
     /**
      * Thanks FarmyFeud (https://github.com/NucleoidMC/farmy-feud/blob/1.16.2/src/main/java/xyz/nucleoid/farmyfeud/game/active/EntityRayTrace.java)
      */
-    public static @Nullable EntityHitResult raycastEntity(@NotNull Entity source, double range, double margin, Predicate<Entity> predicate) {
+    public static @Nullable EntityHitResult raycastEntity(Entity source, double range, double margin, Predicate<Entity> predicate) {
         World world = source.getEntityWorld();
 
         Vec3d origin = source.getCameraPosVec(1.0F);
@@ -165,14 +164,14 @@ public final class RayUtils {
         return new EntityHitResult(hitEntity, hitPoint);
     }
 
-    public static void drawRay(@NotNull GameSpace world, @NotNull Entity source, double range) {
+    public static void drawRay(ServerWorld world, Entity source, double range) {
         Vec3d origin = source.getCameraPosVec(1.f).subtract(0, 0.5, 0);
         Vec3d delta = source.getRotationVec(1.f).multiply(range);
 
         Vec3d target = origin.add(delta);
 
         ((RayAccessor) source).quakecraft$setRaycasting(true);
-        BlockHitResult blockHitResult = world.getWorld().raycast(new RaycastContext(origin, target, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, source));
+        BlockHitResult blockHitResult = world.raycast(new RaycastContext(origin, target, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, source));
         ((RayAccessor) source).quakecraft$setRaycasting(false);
         if (blockHitResult.getType() != HitResult.Type.MISS) {
             target = blockHitResult.getPos();
@@ -181,13 +180,13 @@ public final class RayUtils {
         drawRay(world, origin, target);
     }
 
-    public static void drawRay(@NotNull GameSpace world, @NotNull Entity source, @NotNull Entity target) {
+    public static void drawRay(ServerWorld world, Entity source, Entity target) {
         Vec3d origin = source.getCameraPosVec(1.f).subtract(0, 0.5, 0);
 
         Vec3d end = target.getCameraPosVec(1.f).subtract(0, 0.5, 0);
 
         ((RayAccessor) source).quakecraft$setRaycasting(true);
-        BlockHitResult blockHitResult = world.getWorld().raycast(new RaycastContext(origin, end, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, source));
+        BlockHitResult blockHitResult = world.raycast(new RaycastContext(origin, end, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, source));
         ((RayAccessor) source).quakecraft$setRaycasting(false);
         if (blockHitResult.getType() != HitResult.Type.MISS) {
             end = blockHitResult.getPos();
@@ -196,7 +195,7 @@ public final class RayUtils {
         drawRay(world, origin, end);
     }
 
-    public static void drawRay(@NotNull GameSpace world, @NotNull Vec3d origin, @NotNull Vec3d target) {
+    public static void drawRay(ServerWorld world, Vec3d origin, Vec3d target) {
         Vec3d delta = target.subtract(origin);
         double length = delta.length();
         double stepX = delta.x / length;
@@ -208,9 +207,8 @@ public final class RayUtils {
             double y = origin.y + stepY * d;
             double z = origin.z + stepZ * d;
 
-            ParticleS2CPacket packet = new ParticleS2CPacket(new DustParticleEffect(1.f, 0.647f, 0.f, .75f), false, x, y, z,
-                    0.f, 0.f, 0.f, 1.f, 3);
-            world.getPlayers().sendPacket(packet);
+            world.spawnParticles(new DustParticleEffect(new Vec3f(1.f, 0.647f, 0.f), .75f),
+                    x, y, z, 3, 0.f, 0.f, 0.f, 1.f);
         }
     }
 }

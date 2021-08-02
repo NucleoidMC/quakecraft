@@ -20,16 +20,16 @@ package dev.lambdaurora.quakecraft.game.environment;
 import dev.lambdaurora.quakecraft.block.TeamBarrierBlock;
 import dev.lambdaurora.quakecraft.game.QuakecraftLogic;
 import net.fabricmc.fabric.api.util.NbtType;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.plasmid.game.player.GameTeam;
-import xyz.nucleoid.plasmid.map.template.TemplateRegion;
-import xyz.nucleoid.plasmid.util.BlockBounds;
+import xyz.nucleoid.map_templates.BlockBounds;
+import xyz.nucleoid.map_templates.TemplateRegion;
+import xyz.nucleoid.plasmid.game.common.team.GameTeam;
 
 import java.util.Optional;
 
@@ -37,7 +37,7 @@ import java.util.Optional;
  * Represents a door which opens/closes automatically.
  *
  * @author LambdAurora
- * @version 1.6.1
+ * @version 1.7.0
  * @since 1.5.0
  */
 public class QuakecraftDoor {
@@ -51,10 +51,9 @@ public class QuakecraftDoor {
     private boolean open = false;
     private int openTicks = 0;
 
-    public QuakecraftDoor(@NotNull QuakecraftLogic game,
-                          @NotNull TemplateRegion region,
-                          @NotNull BlockBounds bounds, @NotNull BlockBounds detectionBounds,
-                          @NotNull BlockState closedState, @Nullable GameTeam team) {
+    public QuakecraftDoor(QuakecraftLogic game, TemplateRegion region,
+                          BlockBounds bounds, BlockBounds detectionBounds,
+                          BlockState closedState, @Nullable GameTeam team) {
         this.game = game;
         this.region = region;
         this.bounds = bounds;
@@ -69,7 +68,7 @@ public class QuakecraftDoor {
      *
      * @return the region
      */
-    public @NotNull TemplateRegion getRegion() {
+    public TemplateRegion getRegion() {
         return this.region;
     }
 
@@ -80,7 +79,7 @@ public class QuakecraftDoor {
      *
      * @return the bounds of the door
      */
-    public @NotNull BlockBounds getBounds() {
+    public BlockBounds getBounds() {
         return this.bounds;
     }
 
@@ -89,7 +88,7 @@ public class QuakecraftDoor {
      *
      * @return the detection bounds
      */
-    public @NotNull BlockBounds getDetectionBounds() {
+    public BlockBounds getDetectionBounds() {
         return this.detectionBounds;
     }
 
@@ -112,7 +111,8 @@ public class QuakecraftDoor {
     }
 
     public void tick() {
-        var players = this.game.getSpace().getWorld().getEntitiesByClass(ServerPlayerEntity.class, this.detectionBounds.toBox(),
+        var players = this.game.world().getEntitiesByClass(ServerPlayerEntity.class,
+                this.detectionBounds.asBox(),
                 player -> this.game.canOpenDoor(this, player));
         if (players.size() > 0) {
             if (!this.open) {
@@ -130,7 +130,8 @@ public class QuakecraftDoor {
      * Opens the door.
      */
     public void open() {
-        this.getBounds().forEach(pos -> this.game.getWorld().setBlockState(pos, this.openState, 0b0111010));
+        this.getBounds().forEach(pos -> this.game.world().setBlockState(pos, this.openState,
+                Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL));
         this.open = true;
     }
 
@@ -138,17 +139,18 @@ public class QuakecraftDoor {
      * Closes the door.
      */
     public void close() {
-        this.getBounds().forEach(pos -> this.game.getWorld().setBlockState(pos, this.closedState, 0b0111010));
+        this.getBounds().forEach(pos -> this.game.world().setBlockState(pos, this.closedState,
+                Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL));
         this.open = false;
     }
 
-    public static @NotNull Optional<QuakecraftDoor> fromRegion(@NotNull QuakecraftLogic game, @NotNull TemplateRegion region) {
+    public static Optional<QuakecraftDoor> fromRegion(QuakecraftLogic game, TemplateRegion region) {
         BlockBounds bounds = region.getBounds();
 
         BlockBounds detectionBounds = null;
 
         if (region.getData().contains("activation", NbtType.STRING)) {
-            detectionBounds = game.getMap().getDoorActivationBounds(region.getData().getString("activation"));
+            detectionBounds = game.map().getDoorActivationBounds(region.getData().getString("activation"));
         }
 
         if (detectionBounds == null && region.getData().contains("distance", NbtType.INT)) {
@@ -160,10 +162,10 @@ public class QuakecraftDoor {
             if (axis == null)
                 return Optional.empty();
 
-            BlockPos min = bounds.getMin().offset(Direction.from(axis, Direction.AxisDirection.NEGATIVE), distance);
-            BlockPos max = bounds.getMax().offset(Direction.from(axis, Direction.AxisDirection.POSITIVE), distance);
+            BlockPos min = bounds.min().offset(Direction.from(axis, Direction.AxisDirection.NEGATIVE), distance);
+            BlockPos max = bounds.max().offset(Direction.from(axis, Direction.AxisDirection.POSITIVE), distance);
 
-            detectionBounds = new BlockBounds(min, max);
+            detectionBounds = BlockBounds.of(min, max);
         }
 
         if (detectionBounds == null)
@@ -176,7 +178,7 @@ public class QuakecraftDoor {
 
         GameTeam team = game.getTeam(region.getData().getString("team"));
 
-        QuakecraftDoor door = new QuakecraftDoor(game, region, bounds, detectionBounds, closedState, team);
+        var door = new QuakecraftDoor(game, region, bounds, detectionBounds, closedState, team);
         door.close();
         return Optional.of(door);
     }

@@ -26,16 +26,14 @@ package dev.lambdaurora.quakecraft;
  * @version 1.2.2
  * @since 1.2.2
  */
-public enum PlayerAction
-{
+public enum PlayerAction {
     NONE,
     ATTACK,
     USE,
     USE_BLOCK,
     USE_BLOCK_AND_ITEM;
 
-    public boolean isUse()
-    {
+    public boolean isUse() {
         return this == USE || this == USE_BLOCK || this == USE_BLOCK_AND_ITEM;
     }
 }

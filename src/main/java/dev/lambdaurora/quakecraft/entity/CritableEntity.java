@@ -27,19 +27,17 @@ import org.jetbrains.annotations.NotNull;
  * Represents a projectile entity that can deal critical damage.
  *
  * @author LambdAurora
- * @version 1.3.0
+ * @version 1.7.0
  * @since 1.3.0
  */
-public interface CritableEntity
-{
+public interface CritableEntity {
     boolean isCritical();
 
     void setCritical(boolean critical);
 
     void rollCritical();
 
-    static void spawnCritParticles(@NotNull World world, double x, double y, double z, Vec3d velocity)
-    {
+    static void spawnCritParticles(@NotNull World world, double x, double y, double z, Vec3d velocity) {
         for (int i = 0; i < 4; i++) {
             if (world.isClient()) {
                 world.addParticle(ParticleTypes.CRIT,

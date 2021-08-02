@@ -17,22 +17,21 @@
 
 package dev.lambdaurora.quakecraft.game.map;
 
-import com.mojang.datafixers.util.Pair;
 import dev.lambdaurora.quakecraft.block.LaunchPadBlock;
 import dev.lambdaurora.quakecraft.block.TeamBarrierBlock;
 import dev.lambdaurora.quakecraft.game.QuakecraftLogic;
 import dev.lambdaurora.quakecraft.game.environment.QuakecraftDoor;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.plasmid.game.player.GameTeam;
-import xyz.nucleoid.plasmid.map.template.MapTemplate;
-import xyz.nucleoid.plasmid.map.template.TemplateChunkGenerator;
-import xyz.nucleoid.plasmid.map.template.TemplateRegion;
-import xyz.nucleoid.plasmid.util.BlockBounds;
+import xyz.nucleoid.map_templates.BlockBounds;
+import xyz.nucleoid.map_templates.MapTemplate;
+import xyz.nucleoid.map_templates.TemplateRegion;
+import xyz.nucleoid.plasmid.game.common.team.GameTeam;
+import xyz.nucleoid.plasmid.game.world.generator.TemplateChunkGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +42,7 @@ import java.util.stream.Stream;
  * Represents the Quakecraft map.
  *
  * @author LambdAurora
- * @version 1.6.3
+ * @version 1.7.0
  * @since 1.0.0
  */
 public class QuakecraftMap {
@@ -52,7 +51,7 @@ public class QuakecraftMap {
     private final List<MapSpawn> spawns;
     private final List<QuakecraftDoor> doors = new ArrayList<>();
 
-    public QuakecraftMap(@NotNull MapTemplate template, @NotNull BlockBounds waitingSpawn, @NotNull List<MapSpawn> spawns) {
+    public QuakecraftMap(MapTemplate template, BlockBounds waitingSpawn, List<MapSpawn> spawns) {
         this.template = template;
         this.waitingSpawn = waitingSpawn;
         this.spawns = spawns;
@@ -92,7 +91,7 @@ public class QuakecraftMap {
      * @param id the identifier of the door activation bounds
      * @return the bounds if found, else {@code null}
      */
-    public @Nullable BlockBounds getDoorActivationBounds(@NotNull String id) {
+    public @Nullable BlockBounds getDoorActivationBounds(String id) {
         return this.template.getMetadata().getRegions("door_activation")
                 .filter(region -> id.equals(region.getData().getString("id")))
                 .map(TemplateRegion::getBounds)
@@ -103,25 +102,28 @@ public class QuakecraftMap {
         this.doors.forEach(QuakecraftDoor::tick);
     }
 
-    public void init(@NotNull ServerWorld world) {
+    public void init(ServerWorld world) {
         this.initLaunchPads(world);
     }
 
-    private void initLaunchPads(@NotNull ServerWorld world) {
+    private void initLaunchPads(ServerWorld world) {
+        record LaunchPad(BlockBounds bounds, BlockState state) {
+        }
+
         this.template.getMetadata().getRegions("launchpad")
                 .map(region -> {
-                    var state = LaunchPadBlock.fromTag(region.getData());
+                    var state = LaunchPadBlock.fromNbt(region.getData());
                     if (state == null)
                         return null;
-                    // @TODO replace with local record
-                    return new Pair<>(region.getBounds(), state);
+                    return new LaunchPad(region.getBounds(), state);
                 })
                 .filter(Objects::nonNull)
-                .forEach(region -> region.getFirst()
-                        .forEach(pos -> world.setBlockState(pos, region.getSecond(), 0b0111010)));
+                .forEach(region -> region.bounds()
+                        .forEach(pos -> world.setBlockState(pos, region.state(),
+                                Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL)));
     }
 
-    public void postInit(@NotNull QuakecraftLogic game) {
+    public void postInit(QuakecraftLogic game) {
         this.template.getMetadata().getRegions("door").map(region -> QuakecraftDoor.fromRegion(game, region).orElse(null))
                 .filter(Objects::nonNull).forEach(this.doors::add);
 
@@ -130,13 +132,14 @@ public class QuakecraftMap {
                 GameTeam team = game.getTeam(region.getData().getString("team"));
                 if (team != null) {
                     BlockState state = TeamBarrierBlock.of(team).getDefaultState();
-                    region.getBounds().forEach(pos -> game.getSpace().getWorld().setBlockState(pos, state, 0b0111010));
+                    region.getBounds().forEach(pos -> game.world().setBlockState(pos, state,
+                            Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL));
                 }
             });
         }
     }
 
-    public @NotNull ChunkGenerator asGenerator(@NotNull MinecraftServer server) {
+    public ChunkGenerator asGenerator(MinecraftServer server) {
         return new TemplateChunkGenerator(server, this.template);
     }
 }

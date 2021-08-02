@@ -22,12 +22,13 @@ import dev.lambdaurora.quakecraft.game.map.MapSpawn;
 import dev.lambdaurora.quakecraft.game.map.QuakecraftMap;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameMode;
-import org.jetbrains.annotations.NotNull;
+import org.apache.logging.log4j.core.jmx.Server;
 import xyz.nucleoid.plasmid.game.GameSpace;
 import xyz.nucleoid.plasmid.util.ItemStackBuilder;
 
@@ -37,22 +38,24 @@ import java.util.Random;
  * Represents the Quakecraft spawn logic.
  *
  * @author LambdAurora
- * @version 1.6.0
+ * @version 1.7.0
  * @since 1.0.0
  */
 public class QuakecraftSpawnLogic {
     private static final Random RANDOM = new Random();
     private final GameSpace space;
+    private final ServerWorld world;
     private final QuakecraftMap map;
     private final SpawnCache spawnCache;
 
-    public QuakecraftSpawnLogic(@NotNull GameSpace space, @NotNull QuakecraftMap map) {
+    public QuakecraftSpawnLogic(GameSpace space, ServerWorld world, QuakecraftMap map) {
         this.space = space;
+        this.world = world;
         this.map = map;
         this.spawnCache = new SpawnCache(map.getSpawnCount() / 2);
     }
 
-    public void spawnPlayer(@NotNull ServerPlayerEntity player) {
+    public void spawnPlayer(ServerPlayerEntity player) {
         MapSpawn spawn = null;
         int spawnIndex = -1;
         int lowestPlayers = this.space.getPlayerCount();
@@ -61,8 +64,8 @@ public class QuakecraftSpawnLogic {
                 continue;
             var currentSpawn = this.map.getSpawn(i);
 
-            var box = new Box(currentSpawn.getPos().add(-16, -5, -16), currentSpawn.getPos().add(16, 5, 16));
-            int playersNearSpawn = (int) space.getPlayers().stream().filter(p -> box.contains(p.getPos())).count();
+            var box = new Box(currentSpawn.pos().add(-16, -5, -16), currentSpawn.pos().add(16, 5, 16));
+            int playersNearSpawn = (int) this.space.getPlayers().stream().filter(p -> box.contains(p.getPos())).count();
             if (playersNearSpawn < lowestPlayers) {
                 lowestPlayers = playersNearSpawn;
                 spawn = currentSpawn;
@@ -77,17 +80,17 @@ public class QuakecraftSpawnLogic {
             this.spawnCache.push(spawnIndex);
         }
 
-        player.teleport(this.space.getWorld(), spawn.getPos().getX(), spawn.getPos().getY(), spawn.getPos().getZ(), spawn.getDirection(), 0.f);
+        player.teleport(this.world, spawn.pos().getX(), spawn.pos().getY(), spawn.pos().getZ(), spawn.direction(), 0.f);
     }
 
-    public void resetWaitingPlayer(@NotNull ServerPlayerEntity player) {
-        player.setGameMode(GameMode.ADVENTURE);
-        player.inventory.clear();
+    public void resetWaitingPlayer(ServerPlayerEntity player) {
+        player.changeGameMode(GameMode.ADVENTURE);
+        player.getInventory().clear();
 
         var leaveGame = ItemStackBuilder.of(Items.RED_BED)
                 .setName(new LiteralText("Leave Lobby").styled(style -> style.withItalic(false).withColor(Formatting.YELLOW)))
                 .build();
-        player.inventory.insertStack(8, leaveGame);
+        player.getInventory().insertStack(8, leaveGame);
 
         Quakecraft.applySpeed(player);
     }
@@ -97,18 +100,16 @@ public class QuakecraftSpawnLogic {
      *
      * @param player the player to spawn
      */
-    public final void spawnWaitingPlayer(@NotNull ServerPlayerEntity player) {
-        var world = this.space.getWorld();
-
+    public final void spawnWaitingPlayer(ServerPlayerEntity player) {
         var bounds = this.map.waitingSpawn;
-        var min = bounds.getMin();
-        var max = bounds.getMax();
+        var min = bounds.min();
+        var max = bounds.max();
 
         double x = MathHelper.nextDouble(player.getRandom(), min.getX(), max.getX());
         double z = MathHelper.nextDouble(player.getRandom(), min.getZ(), max.getZ());
         double y = min.getY() + 0.5;
 
-        player.teleport(world, x, y, z, 0.f, 0.f);
+        player.teleport(this.world, x, y, z, 0.f, 0.f);
     }
 
     /**

@@ -29,6 +29,7 @@ import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.TranslatableText;
@@ -39,15 +40,21 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.world.GameMode;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.plasmid.game.GameLogic;
-import xyz.nucleoid.plasmid.game.event.*;
-import xyz.nucleoid.plasmid.game.player.GameTeam;
-import xyz.nucleoid.plasmid.game.player.JoinResult;
-import xyz.nucleoid.plasmid.game.rule.GameRule;
-import xyz.nucleoid.plasmid.game.rule.RuleResult;
-import xyz.nucleoid.plasmid.widget.GlobalWidgets;
+import xyz.nucleoid.plasmid.game.GameActivity;
+import xyz.nucleoid.plasmid.game.GameCloseReason;
+import xyz.nucleoid.plasmid.game.GameSpace;
+import xyz.nucleoid.plasmid.game.common.GlobalWidgets;
+import xyz.nucleoid.plasmid.game.common.team.GameTeam;
+import xyz.nucleoid.plasmid.game.event.GameActivityEvents;
+import xyz.nucleoid.plasmid.game.event.GamePlayerEvents;
+import xyz.nucleoid.plasmid.game.rule.GameRuleType;
+import xyz.nucleoid.stimuli.event.block.BlockUseEvent;
+import xyz.nucleoid.stimuli.event.item.ItemUseEvent;
+import xyz.nucleoid.stimuli.event.player.PlayerAttackEntityEvent;
+import xyz.nucleoid.stimuli.event.player.PlayerDamageEvent;
+import xyz.nucleoid.stimuli.event.player.PlayerDeathEvent;
+import xyz.nucleoid.stimuli.event.player.PlayerSwingHandEvent;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -56,7 +63,7 @@ import java.util.Set;
  * Represents the Quakecraft running game.
  *
  * @author LambdAurora
- * @version 1.6.1
+ * @version 1.7.0
  * @since 1.0.0
  */
 public class QuakecraftGame extends QuakecraftLogic {
@@ -69,58 +76,58 @@ public class QuakecraftGame extends QuakecraftLogic {
 
     private Set<QuakecraftPlayer> winners = new HashSet<>();
 
-    private QuakecraftGame(@NotNull QuakecraftConfig config, @NotNull GameLogic logic, @NotNull QuakecraftMap map, @NotNull QuakecraftSpawnLogic spawnLogic) {
-        super(logic, config, map);
+    private QuakecraftGame(QuakecraftConfig config, GameActivity game, ServerWorld world, QuakecraftMap map, QuakecraftSpawnLogic spawnLogic) {
+        super(game.getGameSpace(), world, config, map);
         this.spawnLogic = spawnLogic;
-        GlobalWidgets widgets = new GlobalWidgets(logic);
+        GlobalWidgets widgets = GlobalWidgets.addTo(game);
         this.scoreboard = new QuakecraftScoreboard(this, widgets);
 
-        this.time = this.getConfig().time;
+        this.time = this.getConfig().time();
     }
 
     /**
      * Opens the game.
      *
      * @param config the game configuration
-     * @param logic the game logic
+     * @param gameSpace the game logic
      * @param map the game map
      * @param spawnLogic the game spawn logic
      * @param players the players affected to teams
      */
-    public static void open(@NotNull QuakecraftConfig config, @NotNull GameLogic logic, @NotNull QuakecraftMap map, @NotNull QuakecraftSpawnLogic spawnLogic,
-                            @Nullable Multimap<GameTeam, ServerPlayerEntity> players) {
-        logic.getSpace().openGame(game -> {
-            QuakecraftGame active = new QuakecraftGame(config, game, map, spawnLogic);
+    public static void open(QuakecraftConfig config, GameSpace gameSpace, ServerWorld world, QuakecraftMap map,
+                            QuakecraftSpawnLogic spawnLogic, @Nullable Multimap<GameTeam, ServerPlayerEntity> players) {
+        gameSpace.setActivity(game -> {
+            QuakecraftGame active = new QuakecraftGame(config, game, world, map, spawnLogic);
             if (players != null)
                 active.assignTeams(players);
             map.postInit(active);
 
-            game.setRule(GameRule.CRAFTING, RuleResult.DENY);
-            game.setRule(GameRule.PORTALS, RuleResult.DENY);
-            game.setRule(GameRule.PVP, RuleResult.DENY);
-            game.setRule(GameRule.HUNGER, RuleResult.DENY);
-            game.setRule(GameRule.FALL_DAMAGE, RuleResult.DENY);
-            game.setRule(GameRule.INTERACTION, RuleResult.ALLOW);
-            game.setRule(GameRule.BLOCK_DROPS, RuleResult.DENY);
-            game.setRule(GameRule.THROW_ITEMS, RuleResult.DENY);
-            game.setRule(GameRule.UNSTABLE_TNT, RuleResult.DENY);
+            game.deny(GameRuleType.CRAFTING);
+            game.deny(GameRuleType.PORTALS);
+            game.deny(GameRuleType.PVP);
+            game.deny(GameRuleType.HUNGER);
+            game.deny(GameRuleType.FALL_DAMAGE);
+            game.deny(GameRuleType.BLOCK_DROPS);
+            game.deny(GameRuleType.THROW_ITEMS);
+            game.deny(GameRuleType.UNSTABLE_TNT);
+            game.allow(GameRuleType.INTERACTION);
 
-            game.on(GameOpenListener.EVENT, active::onOpen);
-            game.on(GameCloseListener.EVENT, active::onClose);
+            game.listen(GameActivityEvents.ENABLE, active::onOpen);
+            game.listen(GameActivityEvents.DISABLE, active::onClose);
 
-            game.on(OfferPlayerListener.EVENT, player -> JoinResult.ok());
-            game.on(PlayerAddListener.EVENT, active::addPlayer);
-            game.on(PlayerRemoveListener.EVENT, active::removePlayer);
+            game.listen(GamePlayerEvents.OFFER, offer -> offer.accept(active.world(), active.map().waitingSpawn.center()));
+            game.listen(GamePlayerEvents.ADD, active::addPlayer);
+            game.listen(GamePlayerEvents.REMOVE, active::removePlayer);
 
-            game.on(GameTickListener.EVENT, active::tick);
+            game.listen(GameActivityEvents.TICK, active::tick);
 
-            game.on(PlayerDamageListener.EVENT, active::onDamage);
-            game.on(PlayerDeathListener.EVENT, active::onPlayerDeath);
+            game.listen(PlayerDamageEvent.EVENT, active::onDamage);
+            game.listen(PlayerDeathEvent.EVENT, active::onPlayerDeath);
 
-            game.on(UseBlockListener.EVENT, active::onUseBlock);
-            game.on(UseItemListener.EVENT, active::onUseItem);
-            game.on(HandSwingListener.EVENT, active::onSwingHand);
-            game.on(AttackEntityListener.EVENT, active::onAttackEntity);
+            game.listen(BlockUseEvent.EVENT, active::onUseBlock);
+            game.listen(ItemUseEvent.EVENT, active::onUseItem);
+            game.listen(PlayerSwingHandEvent.EVENT, active::onSwingHand);
+            game.listen(PlayerAttackEntityEvent.EVENT, active::onAttackEntity);
         });
     }
 
@@ -160,12 +167,12 @@ public class QuakecraftGame extends QuakecraftLogic {
 
             if (activePlayer[0] <= 1) {
                 this.getSpace().getPlayers().sendMessage(new TranslatableText("quakecraft.game.end.not_enough_players").formatted(Formatting.RED));
-                this.getSpace().close();
+                this.getSpace().close(GameCloseReason.CANCELED);
             }
 
             if (this.time <= 0) {
                 this.getSpace().getPlayers().sendMessage(new TranslatableText("quakecraft.game.end.nobody_won").formatted(Formatting.RED));
-                this.getSpace().close();
+                this.getSpace().close(GameCloseReason.FINISHED);
             }
 
             if (this.end) {
@@ -181,13 +188,14 @@ public class QuakecraftGame extends QuakecraftLogic {
                         if (mcPlayer == null)
                             return;
 
-                        Quakecraft.spawnFirework(this.getSpace().getWorld(), mcPlayer.getX(), mcPlayer.getY(), mcPlayer.getZ(), new int[]{15435844, 11743532}, false, -1);
+                        Quakecraft.spawnFirework(this.world(), mcPlayer.getX(), mcPlayer.getY(), mcPlayer.getZ(),
+                                new int[]{15435844, 11743532}, false, -1);
                     }
                 });
             }
 
             if (this.endTime == 0)
-                this.getSpace().close();
+                this.getSpace().close(GameCloseReason.FINISHED);
         }
 
         this.scoreboard.update();
@@ -197,18 +205,18 @@ public class QuakecraftGame extends QuakecraftLogic {
         players.forEach((team, player) -> this.getOptParticipant(player).ifPresent(p -> p.setTeam(team)));
     }
 
-    private void onWin(@NotNull QuakecraftPlayer winner) {
+    private void onWin(QuakecraftPlayer winner) {
         this.getSpace().getPlayers().sendMessage(new TranslatableText("quakecraft.game.end.win", winner.getDisplayName()).formatted(Formatting.GREEN));
         this.end = true;
         this.running = false;
         this.winners.add(winner);
     }
 
-    private void addPlayer(@NotNull ServerPlayerEntity player) {
+    private void addPlayer(ServerPlayerEntity player) {
         this.spawnParticipant(player);
     }
 
-    private void removePlayer(@NotNull ServerPlayerEntity player) {
+    private void removePlayer(ServerPlayerEntity player) {
         QuakecraftPlayer participant = this.participants.get(player.getUuid());
         if (participant != null) {
             participant.leave();
@@ -219,17 +227,16 @@ public class QuakecraftGame extends QuakecraftLogic {
     private ActionResult onDamage(ServerPlayerEntity player, DamageSource source, float amount) {
         if (source.isExplosive()) {
             Entity attacker = null;
-            if (source.getSource() instanceof GrenadeEntity) {
-                GrenadeEntity grenade = (GrenadeEntity) source.getSource();
+            if (source.getSource() instanceof GrenadeEntity grenade) {
                 attacker = grenade.getOwner();
             } else if (source.getSource() instanceof ServerPlayerEntity) {
                 attacker = source.getSource();
             }
 
             if (attacker != null) {
-                if (attacker instanceof ServerPlayerEntity && attacker != player) {
-                    player.setAttacker((LivingEntity) attacker);
-                    ((ServerPlayerEntity) attacker).setAttacking(player);
+                if (attacker instanceof ServerPlayerEntity playerAttacker && attacker != player) {
+                    player.setAttacker(playerAttacker);
+                    playerAttacker.setAttacking(player);
                     player.kill();
                 }
             }
@@ -237,7 +244,7 @@ public class QuakecraftGame extends QuakecraftLogic {
         return source.isExplosive() && !(source.getAttacker() instanceof ServerPlayerEntity) ? ActionResult.FAIL : ActionResult.PASS;
     }
 
-    private @NotNull ActionResult onPlayerDeath(@NotNull ServerPlayerEntity player, @NotNull DamageSource source) {
+    private ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
         LivingEntity attacker = player.getAttacker();
         if (attacker != null) {
             QuakecraftPlayer other = this.participants.get(attacker.getUuid());
@@ -260,7 +267,7 @@ public class QuakecraftGame extends QuakecraftLogic {
         return ActionResult.FAIL;
     }
 
-    private void onSwingHand(@NotNull ServerPlayerEntity player, @NotNull Hand hand) {
+    private void onSwingHand(ServerPlayerEntity player, Hand hand) {
         if (Thread.currentThread() != player.getServer().getThread())
             return;
 
@@ -271,7 +278,7 @@ public class QuakecraftGame extends QuakecraftLogic {
         QuakecraftPlayer participant = this.getParticipant(player);
         if (participant == null)
             return;
-        participant.onSwingHand(this.getSpace());
+        participant.onSwingHand(this.world());
     }
 
     private ActionResult onUseBlock(ServerPlayerEntity player, Hand hand, BlockHitResult hitResult) {
@@ -285,7 +292,7 @@ public class QuakecraftGame extends QuakecraftLogic {
         return ActionResult.FAIL;
     }
 
-    private @NotNull TypedActionResult<ItemStack> onUseItem(@NotNull ServerPlayerEntity player, @NotNull Hand hand) {
+    private TypedActionResult<ItemStack> onUseItem(ServerPlayerEntity player, Hand hand) {
         if (hand == Hand.OFF_HAND) {
             return TypedActionResult.fail(ItemStack.EMPTY);
         }
@@ -296,7 +303,7 @@ public class QuakecraftGame extends QuakecraftLogic {
         if (participant != null) {
             ItemCooldownManager cooldown = player.getItemCooldownManager();
             if (!cooldown.isCoolingDown(heldStack.getItem())) {
-                int result = participant.onItemUse(this.getSpace(), player, hand);
+                int result = participant.onItemUse(this.world(), player, hand);
                 if (result != -1) {
                     this.getSpace().getPlayers().forEach(other -> {
                         if (player.squaredDistanceTo(other) <= 16.f) {
@@ -316,20 +323,20 @@ public class QuakecraftGame extends QuakecraftLogic {
         return TypedActionResult.pass(ItemStack.EMPTY);
     }
 
-    private @NotNull ActionResult onAttackEntity(ServerPlayerEntity player, Hand hand, Entity entity, EntityHitResult entityHitResult) {
+    private ActionResult onAttackEntity(ServerPlayerEntity player, Hand hand, Entity entity, EntityHitResult entityHitResult) {
         if (player.interactionManager.getGameMode() == GameMode.SPECTATOR)
             return ActionResult.PASS;
         return ActionResult.FAIL;
     }
 
-    private void spawnParticipant(@NotNull ServerPlayerEntity player) {
+    private void spawnParticipant(ServerPlayerEntity player) {
         QuakecraftPlayer participant = this.getParticipant(player);
         if (participant != null) {
             participant.reset(player);
             this.spawnLogic.spawnPlayer(player);
         } else if (this.running) {
-            player.setGameMode(GameMode.SPECTATOR);
-            player.inventory.clear();
+            player.changeGameMode(GameMode.SPECTATOR);
+            player.getInventory().clear();
             this.spawnLogic.spawnWaitingPlayer(player);
         }
     }

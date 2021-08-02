@@ -19,6 +19,7 @@ package dev.lambdaurora.quakecraft.block;
 
 import dev.lambdaurora.quakecraft.Quakecraft;
 import dev.lambdaurora.quakecraft.QuakecraftRegistry;
+import eu.pb4.polymer.block.VirtualBlock;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.*;
@@ -37,16 +38,15 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import xyz.nucleoid.plasmid.fake.FakeBlock;
 
 /**
  * Represents a launch pad block.
  *
  * @author LambdAurora
- * @version 1.6.3
+ * @version 1.7.0
  * @since 1.6.1
  */
-public class LaunchPadBlock extends Block implements FakeBlock {
+public class LaunchPadBlock extends Block implements VirtualBlock {
     public static final int POWER_MIN = 1;
     public static final int POWER_MAX = 8;
     public static final IntProperty POWER = IntProperty.of("power", POWER_MIN, POWER_MAX);
@@ -73,20 +73,12 @@ public class LaunchPadBlock extends Block implements FakeBlock {
         if (world.isClient())
             return;
         var direction = state.get(Properties.HORIZONTAL_FACING);
-        int angle;
-        switch (direction) {
-            case EAST:
-                angle = 270;
-                break;
-            case WEST:
-                angle = 90;
-                break;
-            case NORTH:
-                angle = 180;
-                break;
-            default:
-                angle = 0;
-        }
+        int angle = switch (direction) {
+            case EAST -> 270;
+            case WEST -> 90;
+            case NORTH -> 180;
+            default -> 0;
+        };
         var vector = getVector(angle, entity.getPitch(1.f), entity.getYaw(1.f), state.get(POWER));
         entity.setVelocity(vector.getX(), vector.getY(), vector.getZ());
         if (entity instanceof ServerPlayerEntity) {
@@ -121,13 +113,13 @@ public class LaunchPadBlock extends Block implements FakeBlock {
     }
 
     @Override
-    public Block asProxy() {
+    public Block getVirtualBlock() {
         return this.proxy;
     }
 
     @Override
-    public BlockState asProxy(BlockState state) {
-        return this.asProxy().getDefaultState();
+    public BlockState getVirtualBlockState(BlockState state) {
+        return this.getVirtualBlock().getDefaultState();
     }
 
     @Override
@@ -135,7 +127,7 @@ public class LaunchPadBlock extends Block implements FakeBlock {
         return BlockRenderType.INVISIBLE;
     }
 
-    public static BlockState fromTag(NbtCompound data) {
+    public static BlockState fromNbt(NbtCompound data) {
         Block block = QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK;
         if (data.contains("type", NbtType.STRING)) {
             block = Registry.BLOCK.getOrEmpty(Quakecraft.mc(data.getString("type") + "_launchpad")).orElse(QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK);

@@ -64,8 +64,7 @@ public class Quakecraft implements ModInitializer {
         QuakecraftRegistry.init();
 
         GameType.register(new Identifier(NAMESPACE, "quakecraft"),
-                QuakecraftWaiting::open,
-                QuakecraftConfig.CODEC);
+                QuakecraftConfig.CODEC, QuakecraftWaiting::open);
     }
 
     /**
@@ -101,11 +100,11 @@ public class Quakecraft implements ModInitializer {
         return this.activeGames;
     }
 
-    public static @NotNull Quakecraft get() {
+    public static Quakecraft get() {
         return INSTANCE;
     }
 
-    public static @NotNull Identifier mc(@NotNull String name) {
+    public static Identifier mc(@NotNull String name) {
         return new Identifier(NAMESPACE, name);
     }
 
@@ -115,7 +114,7 @@ public class Quakecraft implements ModInitializer {
      * @param player the player
      * @since 1.1.0
      */
-    public static void applySpeed(@NotNull ServerPlayerEntity player) {
+    public static void applySpeed(ServerPlayerEntity player) {
         var movementSpeedAttribute = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
         if (movementSpeedAttribute != null) {
             movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
@@ -129,7 +128,7 @@ public class Quakecraft implements ModInitializer {
      * @param player the player
      * @since 1.1.0
      */
-    public static void removeSpeed(@NotNull ServerPlayerEntity player) {
+    public static void removeSpeed(ServerPlayerEntity player) {
         var movementSpeedAttribute = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
         if (movementSpeedAttribute != null) {
             movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
@@ -140,10 +139,10 @@ public class Quakecraft implements ModInitializer {
         return name == null ? null : DirectionAccessor.quakecraft$getNameMap().get(name.toLowerCase(Locale.ROOT));
     }
 
-    public static void spawnFirework(@NotNull ServerWorld world, double x, double y, double z, int[] colors, boolean silent, int lifetime) {
+    public static void spawnFirework(ServerWorld world, double x, double y, double z, int[] colors, boolean silent, int lifetime) {
         var fireworkStack = new ItemStack(Items.FIREWORK_ROCKET);
 
-        var tag = fireworkStack.getOrCreateSubTag("Fireworks");
+        var tag = fireworkStack.getOrCreateSubNbt("Fireworks");
         tag.putByte("Flight", (byte) 0);
 
         var explosions = new NbtList();

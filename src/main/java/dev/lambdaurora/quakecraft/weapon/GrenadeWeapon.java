@@ -20,30 +20,29 @@ package dev.lambdaurora.quakecraft.weapon;
 import dev.lambdaurora.quakecraft.entity.GrenadeEntity;
 import net.minecraft.item.Item;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.NotNull;
-import xyz.nucleoid.plasmid.game.GameSpace;
 
 /**
  * Represents a grenade weapon.
  *
  * @author LambdAurora
- * @version 1.6.0
+ * @version 1.7.0
  * @since 1.0.0
  */
 public class GrenadeWeapon extends Weapon {
-    public GrenadeWeapon(@NotNull Identifier id, @NotNull Item item, @NotNull Settings settings) {
+    public GrenadeWeapon(Identifier id, Item item, Settings settings) {
         super(id, item, settings);
     }
 
     @Override
-    public @NotNull ActionResult onPrimary(@NotNull GameSpace world, @NotNull ServerPlayerEntity player, @NotNull Hand hand) {
-        var grenade = new GrenadeEntity(world.getWorld(), player, 40);
-        grenade.setProperties(player, player.pitch, player.yaw, 0.f, 1.5f, 1.f);
+    public ActionResult onPrimary(ServerWorld world, ServerPlayerEntity player, Hand hand) {
+        var grenade = new GrenadeEntity(world, player, 40);
+        grenade.setProperties(player, player.getPitch(), player.getYaw(), 0.f, 1.5f, 1.f);
         grenade.rollCritical();
-        world.getWorld().spawnEntity(grenade);
+        world.spawnEntity(grenade);
 
         return super.onPrimary(world, player, hand);
     }

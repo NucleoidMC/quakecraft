@@ -22,27 +22,27 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.NotNull;
-import xyz.nucleoid.plasmid.game.GameSpace;
+import net.minecraft.world.World;
 
 /**
  * Represents a rocket launcher.
  *
  * @author LambdAurora
- * @version 1.6.0
+ * @version 1.7.0
  * @since 1.3.0
  */
 public class RocketLauncherWeapon extends Weapon {
-    public RocketLauncherWeapon(@NotNull Identifier id, @NotNull Item item, @NotNull Settings settings) {
+    public RocketLauncherWeapon(Identifier id, Item item, Settings settings) {
         super(id, item, settings);
     }
 
     @Override
-    public @NotNull ActionResult onPrimary(@NotNull GameSpace world, @NotNull ServerPlayerEntity player, @NotNull Hand hand) {
-        var rocket = new RocketEntity(world.getWorld(), player, 0, 0, 0);
+    public ActionResult onPrimary(ServerWorld world, ServerPlayerEntity player, Hand hand) {
+        var rocket = new RocketEntity(world, player, 0, 0, 0);
 
         var origin = player.getCameraPosVec(1.0F);
         var delta = player.getRotationVec(1.0F).multiply(0.25);
@@ -50,11 +50,11 @@ public class RocketLauncherWeapon extends Weapon {
         var target = origin.add(delta);
         rocket.setPos(target.getX(), target.getY(), target.getZ());
 
-        rocket.setProperties(player, player.pitch, player.yaw, 0.f, 1.5f, 1.f);
+        rocket.setProperties(player, player.getPitch(), player.getYaw(), 0.f, 1.5f, 1.f);
         rocket.setVelocity(rocket.getVelocity().multiply(0.75));
         rocket.setItem(new ItemStack(Items.FIRE_CHARGE));
         rocket.rollCritical();
-        world.getWorld().spawnEntity(rocket);
+        world.spawnEntity(rocket);
 
         return super.onPrimary(world, player, hand);
     }

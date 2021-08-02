@@ -23,32 +23,33 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.World;
 import xyz.nucleoid.plasmid.game.GameSpace;
 
 /**
  * Represents a weapon that shoot.
  *
  * @author LambdAurora
- * @version 1.6.0
+ * @version 1.7.0
  * @since 1.0.0
  */
 public class ShooterWeapon extends Weapon {
-    public ShooterWeapon(@NotNull Identifier id, @NotNull Item item, @NotNull Settings settings) {
+    public ShooterWeapon(Identifier id, Item item, Settings settings) {
         super(id, item, settings);
     }
 
     @Override
-    public @NotNull ActionResult onPrimary(@NotNull GameSpace world, @NotNull ServerPlayerEntity player, @NotNull Hand hand) {
+    public ActionResult onPrimary(ServerWorld world, ServerPlayerEntity player, Hand hand) {
         var result = RayUtils.raycastEntities(player, 80.0, 0.25, QuakecraftConstants.PLAYER_PREDICATE,
                 entity -> {
-                    ServerPlayerEntity hitPlayer = (ServerPlayerEntity) entity;
+                    var hitPlayer = (ServerPlayerEntity) entity;
                     hitPlayer.setAttacker(player);
                     player.setAttacking(hitPlayer);
                     hitPlayer.kill();
@@ -62,10 +63,14 @@ public class ShooterWeapon extends Weapon {
     }
 
     @Override
-    public @NotNull ActionResult onSecondary(@NotNull GameSpace world, @NotNull ServerPlayerEntity player, @NotNull ItemStack stack) {
+    public ActionResult onSecondary(ServerWorld world, ServerPlayerEntity player, ItemStack stack) {
         var rotationVec = player.getRotationVec(1.0F);
         var yVelocity = player.getVelocity().y;
-        player.setVelocity(new Vec3d(rotationVec.x * QuakecraftConstants.DASH_VELOCITY, yVelocity, rotationVec.z * QuakecraftConstants.DASH_VELOCITY));
+        player.setVelocity(new Vec3d(
+                rotationVec.x * QuakecraftConstants.DASH_VELOCITY,
+                yVelocity,
+                rotationVec.z * QuakecraftConstants.DASH_VELOCITY
+        ));
         player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
 
         player.playSound(SoundEvents.ENTITY_BAT_TAKEOFF, SoundCategory.MASTER, 1.0F, 0.5F);

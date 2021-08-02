@@ -25,11 +25,9 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.GameMode;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.plasmid.game.GameLogic;
 import xyz.nucleoid.plasmid.game.GameSpace;
-import xyz.nucleoid.plasmid.game.player.GameTeam;
+import xyz.nucleoid.plasmid.game.common.team.GameTeam;
 
 import java.util.Collection;
 import java.util.List;
@@ -40,18 +38,20 @@ import java.util.UUID;
  * Represents an instance of Quakecraft.
  *
  * @author LambdAurora
- * @version 1.6.0
+ * @version 1.7.0
  * @since 1.5.0
  */
 public abstract class QuakecraftLogic {
     private final GameSpace space;
+    private final ServerWorld world;
     private final QuakecraftConfig config;
     private final QuakecraftMap map;
     protected final Object2ObjectMap<UUID, QuakecraftPlayer> participants = new Object2ObjectOpenHashMap<>();
     private GameStage stage;
 
-    public QuakecraftLogic(@NotNull GameLogic logic, @NotNull QuakecraftConfig config, @NotNull QuakecraftMap map) {
-        this.space = logic.getSpace();
+    public QuakecraftLogic(GameSpace space, ServerWorld world, QuakecraftConfig config, QuakecraftMap map) {
+        this.space = space;
+        this.world = world;
         this.config = config;
         this.map = map;
         this.stage = GameStage.ROUND_START;
@@ -70,8 +70,8 @@ public abstract class QuakecraftLogic {
         return this.space;
     }
 
-    public ServerWorld getWorld() {
-        return this.getSpace().getWorld();
+    public ServerWorld world() {
+        return this.world;
     }
 
     public QuakecraftConfig getConfig() {
@@ -79,20 +79,20 @@ public abstract class QuakecraftLogic {
     }
 
     public List<GameTeam> getTeams() {
-        return this.config.teams;
+        return this.config.teams();
     }
 
     public @Nullable GameTeam getTeam(String key) {
         if (this.getTeams().size() == 0)
             return null;
-        for (GameTeam team : this.getTeams()) {
-            if (team.getKey().equals(key))
+        for (var team : this.getTeams()) {
+            if (team.key().equals(key))
                 return team;
         }
         return null;
     }
 
-    public QuakecraftMap getMap() {
+    public QuakecraftMap map() {
         return this.map;
     }
 
@@ -115,22 +115,22 @@ public abstract class QuakecraftLogic {
      * @param player the player
      * @return {@code true} if the player can open the door, else {@code false}
      */
-    public boolean canOpenDoor(@NotNull QuakecraftDoor door, @NotNull ServerPlayerEntity player) {
+    public boolean canOpenDoor(QuakecraftDoor door, ServerPlayerEntity player) {
         if (!this.getSpace().containsPlayer(player) || player.interactionManager.getGameMode() == GameMode.SPECTATOR)
             return false;
         GameTeam team = this.getOptParticipant(player).map(QuakecraftPlayer::getTeam).orElse(null);
         return door.getTeam() == null || team == null || team == door.getTeam();
     }
 
-    public @Nullable QuakecraftPlayer getParticipant(@NotNull ServerPlayerEntity player) {
+    public @Nullable QuakecraftPlayer getParticipant(ServerPlayerEntity player) {
         return this.participants.get(player.getUuid());
     }
 
-    public @NotNull Optional<QuakecraftPlayer> getOptParticipant(@NotNull ServerPlayerEntity player) {
+    public Optional<QuakecraftPlayer> getOptParticipant(ServerPlayerEntity player) {
         return Optional.ofNullable(this.getParticipant(player));
     }
 
-    public @NotNull Collection<QuakecraftPlayer> getParticipants() {
+    public Collection<QuakecraftPlayer> getParticipants() {
         return this.participants.values();
     }
 }

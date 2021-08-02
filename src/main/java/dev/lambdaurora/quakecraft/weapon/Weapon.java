@@ -20,19 +20,19 @@ package dev.lambdaurora.quakecraft.weapon;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.NotNull;
-import xyz.nucleoid.plasmid.game.GameSpace;
+import net.minecraft.world.World;
 import xyz.nucleoid.plasmid.util.ItemStackBuilder;
 
 /**
  * Represents a weapon.
  *
  * @author LambdAurora
- * @version 1.6.0
+ * @version 1.7.0
  * @since 1.0.0
  */
 public class Weapon {
@@ -44,7 +44,7 @@ public class Weapon {
     public final int clipSize;
     public final int ammoSize;
 
-    public Weapon(@NotNull Identifier id, @NotNull Item item, @NotNull Settings settings) {
+    public Weapon(Identifier id, Item item, Settings settings) {
         this.identifier = id;
         this.item = item;
         this.primaryCooldown = settings.primaryCooldown;
@@ -80,7 +80,7 @@ public class Weapon {
      * @param stack the item stack
      * @return {@code true} if the item stack matches this weapon, else {@code false}
      */
-    public boolean matchesStack(@NotNull ItemStack stack) {
+    public boolean matchesStack(ItemStack stack) {
         return !stack.isEmpty()
                 && this.item == stack.getItem();
     }
@@ -91,18 +91,18 @@ public class Weapon {
      * @param stack the weapon stack
      * @since 1.1.0
      */
-    public void tick(@NotNull ItemStack stack) {
+    public void tick(ItemStack stack) {
     }
 
-    public @NotNull ActionResult onPrimary(@NotNull GameSpace world, @NotNull ServerPlayerEntity player, @NotNull Hand hand) {
+    public ActionResult onPrimary(ServerWorld world, ServerPlayerEntity player, Hand hand) {
         return ActionResult.PASS;
     }
 
-    public @NotNull ActionResult onSecondary(@NotNull GameSpace world, @NotNull ServerPlayerEntity player, @NotNull ItemStack stack) {
+    public ActionResult onSecondary(ServerWorld world, ServerPlayerEntity player, ItemStack stack) {
         return ActionResult.PASS;
     }
 
-    public @NotNull ItemStackBuilder stackBuilder() {
+    public ItemStackBuilder stackBuilder() {
         return ItemStackBuilder.of(this.item)
                 .setUnbreakable();
     }
@@ -112,7 +112,7 @@ public class Weapon {
      *
      * @return the item stack
      */
-    public final @NotNull ItemStack build(@NotNull ServerPlayerEntity player) {
+    public final ItemStack build(ServerPlayerEntity player) {
         return this.stackBuilder()
                 .setName(new TranslatableText("weapon." + this.identifier.getNamespace() + "." + this.identifier.getPath())
                         .styled(style -> style.withItalic(false)))
@@ -130,22 +130,22 @@ public class Weapon {
             this.primaryCooldown = primaryCooldown;
         }
 
-        public @NotNull Settings secondaryCooldown(int secondaryCooldown) {
+        public Settings secondaryCooldown(int secondaryCooldown) {
             this.secondaryCooldown = secondaryCooldown;
             return this;
         }
 
-        public @NotNull Settings reloadCooldown(int reloadCooldown) {
+        public Settings reloadCooldown(int reloadCooldown) {
             this.reloadCooldown = reloadCooldown;
             return this;
         }
 
-        public @NotNull Settings clipSize(int clipSize) {
+        public Settings clipSize(int clipSize) {
             this.clipSize = clipSize;
             return this;
         }
 
-        public @NotNull Settings ammoSize(int ammoSize) {
+        public Settings ammoSize(int ammoSize) {
             this.ammoSize = ammoSize;
             return this;
         }

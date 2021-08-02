@@ -21,128 +21,123 @@ import com.google.common.collect.Multimap;
 import dev.lambdaurora.quakecraft.Quakecraft;
 import dev.lambdaurora.quakecraft.game.map.MapBuilder;
 import dev.lambdaurora.quakecraft.game.map.QuakecraftMap;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.tag.ItemTags;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.world.GameMode;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.fantasy.BubbleWorldConfig;
-import xyz.nucleoid.plasmid.game.*;
-import xyz.nucleoid.plasmid.game.event.*;
-import xyz.nucleoid.plasmid.game.player.GameTeam;
-import xyz.nucleoid.plasmid.game.player.TeamAllocator;
-import xyz.nucleoid.plasmid.game.rule.GameRule;
-import xyz.nucleoid.plasmid.game.rule.RuleResult;
+import xyz.nucleoid.fantasy.RuntimeWorldConfig;
+import xyz.nucleoid.plasmid.game.GameActivity;
+import xyz.nucleoid.plasmid.game.GameOpenContext;
+import xyz.nucleoid.plasmid.game.GameOpenProcedure;
+import xyz.nucleoid.plasmid.game.GameResult;
+import xyz.nucleoid.plasmid.game.common.GameWaitingLobby;
+import xyz.nucleoid.plasmid.game.common.team.GameTeam;
+import xyz.nucleoid.plasmid.game.common.team.TeamAllocator;
+import xyz.nucleoid.plasmid.game.event.GameActivityEvents;
+import xyz.nucleoid.plasmid.game.event.GamePlayerEvents;
+import xyz.nucleoid.plasmid.game.player.PlayerOffer;
+import xyz.nucleoid.plasmid.game.player.PlayerOfferResult;
+import xyz.nucleoid.plasmid.game.rule.GameRuleType;
+import xyz.nucleoid.stimuli.event.item.ItemUseEvent;
+import xyz.nucleoid.stimuli.event.player.PlayerDeathEvent;
 
 /**
  * Represents a Quakecraft wait-room.
  *
  * @author LambdAurora
- * @version 1.6.0
+ * @version 1.7.0
  * @since 1.0.0
  */
 public class QuakecraftWaiting {
-    private final GameLogic logic;
+    private final GameActivity game;
+    private final ServerWorld world;
     private final QuakecraftMap map;
     private final QuakecraftConfig config;
     private final QuakecraftSpawnLogic spawnLogic;
 
-    private QuakecraftWaiting(GameLogic logic, @NotNull QuakecraftMap map, @NotNull QuakecraftConfig config) {
-        this.logic = logic;
+    private QuakecraftWaiting(GameActivity game, ServerWorld world, QuakecraftMap map, QuakecraftConfig config) {
+        this.game = game;
+        this.world = world;
         this.map = map;
         this.config = config;
-        this.spawnLogic = new QuakecraftSpawnLogic(logic.getSpace(), map);
+        this.spawnLogic = new QuakecraftSpawnLogic(game.getGameSpace(), world, map);
     }
 
-    public static @NotNull GameOpenProcedure open(@NotNull GameOpenContext<QuakecraftConfig> context) {
-        var config = context.getConfig();
+    public static GameOpenProcedure open(GameOpenContext<QuakecraftConfig> context) {
+        var config = context.config();
 
-        var map = new MapBuilder(config.map).create();
-        var worldConfig = new BubbleWorldConfig()
-                .setGenerator(map.asGenerator(context.getServer()))
-                .setDefaultGameMode(GameMode.SPECTATOR)
-                .setTimeOfDay(config.map.time);
+        var map = new MapBuilder(config.map()).create(context.server());
+        var worldConfig = new RuntimeWorldConfig()
+                .setGenerator(map.asGenerator(context.server()))
+                .setTimeOfDay(config.map().time());
 
-        return context.createOpenProcedure(worldConfig, logic -> {
-            map.init(logic.getSpace().getWorld());
+        return context.openWithWorld(worldConfig, (game, world) -> {
+            map.init(world);
 
-            QuakecraftWaiting waiting = new QuakecraftWaiting(logic, map, config);
+            QuakecraftWaiting waiting = new QuakecraftWaiting(game, world, map, config);
 
-            GameWaitingLobby.applyTo(logic, config.players);
+            GameWaitingLobby.applyTo(game, config.players());
 
-            logic.on(RequestStartListener.EVENT, waiting::requestStart);
+            game.listen(GameActivityEvents.REQUEST_START, waiting::requestStart);
 
-            logic.on(PlayerAddListener.EVENT, waiting::addPlayer);
-            logic.on(PlayerRemoveListener.EVENT, waiting::removePlayer);
-            logic.on(PlayerDeathListener.EVENT, waiting::onPlayerDeath);
+            game.listen(GamePlayerEvents.OFFER, waiting::addPlayer);
+            game.listen(GamePlayerEvents.REMOVE, waiting::removePlayer);
 
-            logic.on(UseBlockListener.EVENT, waiting::onUseBlock);
-            logic.on(UseItemListener.EVENT, waiting::onUseItem);
-            logic.on(AttackEntityListener.EVENT, waiting::onAttackEntity);
+            game.listen(PlayerDeathEvent.EVENT, waiting::onPlayerDeath);
+            game.listen(ItemUseEvent.EVENT, waiting::onUseItem);
 
-            logic.setRule(GameRule.INTERACTION, RuleResult.ALLOW);
+            game.deny(GameRuleType.USE_BLOCKS);
+            game.deny(GameRuleType.PVP);
         });
     }
 
-    private StartResult requestStart() {
+    private GameResult requestStart() {
         var players = this.allocatePlayers();
-        QuakecraftGame.open(this.config, this.logic, this.map, this.spawnLogic, players);
-        return StartResult.OK;
+        QuakecraftGame.open(this.config, this.game.getGameSpace(), this.world, this.map, this.spawnLogic, players);
+        return GameResult.ok();
     }
 
-    private void spawnPlayer(@NotNull ServerPlayerEntity player) {
-        this.spawnLogic.resetWaitingPlayer(player);
-        this.spawnLogic.spawnWaitingPlayer(player);
+    private PlayerOfferResult addPlayer(PlayerOffer offer) {
+        this.spawnLogic.spawnWaitingPlayer(offer.player());
+
+        return offer.accept(this.world, this.map.waitingSpawn.center())
+                .and(() -> {
+                    this.spawnLogic.resetWaitingPlayer(offer.player());
+                });
     }
 
-    private void addPlayer(@NotNull ServerPlayerEntity player) {
-        this.spawnPlayer(player);
-    }
-
-    private void removePlayer(@NotNull ServerPlayerEntity player) {
+    private void removePlayer(ServerPlayerEntity player) {
         Quakecraft.removeSpeed(player);
     }
 
-    private @NotNull ActionResult onPlayerDeath(@NotNull ServerPlayerEntity player, @NotNull DamageSource source) {
-        this.spawnPlayer(player);
+    private ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
+        this.spawnLogic.resetWaitingPlayer(player);
+        this.spawnLogic.spawnWaitingPlayer(player);
         return ActionResult.FAIL;
     }
 
-    private ActionResult onUseBlock(ServerPlayerEntity playerEntity, Hand hand, BlockHitResult blockHitResult) {
-        return ActionResult.FAIL;
-    }
-
-    private @NotNull TypedActionResult<ItemStack> onUseItem(@NotNull ServerPlayerEntity player, @NotNull Hand hand) {
+    private TypedActionResult<ItemStack> onUseItem(ServerPlayerEntity player, Hand hand) {
         var heldStack = player.getStackInHand(hand);
 
-        if (heldStack.getItem().isIn(ItemTags.BEDS)) {
-            this.logic.getSpace().removePlayer(player);
+        if (heldStack.isIn(ItemTags.BEDS)) {
+            this.game.getGameSpace().kickPlayer(player);
             return TypedActionResult.success(heldStack);
         }
 
         return TypedActionResult.pass(ItemStack.EMPTY);
     }
 
-    private @NotNull ActionResult onAttackEntity(ServerPlayerEntity player, Hand hand, Entity entity, EntityHitResult entityHitResult) {
-        if (player.interactionManager.getGameMode() == GameMode.SPECTATOR)
-            return ActionResult.PASS;
-        return ActionResult.FAIL;
-    }
-
     private @Nullable Multimap<GameTeam, ServerPlayerEntity> allocatePlayers() {
-        if (this.config.teams.size() == 0) {
+        if (this.config.teams().size() == 0) {
             return null;
         }
-        var allocator = new TeamAllocator<GameTeam, ServerPlayerEntity>(this.config.teams);
-        this.logic.getSpace().getPlayers().forEach(player -> allocator.add(player, null));
-        return allocator.build();
+        var allocator = new TeamAllocator<GameTeam, ServerPlayerEntity>(this.config.teams());
+        this.game.getGameSpace().getPlayers().forEach(player -> allocator.add(player, null));
+        return allocator.allocate();
     }
 }
