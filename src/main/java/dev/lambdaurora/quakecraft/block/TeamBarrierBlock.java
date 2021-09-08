@@ -56,8 +56,7 @@ public class TeamBarrierBlock extends Block implements VirtualBlock {
 
         if (context instanceof UsefulEntityShapeContext) {
             var entity = ((UsefulEntityShapeContext) context).quakecraft$getEntity();
-            if (entity instanceof ServerPlayerEntity && !((RayAccessor) entity).quakecraft$isRaycasting()) {
-                var player = (ServerPlayerEntity) entity;
+            if (entity instanceof ServerPlayerEntity player && !((RayAccessor) entity).quakecraft$isRaycasting()) {
                 var quakecraft = Quakecraft.get();
                 if (quakecraft.isPlayerActive(player)) {
                     for (var game : quakecraft.getActiveGames()) {
