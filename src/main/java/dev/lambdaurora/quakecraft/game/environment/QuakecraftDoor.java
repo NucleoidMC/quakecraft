@@ -41,145 +41,145 @@ import java.util.Optional;
  * @since 1.5.0
  */
 public class QuakecraftDoor {
-    private final QuakecraftLogic game;
-    private final TemplateRegion region;
-    private final BlockBounds bounds;
-    private final BlockBounds detectionBounds;
-    private final BlockState openState;
-    private final BlockState closedState;
-    private final GameTeam team;
-    private boolean open = false;
-    private int openTicks = 0;
+	private final QuakecraftLogic game;
+	private final TemplateRegion region;
+	private final BlockBounds bounds;
+	private final BlockBounds detectionBounds;
+	private final BlockState openState;
+	private final BlockState closedState;
+	private final GameTeam team;
+	private boolean open = false;
+	private int openTicks = 0;
 
-    public QuakecraftDoor(QuakecraftLogic game, TemplateRegion region,
-                          BlockBounds bounds, BlockBounds detectionBounds,
-                          BlockState closedState, @Nullable GameTeam team) {
-        this.game = game;
-        this.region = region;
-        this.bounds = bounds;
-        this.detectionBounds = detectionBounds;
-        this.openState = TeamBarrierBlock.of(team).getDefaultState();
-        this.closedState = closedState;
-        this.team = team;
-    }
+	public QuakecraftDoor(QuakecraftLogic game, TemplateRegion region,
+	                      BlockBounds bounds, BlockBounds detectionBounds,
+	                      BlockState closedState, @Nullable GameTeam team) {
+		this.game = game;
+		this.region = region;
+		this.bounds = bounds;
+		this.detectionBounds = detectionBounds;
+		this.openState = TeamBarrierBlock.of(team).getDefaultState();
+		this.closedState = closedState;
+		this.team = team;
+	}
 
-    /**
-     * Returns the region assigned to this door.
-     *
-     * @return the region
-     */
-    public TemplateRegion getRegion() {
-        return this.region;
-    }
+	/**
+	 * Returns the region assigned to this door.
+	 *
+	 * @return the region
+	 */
+	public TemplateRegion getRegion() {
+		return this.region;
+	}
 
-    /**
-     * The bounds of the door.
-     * <p>
-     * All positions inside those bounds are replaced with blocks whether the door is closed or not.
-     *
-     * @return the bounds of the door
-     */
-    public BlockBounds getBounds() {
-        return this.bounds;
-    }
+	/**
+	 * The bounds of the door.
+	 * <p>
+	 * All positions inside those bounds are replaced with blocks whether the door is closed or not.
+	 *
+	 * @return the bounds of the door
+	 */
+	public BlockBounds getBounds() {
+		return this.bounds;
+	}
 
-    /**
-     * Returns the detection bounds. The door will open if any allowed player is in the detection bounds.
-     *
-     * @return the detection bounds
-     */
-    public BlockBounds getDetectionBounds() {
-        return this.detectionBounds;
-    }
+	/**
+	 * Returns the detection bounds. The door will open if any allowed player is in the detection bounds.
+	 *
+	 * @return the detection bounds
+	 */
+	public BlockBounds getDetectionBounds() {
+		return this.detectionBounds;
+	}
 
-    /**
-     * Returns the team assigned to this door. The team mays be null.
-     *
-     * @return the assigned team
-     */
-    public GameTeam getTeam() {
-        return this.team;
-    }
+	/**
+	 * Returns the team assigned to this door. The team mays be null.
+	 *
+	 * @return the assigned team
+	 */
+	public GameTeam getTeam() {
+		return this.team;
+	}
 
-    /**
-     * Returns whether the door is open or not.
-     *
-     * @return {@code true} if the door is open, else {@code false}
-     */
-    public boolean isOpen() {
-        return this.open;
-    }
+	/**
+	 * Returns whether the door is open or not.
+	 *
+	 * @return {@code true} if the door is open, else {@code false}
+	 */
+	public boolean isOpen() {
+		return this.open;
+	}
 
-    public void tick() {
-        var players = this.game.world().getEntitiesByClass(ServerPlayerEntity.class,
-                this.detectionBounds.asBox(),
-                player -> this.game.canOpenDoor(this, player));
-        if (players.size() > 0) {
-            if (!this.open) {
-                this.open();
-            }
-            this.openTicks = 2;
-        }
+	public void tick() {
+		var players = this.game.world().getEntitiesByClass(ServerPlayerEntity.class,
+				this.detectionBounds.asBox(),
+				player -> this.game.canOpenDoor(this, player));
+		if (players.size() > 0) {
+			if (!this.open) {
+				this.open();
+			}
+			this.openTicks = 2;
+		}
 
-        if (this.openTicks == 0) {
-            this.close();
-        } else this.openTicks--;
-    }
+		if (this.openTicks == 0) {
+			this.close();
+		} else this.openTicks--;
+	}
 
-    /**
-     * Opens the door.
-     */
-    public void open() {
-        this.getBounds().forEach(pos -> this.game.world().setBlockState(pos, this.openState,
-                Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL));
-        this.open = true;
-    }
+	/**
+	 * Opens the door.
+	 */
+	public void open() {
+		this.getBounds().forEach(pos -> this.game.world().setBlockState(pos, this.openState,
+				Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL));
+		this.open = true;
+	}
 
-    /**
-     * Closes the door.
-     */
-    public void close() {
-        this.getBounds().forEach(pos -> this.game.world().setBlockState(pos, this.closedState,
-                Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL));
-        this.open = false;
-    }
+	/**
+	 * Closes the door.
+	 */
+	public void close() {
+		this.getBounds().forEach(pos -> this.game.world().setBlockState(pos, this.closedState,
+				Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL));
+		this.open = false;
+	}
 
-    public static Optional<QuakecraftDoor> fromRegion(QuakecraftLogic game, TemplateRegion region) {
-        BlockBounds bounds = region.getBounds();
+	public static Optional<QuakecraftDoor> fromRegion(QuakecraftLogic game, TemplateRegion region) {
+		BlockBounds bounds = region.getBounds();
 
-        BlockBounds detectionBounds = null;
+		BlockBounds detectionBounds = null;
 
-        if (region.getData().contains("activation", NbtType.STRING)) {
-            detectionBounds = game.map().getDoorActivationBounds(region.getData().getString("activation"));
-        }
+		if (region.getData().contains("activation", NbtType.STRING)) {
+			detectionBounds = game.map().getDoorActivationBounds(region.getData().getString("activation"));
+		}
 
-        if (detectionBounds == null && region.getData().contains("distance", NbtType.INT)) {
-            int distance = region.getData().getInt("distance");
-            if (distance == 0)
-                return Optional.empty();
+		if (detectionBounds == null && region.getData().contains("distance", NbtType.INT)) {
+			int distance = region.getData().getInt("distance");
+			if (distance == 0)
+				return Optional.empty();
 
-            Direction.Axis axis = Direction.Axis.fromName(region.getData().getString("axis"));
-            if (axis == null)
-                return Optional.empty();
+			Direction.Axis axis = Direction.Axis.fromName(region.getData().getString("axis"));
+			if (axis == null)
+				return Optional.empty();
 
-            BlockPos min = bounds.min().offset(Direction.from(axis, Direction.AxisDirection.NEGATIVE), distance);
-            BlockPos max = bounds.max().offset(Direction.from(axis, Direction.AxisDirection.POSITIVE), distance);
+			BlockPos min = bounds.min().offset(Direction.from(axis, Direction.AxisDirection.NEGATIVE), distance);
+			BlockPos max = bounds.max().offset(Direction.from(axis, Direction.AxisDirection.POSITIVE), distance);
 
-            detectionBounds = BlockBounds.of(min, max);
-        }
+			detectionBounds = BlockBounds.of(min, max);
+		}
 
-        if (detectionBounds == null)
-            return Optional.empty();
+		if (detectionBounds == null)
+			return Optional.empty();
 
-        // A block must be explicitly defined.
-        if (!region.getData().getCompound("block").contains("Name"))
-            return Optional.empty();
-        BlockState closedState = NbtHelper.toBlockState(region.getData().getCompound("block"));
+		// A block must be explicitly defined.
+		if (!region.getData().getCompound("block").contains("Name"))
+			return Optional.empty();
+		BlockState closedState = NbtHelper.toBlockState(region.getData().getCompound("block"));
 
-        GameTeam team = game.getTeam(region.getData().getString("team"));
+		GameTeam team = game.getTeam(region.getData().getString("team"));
 
-        var door = new QuakecraftDoor(game, region, bounds, detectionBounds, closedState, team);
-        door.close();
-        return Optional.of(door);
-    }
+		var door = new QuakecraftDoor(game, region, bounds, detectionBounds, closedState, team);
+		door.close();
+		return Optional.of(door);
+	}
 }

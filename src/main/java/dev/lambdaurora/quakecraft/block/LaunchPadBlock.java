@@ -47,99 +47,99 @@ import net.minecraft.world.World;
  * @since 1.6.1
  */
 public class LaunchPadBlock extends Block implements VirtualBlock {
-    public static final int POWER_MIN = 1;
-    public static final int POWER_MAX = 8;
-    public static final IntProperty POWER = IntProperty.of("power", POWER_MIN, POWER_MAX);
-    protected static final VoxelShape SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 5.0, 16.0);
-    private final Block proxy;
+	public static final int POWER_MIN = 1;
+	public static final int POWER_MAX = 8;
+	public static final IntProperty POWER = IntProperty.of("power", POWER_MIN, POWER_MAX);
+	protected static final VoxelShape SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 5.0, 16.0);
+	private final Block proxy;
 
-    public LaunchPadBlock(Block proxy) {
-        super(FabricBlockSettings.of(Material.AIR).breakByHand(false).noCollision().dropsNothing());
-        this.setDefaultState(this.stateManager.getDefaultState()
-                .with(Properties.HORIZONTAL_FACING, Direction.NORTH)
-                .with(POWER, 3));
-        this.proxy = proxy;
-    }
+	public LaunchPadBlock(Block proxy) {
+		super(FabricBlockSettings.of(Material.AIR).breakByHand(false).noCollision().dropsNothing());
+		this.setDefaultState(this.stateManager.getDefaultState()
+				.with(Properties.HORIZONTAL_FACING, Direction.NORTH)
+				.with(POWER, 3));
+		this.proxy = proxy;
+	}
 
-    @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        super.appendProperties(builder);
-        builder.add(Properties.HORIZONTAL_FACING)
-                .add(POWER);
-    }
+	@Override
+	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+		super.appendProperties(builder);
+		builder.add(Properties.HORIZONTAL_FACING)
+				.add(POWER);
+	}
 
-    @Override
-    public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
-        if (world.isClient())
-            return;
-        var direction = state.get(Properties.HORIZONTAL_FACING);
-        int angle = switch (direction) {
-            case EAST -> 270;
-            case WEST -> 90;
-            case NORTH -> 180;
-            default -> 0;
-        };
-        var vector = getVector(angle, entity.getPitch(1.f), entity.getYaw(1.f), state.get(POWER));
-        entity.setVelocity(vector.getX(), vector.getY(), vector.getZ());
-        if (entity instanceof ServerPlayerEntity) {
-            ((ServerPlayerEntity) entity).networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(entity));
-        }
-    }
+	@Override
+	public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
+		if (world.isClient())
+			return;
+		var direction = state.get(Properties.HORIZONTAL_FACING);
+		int angle = switch (direction) {
+			case EAST -> 270;
+			case WEST -> 90;
+			case NORTH -> 180;
+			default -> 0;
+		};
+		var vector = getVector(angle, entity.getPitch(1.f), entity.getYaw(1.f), state.get(POWER));
+		entity.setVelocity(vector.getX(), vector.getY(), vector.getZ());
+		if (entity instanceof ServerPlayerEntity) {
+			((ServerPlayerEntity) entity).networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(entity));
+		}
+	}
 
-    protected final Vec3d getVector(float angle, float pitch, float yaw, int power) {
-        final int maxAngleOffset = 25;
-        if (yaw < 0)
-            yaw += 360.f;
-        if (yaw > (angle + 90) || yaw < (angle - 90))
-            yaw = angle;
-        else
-            yaw = MathHelper.clamp(yaw % 360.f, angle - maxAngleOffset, angle + maxAngleOffset);
-        float f = pitch * 0.017453292F;
-        float g = -yaw * 0.017453292F;
-        float h = MathHelper.cos(g);
-        float i = MathHelper.sin(g);
-        float j = MathHelper.cos(f);
+	protected final Vec3d getVector(float angle, float pitch, float yaw, int power) {
+		final int maxAngleOffset = 25;
+		if (yaw < 0)
+			yaw += 360.f;
+		if (yaw > (angle + 90) || yaw < (angle - 90))
+			yaw = angle;
+		else
+			yaw = MathHelper.clamp(yaw % 360.f, angle - maxAngleOffset, angle + maxAngleOffset);
+		float f = pitch * 0.017453292F;
+		float g = -yaw * 0.017453292F;
+		float h = MathHelper.cos(g);
+		float i = MathHelper.sin(g);
+		float j = MathHelper.cos(f);
 
-        float coefficient = power * 0.25f;
-        if (power > 4)
-            coefficient = power;
+		float coefficient = power * 0.25f;
+		if (power > 4)
+			coefficient = power;
 
-        return new Vec3d(i * j * (1 + coefficient), MathHelper.clamp(coefficient, 0.75, 1), h * j * (1 + coefficient));
-    }
+		return new Vec3d(i * j * (1 + coefficient), MathHelper.clamp(coefficient, 0.75, 1), h * j * (1 + coefficient));
+	}
 
-    @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return SHAPE;
-    }
+	@Override
+	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+		return SHAPE;
+	}
 
-    @Override
-    public Block getVirtualBlock() {
-        return this.proxy;
-    }
+	@Override
+	public Block getVirtualBlock() {
+		return this.proxy;
+	}
 
-    @Override
-    public BlockState getVirtualBlockState(BlockState state) {
-        return this.getVirtualBlock().getDefaultState();
-    }
+	@Override
+	public BlockState getVirtualBlockState(BlockState state) {
+		return this.getVirtualBlock().getDefaultState();
+	}
 
-    @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.INVISIBLE;
-    }
+	@Override
+	public BlockRenderType getRenderType(BlockState state) {
+		return BlockRenderType.INVISIBLE;
+	}
 
-    public static BlockState fromNbt(NbtCompound data) {
-        Block block = QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK;
-        if (data.contains("type", NbtType.STRING)) {
-            block = Registry.BLOCK.getOrEmpty(Quakecraft.mc(data.getString("type") + "_launchpad")).orElse(QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK);
-        }
-        var state = block.getDefaultState();
-        Direction direction = Quakecraft.getDirectionByName(data.getString("direction"));
-        if (direction.getAxis().isVertical())
-            return state;
-        state = state.with(Properties.HORIZONTAL_FACING, direction);
-        if (data.contains("power", NbtType.INT)) {
-            state = state.with(POWER, MathHelper.clamp(data.getInt("power"), POWER_MIN, POWER_MAX));
-        }
-        return state;
-    }
+	public static BlockState fromNbt(NbtCompound data) {
+		Block block = QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK;
+		if (data.contains("type", NbtType.STRING)) {
+			block = Registry.BLOCK.getOrEmpty(Quakecraft.mc(data.getString("type") + "_launchpad")).orElse(QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK);
+		}
+		var state = block.getDefaultState();
+		Direction direction = Quakecraft.getDirectionByName(data.getString("direction"));
+		if (direction.getAxis().isVertical())
+			return state;
+		state = state.with(Properties.HORIZONTAL_FACING, direction);
+		if (data.contains("power", NbtType.INT)) {
+			state = state.with(POWER, MathHelper.clamp(data.getInt("power"), POWER_MIN, POWER_MAX));
+		}
+		return state;
+	}
 }

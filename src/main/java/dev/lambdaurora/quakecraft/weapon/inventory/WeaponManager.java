@@ -37,84 +37,84 @@ import java.util.List;
  * @since 1.2.0
  */
 public final class WeaponManager {
-    private final List<Weapon> weapons = new ArrayList<>();
-    private final Object2IntMap<Weapon> secondaryCooldowns = new Object2IntOpenHashMap<>();
+	private final List<Weapon> weapons = new ArrayList<>();
+	private final Object2IntMap<Weapon> secondaryCooldowns = new Object2IntOpenHashMap<>();
 
-    public WeaponManager() {
-        this.secondaryCooldowns.defaultReturnValue(0);
-    }
+	public WeaponManager() {
+		this.secondaryCooldowns.defaultReturnValue(0);
+	}
 
-    public void add(Weapon weapon) {
-        this.weapons.add(weapon);
-    }
+	public void add(Weapon weapon) {
+		this.weapons.add(weapon);
+	}
 
-    public @Nullable Weapon get(ItemStack stack) {
-        if (stack.isEmpty())
-            return null;
+	public @Nullable Weapon get(ItemStack stack) {
+		if (stack.isEmpty())
+			return null;
 
-        for (var weapon : this.weapons) {
-            if (weapon.matchesStack(stack))
-                return weapon;
-        }
-        return null;
-    }
+		for (var weapon : this.weapons) {
+			if (weapon.matchesStack(stack))
+				return weapon;
+		}
+		return null;
+	}
 
-    public void tick() {
-        for (var weapon : this.weapons) {
-            if (weapon.hasSecondaryAction()) {
-                int currentCooldown = this.secondaryCooldowns.getInt(weapon);
-                if (currentCooldown > 0) {
-                    currentCooldown--;
-                    this.secondaryCooldowns.put(weapon, currentCooldown);
-                }
-            }
-        }
-    }
+	public void tick() {
+		for (var weapon : this.weapons) {
+			if (weapon.hasSecondaryAction()) {
+				int currentCooldown = this.secondaryCooldowns.getInt(weapon);
+				if (currentCooldown > 0) {
+					currentCooldown--;
+					this.secondaryCooldowns.put(weapon, currentCooldown);
+				}
+			}
+		}
+	}
 
-    public void insertStacks(ServerPlayerEntity player) {
-        for (var weapon : this.weapons) {
-            player.getInventory().insertStack(weapon.build(player));
-        }
-    }
+	public void insertStacks(ServerPlayerEntity player) {
+		for (var weapon : this.weapons) {
+			player.getInventory().insertStack(weapon.build(player));
+		}
+	}
 
-    public int onPrimary(ServerWorld world, ServerPlayerEntity player, Hand hand) {
-        ItemStack heldStack = player.getStackInHand(hand);
+	public int onPrimary(ServerWorld world, ServerPlayerEntity player, Hand hand) {
+		ItemStack heldStack = player.getStackInHand(hand);
 
-        for (var weapon : this.weapons) {
-            if (weapon.matchesStack(heldStack)) {
-                weapon.onPrimary(world, player, hand);
-                return weapon.primaryCooldown;
-            }
-        }
+		for (var weapon : this.weapons) {
+			if (weapon.matchesStack(heldStack)) {
+				weapon.onPrimary(world, player, hand);
+				return weapon.primaryCooldown;
+			}
+		}
 
-        return -1;
-    }
+		return -1;
+	}
 
-    public void onSecondary(ServerWorld world, ServerPlayerEntity player) {
-        ItemStack heldStack = player.getStackInHand(Hand.MAIN_HAND);
+	public void onSecondary(ServerWorld world, ServerPlayerEntity player) {
+		ItemStack heldStack = player.getStackInHand(Hand.MAIN_HAND);
 
-        for (var weapon : this.weapons) {
-            if (weapon.matchesStack(heldStack) && weapon.hasSecondaryAction()) {
-                if (this.canUseSecondary(weapon)) {
-                    weapon.onSecondary(world, player, heldStack);
-                    this.secondaryCooldowns.put(weapon, weapon.secondaryCooldown);
-                }
-                return;
-            }
-        }
-    }
+		for (var weapon : this.weapons) {
+			if (weapon.matchesStack(heldStack) && weapon.hasSecondaryAction()) {
+				if (this.canUseSecondary(weapon)) {
+					weapon.onSecondary(world, player, heldStack);
+					this.secondaryCooldowns.put(weapon, weapon.secondaryCooldown);
+				}
+				return;
+			}
+		}
+	}
 
-    public int getSecondaryCooldown(Weapon weapon) {
-        return this.secondaryCooldowns.getInt(weapon);
-    }
+	public int getSecondaryCooldown(Weapon weapon) {
+		return this.secondaryCooldowns.getInt(weapon);
+	}
 
-    /**
-     * Returns whether the secondary fire of the specified weapon is currently available or not.
-     *
-     * @param weapon the weapon
-     * @return {@code true} if the secondary fire is available, else {@code false}
-     */
-    public boolean canUseSecondary(Weapon weapon) {
-        return this.getSecondaryCooldown(weapon) == 0;
-    }
+	/**
+	 * Returns whether the secondary fire of the specified weapon is currently available or not.
+	 *
+	 * @param weapon the weapon
+	 * @return {@code true} if the secondary fire is available, else {@code false}
+	 */
+	public boolean canUseSecondary(Weapon weapon) {
+		return this.getSecondaryCooldown(weapon) == 0;
+	}
 }

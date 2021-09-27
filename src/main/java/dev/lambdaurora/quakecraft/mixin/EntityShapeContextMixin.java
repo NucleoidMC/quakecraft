@@ -29,16 +29,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EntityShapeContext.class)
 public class EntityShapeContextMixin implements UsefulEntityShapeContext {
-    @Unique
-    private Entity quakecraft$entity;
+	@Unique
+	private Entity quakecraft$entity;
 
-    @Inject(method = "<init>(Lnet/minecraft/entity/Entity;)V", at = @At("RETURN"))
-    private void onInit(Entity entity, CallbackInfo ci) {
-        this.quakecraft$entity = entity;
-    }
+	@Inject(method = "<init>(Lnet/minecraft/entity/Entity;)V", at = @At("RETURN"))
+	private void onInit(Entity entity, CallbackInfo ci) {
+		this.quakecraft$entity = entity;
+	}
 
-    @Override
-    public @Nullable Entity quakecraft$getEntity() {
-        return this.quakecraft$entity;
-    }
+	@Override
+	public @Nullable Entity quakecraft$getEntity() {
+		return this.quakecraft$entity;
+	}
 }

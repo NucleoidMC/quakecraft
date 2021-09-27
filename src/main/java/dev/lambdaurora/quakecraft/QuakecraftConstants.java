@@ -33,19 +33,19 @@ import java.util.function.Predicate;
  * @since 1.0.0
  */
 public class QuakecraftConstants {
-    public static final int RESPAWN_SECONDS = 5;
-    public static final int RESPAWN_TICKS = RESPAWN_SECONDS * 20;
+	public static final int RESPAWN_SECONDS = 5;
+	public static final int RESPAWN_TICKS = RESPAWN_SECONDS * 20;
 
-    /**
-     * Represents the dash velocity.
-     */
-    public static final double DASH_VELOCITY = 1.2;
+	/**
+	 * Represents the dash velocity.
+	 */
+	public static final double DASH_VELOCITY = 1.2;
 
-    public static final Predicate<Entity> PLAYER_PREDICATE = entity -> entity instanceof ServerPlayerEntity
-            && ((ServerPlayerEntity) entity).interactionManager.getGameMode() != GameMode.SPECTATOR;
+	public static final Predicate<Entity> PLAYER_PREDICATE = entity -> entity instanceof ServerPlayerEntity
+			&& ((ServerPlayerEntity) entity).interactionManager.getGameMode() != GameMode.SPECTATOR;
 
-    public static final EntityAttributeModifier PLAYER_MOVEMENT_SPEED_MODIFIER = new EntityAttributeModifier(UUID.fromString("91AEAA56-376B-4498-935B-2F7F68070635"),
-            "quakecraft.movement.speed",
-            2 * 0.20000000298023224D,
-            EntityAttributeModifier.Operation.MULTIPLY_TOTAL);
+	public static final EntityAttributeModifier PLAYER_MOVEMENT_SPEED_MODIFIER = new EntityAttributeModifier(UUID.fromString("91AEAA56-376B-4498-935B-2F7F68070635"),
+			"quakecraft.movement.speed",
+			2 * 0.20000000298023224D,
+			EntityAttributeModifier.Operation.MULTIPLY_TOTAL);
 }

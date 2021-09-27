@@ -33,17 +33,17 @@ import net.minecraft.util.Identifier;
  * @since 1.0.0
  */
 public class GrenadeWeapon extends Weapon {
-    public GrenadeWeapon(Identifier id, Item item, Settings settings) {
-        super(id, item, settings);
-    }
+	public GrenadeWeapon(Identifier id, Item item, Settings settings) {
+		super(id, item, settings);
+	}
 
-    @Override
-    public ActionResult onPrimary(ServerWorld world, ServerPlayerEntity player, Hand hand) {
-        var grenade = new GrenadeEntity(world, player, 40);
-        grenade.setProperties(player, player.getPitch(), player.getYaw(), 0.f, 1.5f, 1.f);
-        grenade.rollCritical();
-        world.spawnEntity(grenade);
+	@Override
+	public ActionResult onPrimary(ServerWorld world, ServerPlayerEntity player, Hand hand) {
+		var grenade = new GrenadeEntity(world, player, 40);
+		grenade.setProperties(player, player.getPitch(), player.getYaw(), 0.f, 1.5f, 1.f);
+		grenade.rollCritical();
+		world.spawnEntity(grenade);
 
-        return super.onPrimary(world, player, hand);
-    }
+		return super.onPrimary(world, player, hand);
+	}
 }

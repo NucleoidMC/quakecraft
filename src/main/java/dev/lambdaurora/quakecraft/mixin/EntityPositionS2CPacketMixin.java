@@ -37,13 +37,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(EntityPositionS2CPacket.class)
 public class EntityPositionS2CPacketMixin {
-    @Shadow
-    private double y;
+	@Shadow
+	private double y;
 
-    @Inject(method = "<init>(Lnet/minecraft/entity/Entity;)V", at = @At("RETURN"))
-    private void onInit(Entity entity, CallbackInfo ci) {
-        if (entity instanceof GrenadeEntity) {
-            this.y = entity.getY() - 0.35;
-        }
-    }
+	@Inject(method = "<init>(Lnet/minecraft/entity/Entity;)V", at = @At("RETURN"))
+	private void onInit(Entity entity, CallbackInfo ci) {
+		if (entity instanceof GrenadeEntity) {
+			this.y = entity.getY() - 0.35;
+		}
+	}
 }

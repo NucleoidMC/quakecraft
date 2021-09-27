@@ -26,5 +26,5 @@ import org.jetbrains.annotations.Nullable;
  * Why? Because I need the entity to set the correct
  */
 public interface UsefulEntityShapeContext {
-    @Nullable Entity quakecraft$getEntity();
+	@Nullable Entity quakecraft$getEntity();
 }

@@ -25,9 +25,9 @@ package dev.lambdaurora.quakecraft.game;
  * @since 1.6.0
  */
 public enum GameStage {
-    WAITING,
-    ROUND_START,
-    RUNNING,
-    ROUND_END,
-    ENDED
+	WAITING,
+	ROUND_START,
+	RUNNING,
+	ROUND_END,
+	ENDED
 }

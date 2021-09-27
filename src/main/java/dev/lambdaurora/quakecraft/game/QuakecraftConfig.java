@@ -27,10 +27,10 @@ import java.util.List;
 
 public record QuakecraftConfig(MapConfig map, PlayerConfig players,
                                List<GameTeam> teams, int time) {
-    public static final Codec<QuakecraftConfig> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            MapConfig.CODEC.fieldOf("map").forGetter(QuakecraftConfig::map),
-            PlayerConfig.CODEC.fieldOf("players").forGetter(QuakecraftConfig::players),
-            GameTeam.CODEC.listOf().fieldOf("teams").forGetter(QuakecraftConfig::teams),
-            Codec.INT.optionalFieldOf("time", 20 * 60 * 20).forGetter(QuakecraftConfig::time)
-    ).apply(instance, QuakecraftConfig::new));
+	public static final Codec<QuakecraftConfig> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			MapConfig.CODEC.fieldOf("map").forGetter(QuakecraftConfig::map),
+			PlayerConfig.CODEC.fieldOf("players").forGetter(QuakecraftConfig::players),
+			GameTeam.CODEC.listOf().fieldOf("teams").forGetter(QuakecraftConfig::teams),
+			Codec.INT.optionalFieldOf("time", 20 * 60 * 20).forGetter(QuakecraftConfig::time)
+	).apply(instance, QuakecraftConfig::new));
 }

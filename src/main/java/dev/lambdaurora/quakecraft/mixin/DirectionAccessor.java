@@ -25,8 +25,8 @@ import java.util.Map;
 
 @Mixin(Direction.class)
 public interface DirectionAccessor {
-    @Accessor("NAME_MAP")
-    static Map<String, Direction> quakecraft$getNameMap() {
-        throw new UnsupportedOperationException("Accessor injection failed.");
-    }
+	@Accessor("NAME_MAP")
+	static Map<String, Direction> quakecraft$getNameMap() {
+		throw new UnsupportedOperationException("Accessor injection failed.");
+	}
 }

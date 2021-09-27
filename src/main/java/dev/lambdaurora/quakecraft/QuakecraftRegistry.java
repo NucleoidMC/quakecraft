@@ -33,28 +33,28 @@ import net.minecraft.util.registry.Registry;
  * @since 1.6.1
  */
 public class QuakecraftRegistry {
-    public static LaunchPadBlock STONE_LAUNCHPAD_BLOCK = register("stone_launchpad", new LaunchPadBlock(Blocks.STONE_PRESSURE_PLATE));
-    public static LaunchPadBlock OAK_LAUNCHPAD_BLOCK = register("oak_launchpad", new LaunchPadBlock(Blocks.OAK_PRESSURE_PLATE));
-    public static LaunchPadBlock SPRUCE_LAUNCHPAD_BLOCK = register("spruce_launchpad", new LaunchPadBlock(Blocks.SPRUCE_PRESSURE_PLATE));
-    public static LaunchPadBlock BIRCH_LAUNCHPAD_BLOCK = register("birch_launchpad", new LaunchPadBlock(Blocks.BIRCH_PRESSURE_PLATE));
-    public static LaunchPadBlock JUNGLE_LAUNCHPAD_BLOCK = register("jungle_launchpad", new LaunchPadBlock(Blocks.JUNGLE_PRESSURE_PLATE));
-    public static LaunchPadBlock ACACIA_LAUNCHPAD_BLOCK = register("acacia_launchpad", new LaunchPadBlock(Blocks.ACACIA_PRESSURE_PLATE));
-    public static LaunchPadBlock DARK_OAK_LAUNCHPAD_BLOCK = register("dark_oak_launchpad", new LaunchPadBlock(Blocks.DARK_OAK_PRESSURE_PLATE));
-    public static LaunchPadBlock LIGHT_WEIGHTED_LAUNCHPAD_BLOCK = register("light_weighted_launchpad", new LaunchPadBlock(Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE));
-    public static LaunchPadBlock HEAVY_WEIGHTED_LAUNCHPAD_BLOCK = register("heavy_weighted_launchpad", new LaunchPadBlock(Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE));
-    public static LaunchPadBlock CRIMSON_LAUNCHPAD_BLOCK = register("crimson_launchpad", new LaunchPadBlock(Blocks.CRIMSON_PRESSURE_PLATE));
-    public static LaunchPadBlock WARPED_LAUNCHPAD_BLOCK = register("warped_launchpad", new LaunchPadBlock(Blocks.WARPED_PRESSURE_PLATE));
-    public static LaunchPadBlock POLISHED_BLACKSTONE_LAUNCHPAD_BLOCK = register("polished_blackstone_launchpad", new LaunchPadBlock(Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE));
+	public static LaunchPadBlock STONE_LAUNCHPAD_BLOCK = register("stone_launchpad", new LaunchPadBlock(Blocks.STONE_PRESSURE_PLATE));
+	public static LaunchPadBlock OAK_LAUNCHPAD_BLOCK = register("oak_launchpad", new LaunchPadBlock(Blocks.OAK_PRESSURE_PLATE));
+	public static LaunchPadBlock SPRUCE_LAUNCHPAD_BLOCK = register("spruce_launchpad", new LaunchPadBlock(Blocks.SPRUCE_PRESSURE_PLATE));
+	public static LaunchPadBlock BIRCH_LAUNCHPAD_BLOCK = register("birch_launchpad", new LaunchPadBlock(Blocks.BIRCH_PRESSURE_PLATE));
+	public static LaunchPadBlock JUNGLE_LAUNCHPAD_BLOCK = register("jungle_launchpad", new LaunchPadBlock(Blocks.JUNGLE_PRESSURE_PLATE));
+	public static LaunchPadBlock ACACIA_LAUNCHPAD_BLOCK = register("acacia_launchpad", new LaunchPadBlock(Blocks.ACACIA_PRESSURE_PLATE));
+	public static LaunchPadBlock DARK_OAK_LAUNCHPAD_BLOCK = register("dark_oak_launchpad", new LaunchPadBlock(Blocks.DARK_OAK_PRESSURE_PLATE));
+	public static LaunchPadBlock LIGHT_WEIGHTED_LAUNCHPAD_BLOCK = register("light_weighted_launchpad", new LaunchPadBlock(Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE));
+	public static LaunchPadBlock HEAVY_WEIGHTED_LAUNCHPAD_BLOCK = register("heavy_weighted_launchpad", new LaunchPadBlock(Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE));
+	public static LaunchPadBlock CRIMSON_LAUNCHPAD_BLOCK = register("crimson_launchpad", new LaunchPadBlock(Blocks.CRIMSON_PRESSURE_PLATE));
+	public static LaunchPadBlock WARPED_LAUNCHPAD_BLOCK = register("warped_launchpad", new LaunchPadBlock(Blocks.WARPED_PRESSURE_PLATE));
+	public static LaunchPadBlock POLISHED_BLACKSTONE_LAUNCHPAD_BLOCK = register("polished_blackstone_launchpad", new LaunchPadBlock(Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE));
 
-    private static <T extends Block> T register(String identifier, T block) {
-        return register(Registry.BLOCK, identifier, block);
-    }
+	private static <T extends Block> T register(String identifier, T block) {
+		return register(Registry.BLOCK, identifier, block);
+	}
 
-    private static <P, T extends P> T register(Registry<P> registry, String identifier, T item) {
-        return Registry.register(registry, new Identifier(Quakecraft.NAMESPACE, identifier), item);
-    }
+	private static <P, T extends P> T register(Registry<P> registry, String identifier, T item) {
+		return Registry.register(registry, new Identifier(Quakecraft.NAMESPACE, identifier), item);
+	}
 
-    public static void init() {
-        Quakecraft.get().log("Registered custom blocks, items...");
-    }
+	public static void init() {
+		Quakecraft.get().log("Registered custom blocks, items...");
+	}
 }

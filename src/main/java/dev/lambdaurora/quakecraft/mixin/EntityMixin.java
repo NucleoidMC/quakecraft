@@ -24,16 +24,16 @@ import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(Entity.class)
 public class EntityMixin implements RayAccessor {
-    @Unique
-    private boolean quakecraft$raycasting;
+	@Unique
+	private boolean quakecraft$raycasting;
 
-    @Override
-    public boolean quakecraft$isRaycasting() {
-        return this.quakecraft$raycasting;
-    }
+	@Override
+	public boolean quakecraft$isRaycasting() {
+		return this.quakecraft$raycasting;
+	}
 
-    @Override
-    public void quakecraft$setRaycasting(boolean raycasting) {
-        this.quakecraft$raycasting = raycasting;
-    }
+	@Override
+	public void quakecraft$setRaycasting(boolean raycasting) {
+		this.quakecraft$raycasting = raycasting;
+	}
 }

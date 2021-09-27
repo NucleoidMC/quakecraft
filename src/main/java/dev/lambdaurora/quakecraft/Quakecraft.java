@@ -51,111 +51,111 @@ import java.util.Locale;
  * @since 1.0.0
  */
 public class Quakecraft implements ModInitializer {
-    public static final String NAMESPACE = "quakecraft";
-    private static Quakecraft INSTANCE;
-    public final Logger logger = LogManager.getLogger(NAMESPACE);
-    private final List<QuakecraftLogic> activeGames = new ArrayList<>();
-    private final List<ServerPlayerEntity> activePlayers = new ArrayList<>();
+	public static final String NAMESPACE = "quakecraft";
+	private static Quakecraft INSTANCE;
+	public final Logger logger = LogManager.getLogger(NAMESPACE);
+	private final List<QuakecraftLogic> activeGames = new ArrayList<>();
+	private final List<ServerPlayerEntity> activePlayers = new ArrayList<>();
 
-    @Override
-    public void onInitialize() {
-        INSTANCE = this;
+	@Override
+	public void onInitialize() {
+		INSTANCE = this;
 
-        QuakecraftRegistry.init();
+		QuakecraftRegistry.init();
 
-        GameType.register(new Identifier(NAMESPACE, "quakecraft"),
-                QuakecraftConfig.CODEC, QuakecraftWaiting::open);
-    }
+		GameType.register(new Identifier(NAMESPACE, "quakecraft"),
+				QuakecraftConfig.CODEC, QuakecraftWaiting::open);
+	}
 
-    /**
-     * Prints a message to the terminal.
-     *
-     * @param info the message to print
-     */
-    public void log(String info) {
-        this.logger.info("[" + NAMESPACE + "] " + info);
-    }
+	/**
+	 * Prints a message to the terminal.
+	 *
+	 * @param info the message to print
+	 */
+	public void log(String info) {
+		this.logger.info("[" + NAMESPACE + "] " + info);
+	}
 
-    public void addActivePlayer(@NotNull ServerPlayerEntity player) {
-        this.activePlayers.add(player);
-    }
+	public void addActivePlayer(@NotNull ServerPlayerEntity player) {
+		this.activePlayers.add(player);
+	}
 
-    public void removeActivePlayer(@NotNull ServerPlayerEntity player) {
-        this.activePlayers.remove(player);
-    }
+	public void removeActivePlayer(@NotNull ServerPlayerEntity player) {
+		this.activePlayers.remove(player);
+	}
 
-    public boolean isPlayerActive(@NotNull ServerPlayerEntity player) {
-        return this.activePlayers.contains(player);
-    }
+	public boolean isPlayerActive(@NotNull ServerPlayerEntity player) {
+		return this.activePlayers.contains(player);
+	}
 
-    public void addActiveGame(@NotNull QuakecraftLogic game) {
-        this.activeGames.add(game);
-    }
+	public void addActiveGame(@NotNull QuakecraftLogic game) {
+		this.activeGames.add(game);
+	}
 
-    public void removeActiveGame(@NotNull QuakecraftLogic game) {
-        this.activeGames.remove(game);
-    }
+	public void removeActiveGame(@NotNull QuakecraftLogic game) {
+		this.activeGames.remove(game);
+	}
 
-    public List<QuakecraftLogic> getActiveGames() {
-        return this.activeGames;
-    }
+	public List<QuakecraftLogic> getActiveGames() {
+		return this.activeGames;
+	}
 
-    public static Quakecraft get() {
-        return INSTANCE;
-    }
+	public static Quakecraft get() {
+		return INSTANCE;
+	}
 
-    public static Identifier mc(@NotNull String name) {
-        return new Identifier(NAMESPACE, name);
-    }
+	public static Identifier mc(@NotNull String name) {
+		return new Identifier(NAMESPACE, name);
+	}
 
-    /**
-     * Applies the speed modifier to the specified player.
-     *
-     * @param player the player
-     * @since 1.1.0
-     */
-    public static void applySpeed(ServerPlayerEntity player) {
-        var movementSpeedAttribute = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
-        if (movementSpeedAttribute != null) {
-            movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
-            movementSpeedAttribute.addTemporaryModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
-        }
-    }
+	/**
+	 * Applies the speed modifier to the specified player.
+	 *
+	 * @param player the player
+	 * @since 1.1.0
+	 */
+	public static void applySpeed(ServerPlayerEntity player) {
+		var movementSpeedAttribute = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+		if (movementSpeedAttribute != null) {
+			movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
+			movementSpeedAttribute.addTemporaryModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
+		}
+	}
 
-    /**
-     * Removes the speed modifier to the specified player.
-     *
-     * @param player the player
-     * @since 1.1.0
-     */
-    public static void removeSpeed(ServerPlayerEntity player) {
-        var movementSpeedAttribute = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
-        if (movementSpeedAttribute != null) {
-            movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
-        }
-    }
+	/**
+	 * Removes the speed modifier to the specified player.
+	 *
+	 * @param player the player
+	 * @since 1.1.0
+	 */
+	public static void removeSpeed(ServerPlayerEntity player) {
+		var movementSpeedAttribute = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+		if (movementSpeedAttribute != null) {
+			movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
+		}
+	}
 
-    public static Direction getDirectionByName(@Nullable String name) {
-        return name == null ? null : DirectionAccessor.quakecraft$getNameMap().get(name.toLowerCase(Locale.ROOT));
-    }
+	public static Direction getDirectionByName(@Nullable String name) {
+		return name == null ? null : DirectionAccessor.quakecraft$getNameMap().get(name.toLowerCase(Locale.ROOT));
+	}
 
-    public static void spawnFirework(ServerWorld world, double x, double y, double z, int[] colors, boolean silent, int lifetime) {
-        var fireworkStack = new ItemStack(Items.FIREWORK_ROCKET);
+	public static void spawnFirework(ServerWorld world, double x, double y, double z, int[] colors, boolean silent, int lifetime) {
+		var fireworkStack = new ItemStack(Items.FIREWORK_ROCKET);
 
-        var tag = fireworkStack.getOrCreateSubNbt("Fireworks");
-        tag.putByte("Flight", (byte) 0);
+		var tag = fireworkStack.getOrCreateSubNbt("Fireworks");
+		tag.putByte("Flight", (byte) 0);
 
-        var explosions = new NbtList();
-        var explosion = new NbtCompound();
-        explosion.putByte("Type", (byte) 0);
-        explosion.putIntArray("Colors", colors);
-        explosions.add(explosion);
-        tag.put("Explosions", explosions);
+		var explosions = new NbtList();
+		var explosion = new NbtCompound();
+		explosion.putByte("Type", (byte) 0);
+		explosion.putIntArray("Colors", colors);
+		explosions.add(explosion);
+		tag.put("Explosions", explosions);
 
-        var firework = new FireworkRocketEntity(world, x, y, z, fireworkStack);
-        firework.setSilent(silent);
-        if (lifetime >= 0)
-            ((FireworkRocketEntityAccessor) firework).setLifeTime(lifetime);
-        world.spawnEntity(firework);
-    }
+		var firework = new FireworkRocketEntity(world, x, y, z, fireworkStack);
+		firework.setSilent(silent);
+		if (lifetime >= 0)
+			((FireworkRocketEntityAccessor) firework).setLifeTime(lifetime);
+		world.spawnEntity(firework);
+	}
 }

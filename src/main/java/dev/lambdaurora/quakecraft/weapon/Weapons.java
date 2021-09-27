@@ -21,34 +21,34 @@ import dev.lambdaurora.quakecraft.Quakecraft;
 import net.minecraft.item.Items;
 
 public final class Weapons {
-    private Weapons() {
-        throw new UnsupportedOperationException("Weapons only contains static definitions.");
-    }
+	private Weapons() {
+		throw new UnsupportedOperationException("Weapons only contains static definitions.");
+	}
 
-    public static final ShooterWeapon BASE_SHOOTER = new ShooterWeapon(
-            Quakecraft.mc("base_railgun"),
-            Items.STONE_HOE,
-            new Weapon.Settings(2 * 20 + 10).secondaryCooldown(4 * 20)
-    );
-    public static final ShooterWeapon ADVANCED_SHOOTER = new ShooterWeapon(
-            Quakecraft.mc("advanced_railgun"),
-            Items.IRON_HOE,
-            new Weapon.Settings(25).secondaryCooldown(4 * 20)
-    );
+	public static final ShooterWeapon BASE_SHOOTER = new ShooterWeapon(
+			Quakecraft.mc("base_railgun"),
+			Items.STONE_HOE,
+			new Weapon.Settings(2 * 20 + 10).secondaryCooldown(4 * 20)
+	);
+	public static final ShooterWeapon ADVANCED_SHOOTER = new ShooterWeapon(
+			Quakecraft.mc("advanced_railgun"),
+			Items.IRON_HOE,
+			new Weapon.Settings(25).secondaryCooldown(4 * 20)
+	);
 
-    public static final RocketLauncherWeapon ROCKET_LAUNCHER = new RocketLauncherWeapon(
-            Quakecraft.mc("rocket_launcher"),
-            Items.IRON_AXE,
-            new Weapon.Settings(35)
-                    .ammoSize(20)
-                    .clipSize(4)
-    );
+	public static final RocketLauncherWeapon ROCKET_LAUNCHER = new RocketLauncherWeapon(
+			Quakecraft.mc("rocket_launcher"),
+			Items.IRON_AXE,
+			new Weapon.Settings(35)
+					.ammoSize(20)
+					.clipSize(4)
+	);
 
-    public static final GrenadeWeapon GRENADE_LAUNCHER = new GrenadeWeapon(
-            Quakecraft.mc("grenade_launcher"),
-            Items.BLAZE_ROD,
-            new Weapon.Settings(45)
-                    .ammoSize(16)
-                    .clipSize(4)
-    );
+	public static final GrenadeWeapon GRENADE_LAUNCHER = new GrenadeWeapon(
+			Quakecraft.mc("grenade_launcher"),
+			Items.BLAZE_ROD,
+			new Weapon.Settings(45)
+					.ammoSize(16)
+					.clipSize(4)
+	);
 }

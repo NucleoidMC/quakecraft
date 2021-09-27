@@ -54,90 +54,90 @@ import xyz.nucleoid.stimuli.event.player.PlayerDeathEvent;
  * @since 1.0.0
  */
 public class QuakecraftWaiting {
-    private final GameActivity game;
-    private final ServerWorld world;
-    private final QuakecraftMap map;
-    private final QuakecraftConfig config;
-    private final QuakecraftSpawnLogic spawnLogic;
+	private final GameActivity game;
+	private final ServerWorld world;
+	private final QuakecraftMap map;
+	private final QuakecraftConfig config;
+	private final QuakecraftSpawnLogic spawnLogic;
 
-    private QuakecraftWaiting(GameActivity game, ServerWorld world, QuakecraftMap map, QuakecraftConfig config) {
-        this.game = game;
-        this.world = world;
-        this.map = map;
-        this.config = config;
-        this.spawnLogic = new QuakecraftSpawnLogic(game.getGameSpace(), world, map);
-    }
+	private QuakecraftWaiting(GameActivity game, ServerWorld world, QuakecraftMap map, QuakecraftConfig config) {
+		this.game = game;
+		this.world = world;
+		this.map = map;
+		this.config = config;
+		this.spawnLogic = new QuakecraftSpawnLogic(game.getGameSpace(), world, map);
+	}
 
-    public static GameOpenProcedure open(GameOpenContext<QuakecraftConfig> context) {
-        var config = context.config();
+	public static GameOpenProcedure open(GameOpenContext<QuakecraftConfig> context) {
+		var config = context.config();
 
-        var map = new MapBuilder(config.map()).create(context.server());
-        var worldConfig = new RuntimeWorldConfig()
-                .setGenerator(map.asGenerator(context.server()))
-                .setTimeOfDay(config.map().time());
+		var map = new MapBuilder(config.map()).create(context.server());
+		var worldConfig = new RuntimeWorldConfig()
+				.setGenerator(map.asGenerator(context.server()))
+				.setTimeOfDay(config.map().time());
 
-        return context.openWithWorld(worldConfig, (game, world) -> {
-            map.init(world);
+		return context.openWithWorld(worldConfig, (game, world) -> {
+			map.init(world);
 
-            QuakecraftWaiting waiting = new QuakecraftWaiting(game, world, map, config);
+			QuakecraftWaiting waiting = new QuakecraftWaiting(game, world, map, config);
 
-            GameWaitingLobby.applyTo(game, config.players());
+			GameWaitingLobby.applyTo(game, config.players());
 
-            game.listen(GameActivityEvents.REQUEST_START, waiting::requestStart);
+			game.listen(GameActivityEvents.REQUEST_START, waiting::requestStart);
 
-            game.listen(GamePlayerEvents.OFFER, waiting::addPlayer);
-            game.listen(GamePlayerEvents.REMOVE, waiting::removePlayer);
+			game.listen(GamePlayerEvents.OFFER, waiting::addPlayer);
+			game.listen(GamePlayerEvents.REMOVE, waiting::removePlayer);
 
-            game.listen(PlayerDeathEvent.EVENT, waiting::onPlayerDeath);
-            game.listen(ItemUseEvent.EVENT, waiting::onUseItem);
+			game.listen(PlayerDeathEvent.EVENT, waiting::onPlayerDeath);
+			game.listen(ItemUseEvent.EVENT, waiting::onUseItem);
 
-            game.deny(GameRuleType.USE_BLOCKS);
-            game.deny(GameRuleType.PVP);
-        });
-    }
+			game.deny(GameRuleType.USE_BLOCKS);
+			game.deny(GameRuleType.PVP);
+		});
+	}
 
-    private GameResult requestStart() {
-        var players = this.allocatePlayers();
-        QuakecraftGame.open(this.config, this.game.getGameSpace(), this.world, this.map, this.spawnLogic, players);
-        return GameResult.ok();
-    }
+	private GameResult requestStart() {
+		var players = this.allocatePlayers();
+		QuakecraftGame.open(this.config, this.game.getGameSpace(), this.world, this.map, this.spawnLogic, players);
+		return GameResult.ok();
+	}
 
-    private PlayerOfferResult addPlayer(PlayerOffer offer) {
-        this.spawnLogic.spawnWaitingPlayer(offer.player());
+	private PlayerOfferResult addPlayer(PlayerOffer offer) {
+		this.spawnLogic.spawnWaitingPlayer(offer.player());
 
-        return offer.accept(this.world, this.map.waitingSpawn.center())
-                .and(() -> {
-                    this.spawnLogic.resetWaitingPlayer(offer.player());
-                });
-    }
+		return offer.accept(this.world, this.map.waitingSpawn.center())
+				.and(() -> {
+					this.spawnLogic.resetWaitingPlayer(offer.player());
+				});
+	}
 
-    private void removePlayer(ServerPlayerEntity player) {
-        Quakecraft.removeSpeed(player);
-    }
+	private void removePlayer(ServerPlayerEntity player) {
+		Quakecraft.removeSpeed(player);
+	}
 
-    private ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
-        this.spawnLogic.resetWaitingPlayer(player);
-        this.spawnLogic.spawnWaitingPlayer(player);
-        return ActionResult.FAIL;
-    }
+	private ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
+		this.spawnLogic.resetWaitingPlayer(player);
+		this.spawnLogic.spawnWaitingPlayer(player);
+		return ActionResult.FAIL;
+	}
 
-    private TypedActionResult<ItemStack> onUseItem(ServerPlayerEntity player, Hand hand) {
-        var heldStack = player.getStackInHand(hand);
+	private TypedActionResult<ItemStack> onUseItem(ServerPlayerEntity player, Hand hand) {
+		var heldStack = player.getStackInHand(hand);
 
-        if (heldStack.isIn(ItemTags.BEDS)) {
-            this.game.getGameSpace().kickPlayer(player);
-            return TypedActionResult.success(heldStack);
-        }
+		if (heldStack.isIn(ItemTags.BEDS)) {
+			this.game.getGameSpace().kickPlayer(player);
+			return TypedActionResult.success(heldStack);
+		}
 
-        return TypedActionResult.pass(ItemStack.EMPTY);
-    }
+		return TypedActionResult.pass(ItemStack.EMPTY);
+	}
 
-    private @Nullable Multimap<GameTeam, ServerPlayerEntity> allocatePlayers() {
-        if (this.config.teams().size() == 0) {
-            return null;
-        }
-        var allocator = new TeamAllocator<GameTeam, ServerPlayerEntity>(this.config.teams());
-        this.game.getGameSpace().getPlayers().forEach(player -> allocator.add(player, null));
-        return allocator.allocate();
-    }
+	private @Nullable Multimap<GameTeam, ServerPlayerEntity> allocatePlayers() {
+		if (this.config.teams().size() == 0) {
+			return null;
+		}
+		var allocator = new TeamAllocator<GameTeam, ServerPlayerEntity>(this.config.teams());
+		this.game.getGameSpace().getPlayers().forEach(player -> allocator.add(player, null));
+		return allocator.allocate();
+	}
 }

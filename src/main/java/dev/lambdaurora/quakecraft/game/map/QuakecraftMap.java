@@ -46,100 +46,100 @@ import java.util.stream.Stream;
  * @since 1.0.0
  */
 public class QuakecraftMap {
-    private final MapTemplate template;
-    public final BlockBounds waitingSpawn;
-    private final List<MapSpawn> spawns;
-    private final List<QuakecraftDoor> doors = new ArrayList<>();
+	private final MapTemplate template;
+	public final BlockBounds waitingSpawn;
+	private final List<MapSpawn> spawns;
+	private final List<QuakecraftDoor> doors = new ArrayList<>();
 
-    public QuakecraftMap(MapTemplate template, BlockBounds waitingSpawn, List<MapSpawn> spawns) {
-        this.template = template;
-        this.waitingSpawn = waitingSpawn;
-        this.spawns = spawns;
-    }
+	public QuakecraftMap(MapTemplate template, BlockBounds waitingSpawn, List<MapSpawn> spawns) {
+		this.template = template;
+		this.waitingSpawn = waitingSpawn;
+		this.spawns = spawns;
+	}
 
-    /**
-     * Returns the spawn count.
-     *
-     * @return the spawn count
-     */
-    public int getSpawnCount() {
-        return this.spawns.size();
-    }
+	/**
+	 * Returns the spawn count.
+	 *
+	 * @return the spawn count
+	 */
+	public int getSpawnCount() {
+		return this.spawns.size();
+	}
 
-    /**
-     * Returns a spawn assigned to the specified index.
-     *
-     * @param index the index of the spawn
-     * @return the spawn position
-     */
-    public MapSpawn getSpawn(int index) {
-        return this.spawns.get(index);
-    }
+	/**
+	 * Returns a spawn assigned to the specified index.
+	 *
+	 * @param index the index of the spawn
+	 * @return the spawn position
+	 */
+	public MapSpawn getSpawn(int index) {
+		return this.spawns.get(index);
+	}
 
-    /**
-     * Streams the spawns.
-     *
-     * @return the spawn stream
-     */
-    public Stream<MapSpawn> streamSpawns() {
-        return this.spawns.stream();
-    }
+	/**
+	 * Streams the spawns.
+	 *
+	 * @return the spawn stream
+	 */
+	public Stream<MapSpawn> streamSpawns() {
+		return this.spawns.stream();
+	}
 
-    /**
-     * Returns the door activation bounds.
-     *
-     * @param id the identifier of the door activation bounds
-     * @return the bounds if found, else {@code null}
-     */
-    public @Nullable BlockBounds getDoorActivationBounds(String id) {
-        return this.template.getMetadata().getRegions("door_activation")
-                .filter(region -> id.equals(region.getData().getString("id")))
-                .map(TemplateRegion::getBounds)
-                .findFirst().orElse(null);
-    }
+	/**
+	 * Returns the door activation bounds.
+	 *
+	 * @param id the identifier of the door activation bounds
+	 * @return the bounds if found, else {@code null}
+	 */
+	public @Nullable BlockBounds getDoorActivationBounds(String id) {
+		return this.template.getMetadata().getRegions("door_activation")
+				.filter(region -> id.equals(region.getData().getString("id")))
+				.map(TemplateRegion::getBounds)
+				.findFirst().orElse(null);
+	}
 
-    public void tick() {
-        this.doors.forEach(QuakecraftDoor::tick);
-    }
+	public void tick() {
+		this.doors.forEach(QuakecraftDoor::tick);
+	}
 
-    public void init(ServerWorld world) {
-        this.initLaunchPads(world);
-    }
+	public void init(ServerWorld world) {
+		this.initLaunchPads(world);
+	}
 
-    private void initLaunchPads(ServerWorld world) {
-        record LaunchPad(BlockBounds bounds, BlockState state) {
-        }
+	private void initLaunchPads(ServerWorld world) {
+		record LaunchPad(BlockBounds bounds, BlockState state) {
+		}
 
-        this.template.getMetadata().getRegions("launchpad")
-                .map(region -> {
-                    var state = LaunchPadBlock.fromNbt(region.getData());
-                    if (state == null)
-                        return null;
-                    return new LaunchPad(region.getBounds(), state);
-                })
-                .filter(Objects::nonNull)
-                .forEach(region -> region.bounds()
-                        .forEach(pos -> world.setBlockState(pos, region.state(),
-                                Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL)));
-    }
+		this.template.getMetadata().getRegions("launchpad")
+				.map(region -> {
+					var state = LaunchPadBlock.fromNbt(region.getData());
+					if (state == null)
+						return null;
+					return new LaunchPad(region.getBounds(), state);
+				})
+				.filter(Objects::nonNull)
+				.forEach(region -> region.bounds()
+						.forEach(pos -> world.setBlockState(pos, region.state(),
+								Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL)));
+	}
 
-    public void postInit(QuakecraftLogic game) {
-        this.template.getMetadata().getRegions("door").map(region -> QuakecraftDoor.fromRegion(game, region).orElse(null))
-                .filter(Objects::nonNull).forEach(this.doors::add);
+	public void postInit(QuakecraftLogic game) {
+		this.template.getMetadata().getRegions("door").map(region -> QuakecraftDoor.fromRegion(game, region).orElse(null))
+				.filter(Objects::nonNull).forEach(this.doors::add);
 
-        if (game.getTeams().size() != 0) {
-            this.template.getMetadata().getRegions("team_barrier").forEach(region -> {
-                GameTeam team = game.getTeam(region.getData().getString("team"));
-                if (team != null) {
-                    BlockState state = TeamBarrierBlock.of(team).getDefaultState();
-                    region.getBounds().forEach(pos -> game.world().setBlockState(pos, state,
-                            Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL));
-                }
-            });
-        }
-    }
+		if (game.getTeams().size() != 0) {
+			this.template.getMetadata().getRegions("team_barrier").forEach(region -> {
+				GameTeam team = game.getTeam(region.getData().getString("team"));
+				if (team != null) {
+					BlockState state = TeamBarrierBlock.of(team).getDefaultState();
+					region.getBounds().forEach(pos -> game.world().setBlockState(pos, state,
+							Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL));
+				}
+			});
+		}
+	}
 
-    public ChunkGenerator asGenerator(MinecraftServer server) {
-        return new TemplateChunkGenerator(server, this.template);
-    }
+	public ChunkGenerator asGenerator(MinecraftServer server) {
+		return new TemplateChunkGenerator(server, this.template);
+	}
 }

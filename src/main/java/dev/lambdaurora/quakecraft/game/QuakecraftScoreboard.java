@@ -33,41 +33,41 @@ import java.util.Comparator;
  * @since 1.0.0
  */
 public class QuakecraftScoreboard {
-    private final QuakecraftGame game;
-    private final SidebarWidget sidebar;
+	private final QuakecraftGame game;
+	private final SidebarWidget sidebar;
 
-    public QuakecraftScoreboard(@NotNull QuakecraftGame game, GlobalWidgets widgets) {
-        this.game = game;
-        this.sidebar = widgets.addSidebar(new LiteralText("Quakecraft").formatted(Formatting.GOLD));
-    }
+	public QuakecraftScoreboard(@NotNull QuakecraftGame game, GlobalWidgets widgets) {
+		this.game = game;
+		this.sidebar = widgets.addSidebar(new LiteralText("Quakecraft").formatted(Formatting.GOLD));
+	}
 
-    /**
-     * Updates the scoreboard.
-     */
-    public void update() {
-        this.sidebar.set(content -> {
-            var seconds = this.game.getTime() / 20;
-            content.add(new LiteralText("Time left: ")
-                    .append(new LiteralText((seconds / 60) + ":" + (seconds % 60)).formatted(Formatting.GREEN))
-            );
-            content.add(LiteralText.EMPTY);
+	/**
+	 * Updates the scoreboard.
+	 */
+	public void update() {
+		this.sidebar.set(content -> {
+			var seconds = this.game.getTime() / 20;
+			content.add(new LiteralText("Time left: ")
+					.append(new LiteralText((seconds / 60) + ":" + (seconds % 60)).formatted(Formatting.GREEN))
+			);
+			content.add(LiteralText.EMPTY);
 
-            this.game.getParticipants().stream().sorted(Comparator.reverseOrder()).limit(15).forEach(player -> {
-                String playerName = player.name;
+			this.game.getParticipants().stream().sorted(Comparator.reverseOrder()).limit(15).forEach(player -> {
+				String playerName = player.name;
                 /*if ((playerName + ": 10").length() > 16)
                     playerName = playerName.substring(0, 12);*/
-                if (player.hasLeft()) {
-                    content.add(new LiteralText(playerName).formatted(Formatting.GRAY, Formatting.STRIKETHROUGH)
-                            .append(new LiteralText(": ").formatted(Formatting.RESET))
-                            .append(new LiteralText(String.valueOf(player.getKills())).formatted(Formatting.AQUA))
-                    );
-                } else {
-                    content.add(new LiteralText(playerName).formatted(Formatting.GRAY)
-                            .append(new LiteralText(": ").formatted(Formatting.RESET))
-                            .append(new LiteralText(String.valueOf(player.getKills())).formatted(Formatting.AQUA))
-                    );
-                }
-            });
-        });
-    }
+				if (player.hasLeft()) {
+					content.add(new LiteralText(playerName).formatted(Formatting.GRAY, Formatting.STRIKETHROUGH)
+							.append(new LiteralText(": ").formatted(Formatting.RESET))
+							.append(new LiteralText(String.valueOf(player.getKills())).formatted(Formatting.AQUA))
+					);
+				} else {
+					content.add(new LiteralText(playerName).formatted(Formatting.GRAY)
+							.append(new LiteralText(": ").formatted(Formatting.RESET))
+							.append(new LiteralText(String.valueOf(player.getKills())).formatted(Formatting.AQUA))
+					);
+				}
+			});
+		});
+	}
 }

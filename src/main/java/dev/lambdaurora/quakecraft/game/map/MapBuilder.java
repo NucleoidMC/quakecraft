@@ -38,34 +38,34 @@ import java.util.stream.Collectors;
  * @since 1.0.0
  */
 public record MapBuilder(MapConfig config) {
-    public QuakecraftMap create(MinecraftServer server) throws GameOpenException {
-        MapTemplate template;
-        try {
-            template = MapTemplateSerializer.loadFromResource(server, this.config.id());
-        } catch (IOException e) {
-            throw new GameOpenException(new TranslatableText("quakecraft.error.load_map", this.config.id().toString()), e);
-        }
+	public QuakecraftMap create(MinecraftServer server) throws GameOpenException {
+		MapTemplate template;
+		try {
+			template = MapTemplateSerializer.loadFromResource(server, this.config.id());
+		} catch (IOException e) {
+			throw new GameOpenException(new TranslatableText("quakecraft.error.load_map", this.config.id().toString()), e);
+		}
 
-        BlockBounds spawn = template.getMetadata().getFirstRegionBounds("waiting_spawn");
-        if (spawn == null) {
-            spawn = template.getMetadata().getFirstRegionBounds("spawn");
-            if (spawn == null) {
-                Quakecraft.get().logger.error("No spawn is defined on the map! The game will not work.");
-                throw new GameOpenException(new LiteralText("No spawn defined."));
-            }
-        }
+		BlockBounds spawn = template.getMetadata().getFirstRegionBounds("waiting_spawn");
+		if (spawn == null) {
+			spawn = template.getMetadata().getFirstRegionBounds("spawn");
+			if (spawn == null) {
+				Quakecraft.get().logger.error("No spawn is defined on the map! The game will not work.");
+				throw new GameOpenException(new LiteralText("No spawn defined."));
+			}
+		}
 
-        List<MapSpawn> spawns = template.getMetadata().getRegions("spawn").map(MapSpawn::new).collect(Collectors.toList());
+		List<MapSpawn> spawns = template.getMetadata().getRegions("spawn").map(MapSpawn::new).collect(Collectors.toList());
 
-        if (spawns.size() == 0) {
-            Quakecraft.get().logger.error("No player spawns are defined on the map! The game will not work.");
-            throw new GameOpenException(new LiteralText("No player spawn defined."));
-        }
+		if (spawns.size() == 0) {
+			Quakecraft.get().logger.error("No player spawns are defined on the map! The game will not work.");
+			throw new GameOpenException(new LiteralText("No player spawn defined."));
+		}
 
-        var map = new QuakecraftMap(template, spawn, spawns);
+		var map = new QuakecraftMap(template, spawn, spawns);
 
-        //template.setBiome(BuiltinBiomes.PLAINS);
+		//template.setBiome(BuiltinBiomes.PLAINS);
 
-        return map;
-    }
+		return map;
+	}
 }

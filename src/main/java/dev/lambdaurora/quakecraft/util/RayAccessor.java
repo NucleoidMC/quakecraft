@@ -18,7 +18,7 @@
 package dev.lambdaurora.quakecraft.util;
 
 public interface RayAccessor {
-    boolean quakecraft$isRaycasting();
+	boolean quakecraft$isRaycasting();
 
-    void quakecraft$setRaycasting(boolean raycasting);
+	void quakecraft$setRaycasting(boolean raycasting);
 }

@@ -30,8 +30,6 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import xyz.nucleoid.plasmid.game.GameSpace;
 
 /**
  * Represents a weapon that shoot.
@@ -41,39 +39,39 @@ import xyz.nucleoid.plasmid.game.GameSpace;
  * @since 1.0.0
  */
 public class ShooterWeapon extends Weapon {
-    public ShooterWeapon(Identifier id, Item item, Settings settings) {
-        super(id, item, settings);
-    }
+	public ShooterWeapon(Identifier id, Item item, Settings settings) {
+		super(id, item, settings);
+	}
 
-    @Override
-    public ActionResult onPrimary(ServerWorld world, ServerPlayerEntity player, Hand hand) {
-        var result = RayUtils.raycastEntities(player, 80.0, 0.25, QuakecraftConstants.PLAYER_PREDICATE,
-                entity -> {
-                    var hitPlayer = (ServerPlayerEntity) entity;
-                    hitPlayer.setAttacker(player);
-                    player.setAttacking(hitPlayer);
-                    hitPlayer.kill();
-                });
-        RayUtils.drawRay(world, player, Math.abs(result));
+	@Override
+	public ActionResult onPrimary(ServerWorld world, ServerPlayerEntity player, Hand hand) {
+		var result = RayUtils.raycastEntities(player, 80.0, 0.25, QuakecraftConstants.PLAYER_PREDICATE,
+				entity -> {
+					var hitPlayer = (ServerPlayerEntity) entity;
+					hitPlayer.setAttacker(player);
+					player.setAttacking(hitPlayer);
+					hitPlayer.kill();
+				});
+		RayUtils.drawRay(world, player, Math.abs(result));
 
-        if (result < 0.0)
-            return ActionResult.SUCCESS;
+		if (result < 0.0)
+			return ActionResult.SUCCESS;
 
-        return super.onPrimary(world, player, hand);
-    }
+		return super.onPrimary(world, player, hand);
+	}
 
-    @Override
-    public ActionResult onSecondary(ServerWorld world, ServerPlayerEntity player, ItemStack stack) {
-        var rotationVec = player.getRotationVec(1.0F);
-        var yVelocity = player.getVelocity().y;
-        player.setVelocity(new Vec3d(
-                rotationVec.x * QuakecraftConstants.DASH_VELOCITY,
-                yVelocity,
-                rotationVec.z * QuakecraftConstants.DASH_VELOCITY
-        ));
-        player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
+	@Override
+	public ActionResult onSecondary(ServerWorld world, ServerPlayerEntity player, ItemStack stack) {
+		var rotationVec = player.getRotationVec(1.0F);
+		var yVelocity = player.getVelocity().y;
+		player.setVelocity(new Vec3d(
+				rotationVec.x * QuakecraftConstants.DASH_VELOCITY,
+				yVelocity,
+				rotationVec.z * QuakecraftConstants.DASH_VELOCITY
+		));
+		player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
 
-        player.playSound(SoundEvents.ENTITY_BAT_TAKEOFF, SoundCategory.MASTER, 1.0F, 0.5F);
-        return super.onSecondary(world, player, stack);
-    }
+		player.playSound(SoundEvents.ENTITY_BAT_TAKEOFF, SoundCategory.MASTER, 1.0F, 0.5F);
+		return super.onSecondary(world, player, stack);
+	}
 }

@@ -28,40 +28,40 @@ import xyz.nucleoid.map_templates.TemplateRegion;
  * @since 1.4.7
  */
 public class MapSpawn {
-    private final TemplateRegion region;
-    private final BlockPos pos;
-    private final int direction;
+	private final TemplateRegion region;
+	private final BlockPos pos;
+	private final int direction;
 
-    public MapSpawn(TemplateRegion region) {
-        this.region = region;
-        this.pos = new BlockPos(region.getBounds().center());
-        this.direction = region.getData().getInt("direction");
-    }
+	public MapSpawn(TemplateRegion region) {
+		this.region = region;
+		this.pos = new BlockPos(region.getBounds().center());
+		this.direction = region.getData().getInt("direction");
+	}
 
-    /**
-     * Returns the region.
-     *
-     * @return the region
-     */
-    public TemplateRegion region() {
-        return this.region;
-    }
+	/**
+	 * Returns the region.
+	 *
+	 * @return the region
+	 */
+	public TemplateRegion region() {
+		return this.region;
+	}
 
-    /**
-     * Returns the spawn position.
-     *
-     * @return the position
-     */
-    public BlockPos pos() {
-        return this.pos;
-    }
+	/**
+	 * Returns the spawn position.
+	 *
+	 * @return the position
+	 */
+	public BlockPos pos() {
+		return this.pos;
+	}
 
-    /**
-     * Returns the direction the spawn is facing.
-     *
-     * @return the facing direction
-     */
-    public int direction() {
-        return this.direction;
-    }
+	/**
+	 * Returns the direction the spawn is facing.
+	 *
+	 * @return the facing direction
+	 */
+	public int direction() {
+		return this.direction;
+	}
 }

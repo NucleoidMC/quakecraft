@@ -42,95 +42,95 @@ import java.util.UUID;
  * @since 1.5.0
  */
 public abstract class QuakecraftLogic {
-    private final GameSpace space;
-    private final ServerWorld world;
-    private final QuakecraftConfig config;
-    private final QuakecraftMap map;
-    protected final Object2ObjectMap<UUID, QuakecraftPlayer> participants = new Object2ObjectOpenHashMap<>();
-    private GameStage stage;
+	private final GameSpace space;
+	private final ServerWorld world;
+	private final QuakecraftConfig config;
+	private final QuakecraftMap map;
+	protected final Object2ObjectMap<UUID, QuakecraftPlayer> participants = new Object2ObjectOpenHashMap<>();
+	private GameStage stage;
 
-    public QuakecraftLogic(GameSpace space, ServerWorld world, QuakecraftConfig config, QuakecraftMap map) {
-        this.space = space;
-        this.world = world;
-        this.config = config;
-        this.map = map;
-        this.stage = GameStage.ROUND_START;
+	public QuakecraftLogic(GameSpace space, ServerWorld world, QuakecraftConfig config, QuakecraftMap map) {
+		this.space = space;
+		this.world = world;
+		this.config = config;
+		this.map = map;
+		this.stage = GameStage.ROUND_START;
 
-        this.getSpace().getPlayers().forEach(player ->
-                this.participants.put(player.getUuid(), new QuakecraftPlayer(player, null))
-        );
-    }
+		this.getSpace().getPlayers().forEach(player ->
+				this.participants.put(player.getUuid(), new QuakecraftPlayer(player, null))
+		);
+	}
 
-    /**
-     * Returns the game space.
-     *
-     * @return the game space
-     */
-    public GameSpace getSpace() {
-        return this.space;
-    }
+	/**
+	 * Returns the game space.
+	 *
+	 * @return the game space
+	 */
+	public GameSpace getSpace() {
+		return this.space;
+	}
 
-    public ServerWorld world() {
-        return this.world;
-    }
+	public ServerWorld world() {
+		return this.world;
+	}
 
-    public QuakecraftConfig getConfig() {
-        return this.config;
-    }
+	public QuakecraftConfig getConfig() {
+		return this.config;
+	}
 
-    public List<GameTeam> getTeams() {
-        return this.config.teams();
-    }
+	public List<GameTeam> getTeams() {
+		return this.config.teams();
+	}
 
-    public @Nullable GameTeam getTeam(String key) {
-        if (this.getTeams().size() == 0)
-            return null;
-        for (var team : this.getTeams()) {
-            if (team.key().equals(key))
-                return team;
-        }
-        return null;
-    }
+	public @Nullable GameTeam getTeam(String key) {
+		if (this.getTeams().size() == 0)
+			return null;
+		for (var team : this.getTeams()) {
+			if (team.key().equals(key))
+				return team;
+		}
+		return null;
+	}
 
-    public QuakecraftMap map() {
-        return this.map;
-    }
+	public QuakecraftMap map() {
+		return this.map;
+	}
 
-    protected void onOpen() {
-        Quakecraft.get().addActiveGame(this);
-    }
+	protected void onOpen() {
+		Quakecraft.get().addActiveGame(this);
+	}
 
-    protected void onClose() {
-        Quakecraft.get().removeActiveGame(this);
-    }
+	protected void onClose() {
+		Quakecraft.get().removeActiveGame(this);
+	}
 
-    public void tick() {
-        this.map.tick();
-    }
+	public void tick() {
+		this.map.tick();
+	}
 
-    /**
-     * Returns whether a player can open the specified door.
-     *
-     * @param door the door
-     * @param player the player
-     * @return {@code true} if the player can open the door, else {@code false}
-     */
-    public boolean canOpenDoor(QuakecraftDoor door, ServerPlayerEntity player) {
-        if (!this.getSpace().containsPlayer(player) || player.interactionManager.getGameMode() == GameMode.SPECTATOR)
-            return false;
-        GameTeam team = this.getOptParticipant(player).map(QuakecraftPlayer::getTeam).orElse(null);
-        return door.getTeam() == null || team == null || team == door.getTeam();
-    }
+	/**
+	 * Returns whether a player can open the specified door.
+	 *
+	 * @param door the door
+	 * @param player the player
+	 * @return {@code true} if the player can open the door, else {@code false}
+	 */
+	public boolean canOpenDoor(QuakecraftDoor door, ServerPlayerEntity player) {
+		if (!this.getSpace().containsPlayer(player) || player.interactionManager.getGameMode() == GameMode.SPECTATOR)
+			return false;
+		GameTeam team = this.getOptParticipant(player).map(QuakecraftPlayer::getTeam).orElse(null);
+		return door.getTeam() == null || team == null || team == door.getTeam();
+	}
 
-    public @Nullable QuakecraftPlayer getParticipant(ServerPlayerEntity player) {
-        return this.participants.get(player.getUuid());
-    }
+	public @Nullable QuakecraftPlayer getParticipant(ServerPlayerEntity player) {
+		return this.participants.get(player.getUuid());
+	}
 
-    public Optional<QuakecraftPlayer> getOptParticipant(ServerPlayerEntity player) {
-        return Optional.ofNullable(this.getParticipant(player));
-    }
+	public Optional<QuakecraftPlayer> getOptParticipant(ServerPlayerEntity player) {
+		return Optional.ofNullable(this.getParticipant(player));
+	}
 
-    public Collection<QuakecraftPlayer> getParticipants() {
-        return this.participants.values();
-    }
+	public Collection<QuakecraftPlayer> getParticipants() {
+		return this.participants.values();
+	}
 }

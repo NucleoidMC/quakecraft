@@ -42,52 +42,52 @@ import xyz.nucleoid.plasmid.game.common.team.GameTeam;
  * @since 1.5.0
  */
 public class TeamBarrierBlock extends Block implements VirtualBlock {
-    private final GameTeam team;
+	private final GameTeam team;
 
-    public TeamBarrierBlock(@Nullable GameTeam team) {
-        super(FabricBlockSettings.of(Material.BARRIER, MapColor.CLEAR).breakByHand(false).nonOpaque().collidable(true).dropsNothing());
-        this.team = team;
-    }
+	public TeamBarrierBlock(@Nullable GameTeam team) {
+		super(FabricBlockSettings.of(Material.BARRIER, MapColor.CLEAR).breakByHand(false).nonOpaque().collidable(true).dropsNothing());
+		this.team = team;
+	}
 
-    @Override
-    public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        if (this.team == null)
-            return VoxelShapes.empty();
+	@Override
+	public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+		if (this.team == null)
+			return VoxelShapes.empty();
 
-        if (context instanceof UsefulEntityShapeContext) {
-            var entity = ((UsefulEntityShapeContext) context).quakecraft$getEntity();
-            if (entity instanceof ServerPlayerEntity player && !((RayAccessor) entity).quakecraft$isRaycasting()) {
-                var quakecraft = Quakecraft.get();
-                if (quakecraft.isPlayerActive(player)) {
-                    for (var game : quakecraft.getActiveGames()) {
-                        if (game.getTeams().size() != 0 && game.getSpace().containsPlayer(player)) {
-                            var team = game.getOptParticipant(player).map(QuakecraftPlayer::getTeam).orElse(null);
-                            if (team != null) {
-                                if (team != this.team) {
-                                    return VoxelShapes.fullCube();
-                                } else {
-                                    return VoxelShapes.empty();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return VoxelShapes.empty();
-    }
+		if (context instanceof UsefulEntityShapeContext) {
+			var entity = ((UsefulEntityShapeContext) context).quakecraft$getEntity();
+			if (entity instanceof ServerPlayerEntity player && !((RayAccessor) entity).quakecraft$isRaycasting()) {
+				var quakecraft = Quakecraft.get();
+				if (quakecraft.isPlayerActive(player)) {
+					for (var game : quakecraft.getActiveGames()) {
+						if (game.getTeams().size() != 0 && game.getSpace().containsPlayer(player)) {
+							var team = game.getOptParticipant(player).map(QuakecraftPlayer::getTeam).orElse(null);
+							if (team != null) {
+								if (team != this.team) {
+									return VoxelShapes.fullCube();
+								} else {
+									return VoxelShapes.empty();
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return VoxelShapes.empty();
+	}
 
-    @Override
-    public Block getVirtualBlock() {
-        return Blocks.AIR;
-    }
+	@Override
+	public Block getVirtualBlock() {
+		return Blocks.AIR;
+	}
 
-    @Override
-    public BlockState getVirtualBlockState(BlockState state) {
-        return this.getVirtualBlock().getDefaultState();
-    }
+	@Override
+	public BlockState getVirtualBlockState(BlockState state) {
+		return this.getVirtualBlock().getDefaultState();
+	}
 
-    public static TeamBarrierBlock of(@Nullable GameTeam team) {
-        return new TeamBarrierBlock(team);
-    }
+	public static TeamBarrierBlock of(@Nullable GameTeam team) {
+		return new TeamBarrierBlock(team);
+	}
 }

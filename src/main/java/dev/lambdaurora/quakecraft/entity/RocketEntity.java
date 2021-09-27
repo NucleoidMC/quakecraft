@@ -33,79 +33,79 @@ import net.minecraft.world.explosion.Explosion;
  * @since 1.3.0
  */
 public class RocketEntity extends FireballEntity implements CritableEntity {
-    private boolean critical = false;
+	private boolean critical = false;
 
-    public RocketEntity(World world, LivingEntity owner, double velocityX, double velocityY, double velocityZ) {
-        super(world, owner, velocityX, velocityY, velocityZ, 1);
-    }
+	public RocketEntity(World world, LivingEntity owner, double velocityX, double velocityY, double velocityZ) {
+		super(world, owner, velocityX, velocityY, velocityZ, 1);
+	}
 
-    public void detonate() {
-        this.kill();
-        this.getEntityWorld().createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.75f : 1.75f,
-                Explosion.DestructionType.NONE);
-    }
+	public void detonate() {
+		this.kill();
+		this.getEntityWorld().createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.75f : 1.75f,
+				Explosion.DestructionType.NONE);
+	}
 
-    @Override
-    public void tick() {
-        super.tick();
+	@Override
+	public void tick() {
+		super.tick();
 
-        if (this.isCritical()) {
-            CritableEntity.spawnCritParticles(this.world, this.getX(), this.getY(), this.getZ(), this.getVelocity());
-        }
-    }
+		if (this.isCritical()) {
+			CritableEntity.spawnCritParticles(this.world, this.getX(), this.getY(), this.getZ(), this.getVelocity());
+		}
+	}
 
-    @Override
-    protected boolean isBurning() {
-        return false;
-    }
+	@Override
+	protected boolean isBurning() {
+		return false;
+	}
 
-    @Override
-    protected float getDrag() {
-        return 1.f;
-    }
+	@Override
+	protected float getDrag() {
+		return 1.f;
+	}
 
-    @Override
-    protected void onCollision(HitResult hitResult) {
-        if (hitResult.getType() == HitResult.Type.ENTITY) {
-            if (((EntityHitResult) hitResult).getEntity() instanceof RocketEntity) {
-                ((EntityHitResult) hitResult).getEntity().kill();
-                this.detonate();
-                return;
-            }
+	@Override
+	protected void onCollision(HitResult hitResult) {
+		if (hitResult.getType() == HitResult.Type.ENTITY) {
+			if (((EntityHitResult) hitResult).getEntity() instanceof RocketEntity) {
+				((EntityHitResult) hitResult).getEntity().kill();
+				this.detonate();
+				return;
+			}
 
-            this.onEntityHit((EntityHitResult) hitResult);
-        }
+			this.onEntityHit((EntityHitResult) hitResult);
+		}
 
-        this.detonate();
-    }
+		this.detonate();
+	}
 
-    @Override
-    protected void onEntityHit(EntityHitResult entityHitResult) {
-        super.onEntityHit(entityHitResult);
-    }
+	@Override
+	protected void onEntityHit(EntityHitResult entityHitResult) {
+		super.onEntityHit(entityHitResult);
+	}
 
-    @Override
-    public boolean damage(DamageSource source, float amount) {
-        if (this.isInvulnerableTo(source))
-            return false;
-        if (source.isExplosive())
-            return false;
-        this.detonate();
-        return true;
-    }
+	@Override
+	public boolean damage(DamageSource source, float amount) {
+		if (this.isInvulnerableTo(source))
+			return false;
+		if (source.isExplosive())
+			return false;
+		this.detonate();
+		return true;
+	}
 
-    @Override
-    public boolean isCritical() {
-        return this.critical;
-    }
+	@Override
+	public boolean isCritical() {
+		return this.critical;
+	}
 
-    @Override
-    public void setCritical(boolean critical) {
-        this.critical = critical;
-    }
+	@Override
+	public void setCritical(boolean critical) {
+		this.critical = critical;
+	}
 
-    @Override
-    public void rollCritical() {
-        this.setCritical(this.random.nextInt(4) == 0);
-    }
+	@Override
+	public void rollCritical() {
+		this.setCritical(this.random.nextInt(4) == 0);
+	}
 }
