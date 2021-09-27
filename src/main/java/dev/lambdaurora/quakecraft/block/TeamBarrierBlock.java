@@ -60,7 +60,7 @@ public class TeamBarrierBlock extends Block implements VirtualBlock {
 				var quakecraft = Quakecraft.get();
 				if (quakecraft.isPlayerActive(player)) {
 					for (var game : quakecraft.getActiveGames()) {
-						if (game.getTeams().size() != 0 && game.getSpace().containsPlayer(player)) {
+						if (game.getTeams().size() != 0 && game.getSpace().getPlayers().contains(player)) {
 							var team = game.getOptParticipant(player).map(QuakecraftPlayer::getTeam).orElse(null);
 							if (team != null) {
 								if (team != this.team) {

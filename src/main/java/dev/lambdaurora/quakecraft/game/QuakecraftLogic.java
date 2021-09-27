@@ -116,7 +116,7 @@ public abstract class QuakecraftLogic {
 	 * @return {@code true} if the player can open the door, else {@code false}
 	 */
 	public boolean canOpenDoor(QuakecraftDoor door, ServerPlayerEntity player) {
-		if (!this.getSpace().containsPlayer(player) || player.interactionManager.getGameMode() == GameMode.SPECTATOR)
+		if (!this.getSpace().getPlayers().contains(player) || player.interactionManager.getGameMode() == GameMode.SPECTATOR)
 			return false;
 		GameTeam team = this.getOptParticipant(player).map(QuakecraftPlayer::getTeam).orElse(null);
 		return door.getTeam() == null || team == null || team == door.getTeam();

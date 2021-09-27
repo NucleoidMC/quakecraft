@@ -81,7 +81,7 @@ public class QuakecraftWaiting {
 
 			QuakecraftWaiting waiting = new QuakecraftWaiting(game, world, map, config);
 
-			GameWaitingLobby.applyTo(game, config.players());
+			GameWaitingLobby.addTo(game, config.players());
 
 			game.listen(GameActivityEvents.REQUEST_START, waiting::requestStart);
 
@@ -125,7 +125,7 @@ public class QuakecraftWaiting {
 		var heldStack = player.getStackInHand(hand);
 
 		if (heldStack.isIn(ItemTags.BEDS)) {
-			this.game.getGameSpace().kickPlayer(player);
+			this.game.getGameSpace().getPlayers().kick(player);
 			return TypedActionResult.success(heldStack);
 		}
 

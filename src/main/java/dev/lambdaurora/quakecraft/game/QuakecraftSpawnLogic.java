@@ -57,7 +57,7 @@ public class QuakecraftSpawnLogic {
 	public void spawnPlayer(ServerPlayerEntity player) {
 		MapSpawn spawn = null;
 		int spawnIndex = -1;
-		int lowestPlayers = this.space.getPlayerCount();
+		int lowestPlayers = this.space.getPlayers().size();
 		for (int i = 0; i < this.map.getSpawnCount(); i++) {
 			if (this.spawnCache.contains(i))
 				continue;
