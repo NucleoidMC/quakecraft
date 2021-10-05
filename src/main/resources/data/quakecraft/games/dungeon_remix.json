@@ -1,6 +1,6 @@
 {
-  "type": "quakecraft:quakecraft_remix",
-  "name": "Quakecraft Dungeon Remix",
+  "type": "quakecraft:quakecraft",
+  "name": "Quakecraft - Dungeon Remix",
   "map": {
     "id": "quakecraft:dungeon_remix"
   },
