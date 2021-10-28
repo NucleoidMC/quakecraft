@@ -48,7 +48,7 @@ public class QuakecraftScoreboard {
 		this.sidebar.set(content -> {
 			var seconds = this.game.getTime() / 20;
 			content.add(new LiteralText("Time left: ")
-					.append(new LiteralText((seconds / 60) + ":" + (seconds % 60)).formatted(Formatting.GREEN))
+					.append(new LiteralText(String.format("%d:%02d", seconds / 60, seconds % 60)).formatted(Formatting.GREEN))
 			);
 			content.add(LiteralText.EMPTY);
 
