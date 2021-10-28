@@ -1,0 +1,13 @@
+{
+  "type": "quakecraft:quakecraft",
+  "name": "Quakecraft - Dungeon Remix",
+  "map": {
+    "id": "quakecraft:dungeon_remix"
+  },
+  "players": {
+    "min": 2,
+    "threshold": 4,
+    "max": 10
+  },
+  "teams": []
+}
