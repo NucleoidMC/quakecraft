@@ -1,0 +1,13 @@
+{
+  "type": "quakecraft:quakecraft",
+  "name": "quakecraft:live_fire",
+  "map": {
+    "id": "quakecraft:live_fire"
+  },
+  "players": {
+    "min": 2,
+    "threshold": 6,
+    "max": 8
+  },
+  "teams": []
+}
