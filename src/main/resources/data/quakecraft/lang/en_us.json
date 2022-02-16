@@ -1,5 +1,5 @@
 {
-  "game.quakecraft.quakecraft": "Quakecraft",
+  "gameType.quakecraft.quakecraft": "Quakecraft",
   "quakecraft.game.end.nobody_won": "Nobody has won!",
   "quakecraft.game.end.not_enough_players": "There is not enough players to continue the game.",
   "quakecraft.game.end.win": "%s has won!",
