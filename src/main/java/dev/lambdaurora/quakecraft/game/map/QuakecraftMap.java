@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 LambdAurora <aurora42lambda@gmail.com>
+ * Copyright (c) 2022 LambdAurora <email@lambdaurora.dev>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -42,7 +42,7 @@ import java.util.stream.Stream;
  * Represents the Quakecraft map.
  *
  * @author LambdAurora
- * @version 1.7.0
+ * @version 1.7.3
  * @since 1.0.0
  */
 public class QuakecraftMap {
@@ -130,10 +130,9 @@ public class QuakecraftMap {
 		if (game.getTeams().size() != 0) {
 			this.template.getMetadata().getRegions("team_barrier").forEach(region -> {
 				GameTeam team = game.getTeam(region.getData().getString("team"));
+
 				if (team != null) {
-					BlockState state = TeamBarrierBlock.of(team).getDefaultState();
-					region.getBounds().forEach(pos -> game.world().setBlockState(pos, state,
-							Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL));
+					region.getBounds().forEach(pos -> TeamBarrierBlock.createAt(game.world(), pos, team));
 				}
 			});
 		}

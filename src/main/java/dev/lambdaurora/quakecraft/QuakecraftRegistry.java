@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 LambdAurora <aurora42lambda@gmail.com>
+ * Copyright (c) 2022 LambdAurora <email@lambdaurora.dev>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,9 +18,13 @@
 package dev.lambdaurora.quakecraft;
 
 import dev.lambdaurora.quakecraft.block.LaunchPadBlock;
+import dev.lambdaurora.quakecraft.block.TeamBarrierBlock;
+import dev.lambdaurora.quakecraft.block.entity.TeamBarrierBlockEntity;
+import eu.pb4.polymer.api.block.PolymerBlockUtils;
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.util.Identifier;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.util.registry.Registry;
 
 /**
@@ -29,7 +33,7 @@ import net.minecraft.util.registry.Registry;
  * Contains static definitions of custom blocks, items, etc.
  *
  * @author LambdAurora
- * @version 1.6.1
+ * @version 1.7.3
  * @since 1.6.1
  */
 public class QuakecraftRegistry {
@@ -46,15 +50,26 @@ public class QuakecraftRegistry {
 	public static LaunchPadBlock WARPED_LAUNCHPAD_BLOCK = register("warped_launchpad", new LaunchPadBlock(Blocks.WARPED_PRESSURE_PLATE));
 	public static LaunchPadBlock POLISHED_BLACKSTONE_LAUNCHPAD_BLOCK = register("polished_blackstone_launchpad", new LaunchPadBlock(Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE));
 
+	public static TeamBarrierBlock TEAM_BARRIER_BLOCK = register("team_barrier", new TeamBarrierBlock());
+
+	public static BlockEntityType<TeamBarrierBlockEntity> TEAM_BARRIER_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE,
+			Quakecraft.id("team_barrier"),
+			FabricBlockEntityTypeBuilder.create(TeamBarrierBlockEntity::new, TEAM_BARRIER_BLOCK).build()
+	);
+
 	private static <T extends Block> T register(String identifier, T block) {
 		return register(Registry.BLOCK, identifier, block);
 	}
 
-	private static <P, T extends P> T register(Registry<P> registry, String identifier, T item) {
-		return Registry.register(registry, new Identifier(Quakecraft.NAMESPACE, identifier), item);
+	private static <P, T extends P> T register(Registry<P> registry, String name, T item) {
+		return Registry.register(registry, Quakecraft.id(name), item);
 	}
 
 	public static void init() {
 		Quakecraft.get().log("Registered custom blocks, items...");
+	}
+
+	static {
+		PolymerBlockUtils.registerBlockEntity(TEAM_BARRIER_BLOCK_ENTITY);
 	}
 }

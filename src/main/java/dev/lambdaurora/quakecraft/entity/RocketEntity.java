@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 LambdAurora <aurora42lambda@gmail.com>
+ * Copyright (c) 2022 LambdAurora <email@lambdaurora.dev>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -41,7 +41,7 @@ public class RocketEntity extends FireballEntity implements CritableEntity {
 
 	public void detonate() {
 		this.kill();
-		this.getEntityWorld().createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.75f : 1.75f,
+		this.getWorld().createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.75f : 1.75f,
 				Explosion.DestructionType.NONE);
 	}
 

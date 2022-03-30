@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "dev.lambdaurora.quakecraft.mixin",
-  "compatibilityLevel": "JAVA_11",
+  "compatibilityLevel": "JAVA_17",
   "mixins": [
     "DirectionAccessor",
     "EntityMixin",

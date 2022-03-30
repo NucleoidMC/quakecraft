@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 LambdAurora <aurora42lambda@gmail.com>
+ * Copyright (c) 2022 LambdAurora <email@lambdaurora.dev>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,7 +19,7 @@ package dev.lambdaurora.quakecraft.block;
 
 import dev.lambdaurora.quakecraft.Quakecraft;
 import dev.lambdaurora.quakecraft.QuakecraftRegistry;
-import eu.pb4.polymer.block.VirtualBlock;
+import eu.pb4.polymer.api.block.PolymerBlock;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.*;
@@ -46,7 +46,7 @@ import net.minecraft.world.World;
  * @version 1.7.0
  * @since 1.6.1
  */
-public class LaunchPadBlock extends Block implements VirtualBlock {
+public class LaunchPadBlock extends Block implements PolymerBlock {
 	public static final int POWER_MIN = 1;
 	public static final int POWER_MAX = 8;
 	public static final IntProperty POWER = IntProperty.of("power", POWER_MIN, POWER_MAX);
@@ -54,7 +54,7 @@ public class LaunchPadBlock extends Block implements VirtualBlock {
 	private final Block proxy;
 
 	public LaunchPadBlock(Block proxy) {
-		super(FabricBlockSettings.of(Material.AIR).breakByHand(false).noCollision().dropsNothing());
+		super(FabricBlockSettings.of(Material.AIR).noCollision().dropsNothing());
 		this.setDefaultState(this.stateManager.getDefaultState()
 				.with(Properties.HORIZONTAL_FACING, Direction.NORTH)
 				.with(POWER, 3));
@@ -113,13 +113,8 @@ public class LaunchPadBlock extends Block implements VirtualBlock {
 	}
 
 	@Override
-	public Block getVirtualBlock() {
+	public Block getPolymerBlock(BlockState state) {
 		return this.proxy;
-	}
-
-	@Override
-	public BlockState getVirtualBlockState(BlockState state) {
-		return this.getVirtualBlock().getDefaultState();
 	}
 
 	@Override
@@ -130,7 +125,7 @@ public class LaunchPadBlock extends Block implements VirtualBlock {
 	public static BlockState fromNbt(NbtCompound data) {
 		Block block = QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK;
 		if (data.contains("type", NbtType.STRING)) {
-			block = Registry.BLOCK.getOrEmpty(Quakecraft.mc(data.getString("type") + "_launchpad")).orElse(QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK);
+			block = Registry.BLOCK.getOrEmpty(Quakecraft.id(data.getString("type") + "_launchpad")).orElse(QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK);
 		}
 		var state = block.getDefaultState();
 		Direction direction = Quakecraft.getDirectionByName(data.getString("direction"));

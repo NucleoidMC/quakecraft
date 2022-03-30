@@ -1,9 +1,10 @@
 plugins {
-	id 'fabric-loom' version '0.11.+'
-	id 'io.github.juuxel.loom-quiltflower' version '1.6.0'
+	id 'fabric-loom' version '0.12.+'
+	id 'io.github.juuxel.loom-quiltflower' version '1.6.+'
+	id 'org.quiltmc.quilt-mappings-on-loom' version '4.0.0'
 	id 'java-library'
 	id 'maven-publish'
-	id 'org.cadixdev.licenser' version '0.6.+'
+	id 'org.quiltmc.gradle.licenser' version '1.1.+'
 }
 
 group = project.maven_group
@@ -11,7 +12,7 @@ version = "${project.mod_version}+${getMCVersionString()}"
 archivesBaseName = project.archives_base_name
 
 // This field defines the Java version your mod target.
-def targetJavaVersion = 16
+def targetJavaVersion = 17
 
 boolean isMCVersionNonRelease() {
 	def mc = libs.versions.minecraft.get()
@@ -51,8 +52,11 @@ configurations {
 
 dependencies {
 	minecraft libs.minecraft
-	mappings libs.minecraft.mappings
 	modImplementation libs.fabric.loader
+
+	mappings(loom.layered {
+		addLayer(quiltMappings.mappings(libs.minecraft.mappings.get().toString() + ":v2"))
+	})
 
 	// Fabric API.
 	modImplementation libs.fabric.api
@@ -89,6 +93,6 @@ jar {
 }
 
 license {
-	header file('HEADER')
+	rule file('HEADER')
 	include '**/*.java'
 }

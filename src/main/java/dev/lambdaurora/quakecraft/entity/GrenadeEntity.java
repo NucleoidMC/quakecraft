@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 LambdAurora <aurora42lambda@gmail.com>
+ * Copyright (c) 2022 LambdAurora <email@lambdaurora.dev>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -106,7 +106,7 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity {
 
 	public void detonate() {
 		this.kill();
-		this.getEntityWorld().createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.5f : 1.5f,
+		this.getWorld().createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.5f : 1.5f,
 				Explosion.DestructionType.NONE);
 	}
 
@@ -141,7 +141,7 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity {
 			this.leftOwner = this.checkOwnerLeft();
 		}
 
-		var hitResult = ProjectileUtil.getEntityCollision(this.getEntityWorld(), this, this.getPos(), this.getPos().add(this.getVelocity()),
+		var hitResult = ProjectileUtil.getEntityCollision(this.getWorld(), this, this.getPos(), this.getPos().add(this.getVelocity()),
 				this.getBoundingBox().stretch(this.getVelocity()).expand(1.0D), entity -> {
 					if (!entity.isSpectator() && entity.isAlive() && entity.collides()) {
 						Entity entity2 = this.getOwner();

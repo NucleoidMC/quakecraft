@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 LambdAurora <aurora42lambda@gmail.com>
+ * Copyright (c) 2022 LambdAurora <email@lambdaurora.dev>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -62,7 +62,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
 	private boolean left = false;
 
 	public QuakecraftPlayer(ServerPlayerEntity player, GameTeam team) {
-		this.world = player.getServerWorld();
+		this.world = player.getWorld();
 		this.uuid = player.getUuid();
 		this.name = player.getEntityName();
 		this.weapons.add(Weapons.ADVANCED_SHOOTER);

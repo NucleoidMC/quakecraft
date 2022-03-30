@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 LambdAurora <aurora42lambda@gmail.com>
+ * Copyright (c) 2022 LambdAurora <email@lambdaurora.dev>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -37,7 +37,7 @@ import java.util.Optional;
  * Represents a door which opens/closes automatically.
  *
  * @author LambdAurora
- * @version 1.7.0
+ * @version 1.7.3
  * @since 1.5.0
  */
 public class QuakecraftDoor {
@@ -45,7 +45,6 @@ public class QuakecraftDoor {
 	private final TemplateRegion region;
 	private final BlockBounds bounds;
 	private final BlockBounds detectionBounds;
-	private final BlockState openState;
 	private final BlockState closedState;
 	private final GameTeam team;
 	private boolean open = false;
@@ -58,7 +57,6 @@ public class QuakecraftDoor {
 		this.region = region;
 		this.bounds = bounds;
 		this.detectionBounds = detectionBounds;
-		this.openState = TeamBarrierBlock.of(team).getDefaultState();
 		this.closedState = closedState;
 		this.team = team;
 	}
@@ -130,8 +128,7 @@ public class QuakecraftDoor {
 	 * Opens the door.
 	 */
 	public void open() {
-		this.getBounds().forEach(pos -> this.game.world().setBlockState(pos, this.openState,
-				Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL));
+		this.getBounds().forEach(pos -> TeamBarrierBlock.createAt(this.game.world(), pos, this.team));
 		this.open = true;
 	}
 

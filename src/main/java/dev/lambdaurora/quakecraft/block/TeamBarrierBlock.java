@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 LambdAurora <aurora42lambda@gmail.com>
+ * Copyright (c) 2022 LambdAurora <email@lambdaurora.dev>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,13 +18,17 @@
 package dev.lambdaurora.quakecraft.block;
 
 import dev.lambdaurora.quakecraft.Quakecraft;
+import dev.lambdaurora.quakecraft.QuakecraftRegistry;
+import dev.lambdaurora.quakecraft.block.entity.TeamBarrierBlockEntity;
 import dev.lambdaurora.quakecraft.game.QuakecraftPlayer;
 import dev.lambdaurora.quakecraft.util.RayAccessor;
 import dev.lambdaurora.quakecraft.util.UsefulEntityShapeContext;
-import eu.pb4.polymer.block.VirtualBlock;
+import eu.pb4.polymer.api.block.PolymerBlock;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
@@ -38,20 +42,21 @@ import xyz.nucleoid.plasmid.game.common.team.GameTeam;
  * The block collisions only with players of a different team.
  *
  * @author LambdAurora
- * @version 1.7.0
+ * @version 1.7.3
  * @since 1.5.0
  */
-public class TeamBarrierBlock extends Block implements VirtualBlock {
-	private final GameTeam team;
-
-	public TeamBarrierBlock(@Nullable GameTeam team) {
-		super(FabricBlockSettings.of(Material.BARRIER, MapColor.CLEAR).breakByHand(false).nonOpaque().collidable(true).dropsNothing());
-		this.team = team;
+public class TeamBarrierBlock extends BlockWithEntity implements PolymerBlock {
+	public TeamBarrierBlock() {
+		super(FabricBlockSettings.of(Material.BARRIER, MapColor.CLEAR).strength(-1.0F, 3600000.0F)
+				.nonOpaque().collidable(true).dropsNothing());
 	}
 
 	@Override
 	public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		if (this.team == null)
+		TeamBarrierBlockEntity blockEntity = QuakecraftRegistry.TEAM_BARRIER_BLOCK_ENTITY.get(world, pos);
+		GameTeam team = blockEntity == null ? null : blockEntity.getTeam();
+
+		if (team == null)
 			return VoxelShapes.empty();
 
 		if (context instanceof UsefulEntityShapeContext) {
@@ -61,9 +66,9 @@ public class TeamBarrierBlock extends Block implements VirtualBlock {
 				if (quakecraft.isPlayerActive(player)) {
 					for (var game : quakecraft.getActiveGames()) {
 						if (game.getTeams().size() != 0 && game.getSpace().getPlayers().contains(player)) {
-							var team = game.getOptParticipant(player).map(QuakecraftPlayer::getTeam).orElse(null);
-							if (team != null) {
-								if (team != this.team) {
+							var pTeam = game.getOptParticipant(player).map(QuakecraftPlayer::getTeam).orElse(null);
+							if (pTeam != null) {
+								if (team != pTeam) {
 									return VoxelShapes.fullCube();
 								} else {
 									return VoxelShapes.empty();
@@ -78,16 +83,21 @@ public class TeamBarrierBlock extends Block implements VirtualBlock {
 	}
 
 	@Override
-	public Block getVirtualBlock() {
+	public Block getPolymerBlock(BlockState state) {
 		return Blocks.AIR;
 	}
 
 	@Override
-	public BlockState getVirtualBlockState(BlockState state) {
-		return this.getVirtualBlock().getDefaultState();
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+		return QuakecraftRegistry.TEAM_BARRIER_BLOCK_ENTITY.instantiate(pos, state);
 	}
 
-	public static TeamBarrierBlock of(@Nullable GameTeam team) {
-		return new TeamBarrierBlock(team);
+	public static void createAt(ServerWorld world, BlockPos pos, @Nullable GameTeam team) {
+		var block = QuakecraftRegistry.TEAM_BARRIER_BLOCK;
+
+		world.setBlockState(pos, block.getDefaultState(),
+				Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL);
+		var blockEntity = QuakecraftRegistry.TEAM_BARRIER_BLOCK_ENTITY.get(world, pos);
+		blockEntity.setTeam(team);
 	}
 }

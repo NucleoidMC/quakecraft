@@ -1,4 +1,4 @@
-accessWidener	v1	named
+accessWidener	v2	named
 
 accessible method net/minecraft/entity/decoration/ArmorStandEntity setHideBasePlate (Z)V
 accessible method net/minecraft/entity/decoration/ArmorStandEntity setMarker (Z)V

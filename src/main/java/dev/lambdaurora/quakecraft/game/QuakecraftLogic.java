@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 LambdAurora <aurora42lambda@gmail.com>
+ * Copyright (c) 2022 LambdAurora <email@lambdaurora.dev>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -38,7 +38,7 @@ import java.util.UUID;
  * Represents an instance of Quakecraft.
  *
  * @author LambdAurora
- * @version 1.7.0
+ * @version 1.7.3
  * @since 1.5.0
  */
 public abstract class QuakecraftLogic {
@@ -86,7 +86,7 @@ public abstract class QuakecraftLogic {
 		if (this.getTeams().size() == 0)
 			return null;
 		for (var team : this.getTeams()) {
-			if (team.key().equals(key))
+			if (team.key().id().equals(key))
 				return team;
 		}
 		return null;

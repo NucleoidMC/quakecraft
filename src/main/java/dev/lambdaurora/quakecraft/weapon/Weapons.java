@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 LambdAurora <aurora42lambda@gmail.com>
+ * Copyright (c) 2022 LambdAurora <email@lambdaurora.dev>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -26,18 +26,18 @@ public final class Weapons {
 	}
 
 	public static final ShooterWeapon BASE_SHOOTER = new ShooterWeapon(
-			Quakecraft.mc("base_railgun"),
+			Quakecraft.id("base_railgun"),
 			Items.STONE_HOE,
 			new Weapon.Settings(2 * 20 + 10).secondaryCooldown(4 * 20)
 	);
 	public static final ShooterWeapon ADVANCED_SHOOTER = new ShooterWeapon(
-			Quakecraft.mc("advanced_railgun"),
+			Quakecraft.id("advanced_railgun"),
 			Items.IRON_HOE,
 			new Weapon.Settings(25).secondaryCooldown(4 * 20)
 	);
 
 	public static final RocketLauncherWeapon ROCKET_LAUNCHER = new RocketLauncherWeapon(
-			Quakecraft.mc("rocket_launcher"),
+			Quakecraft.id("rocket_launcher"),
 			Items.IRON_AXE,
 			new Weapon.Settings(35)
 					.ammoSize(20)
@@ -45,7 +45,7 @@ public final class Weapons {
 	);
 
 	public static final GrenadeWeapon GRENADE_LAUNCHER = new GrenadeWeapon(
-			Quakecraft.mc("grenade_launcher"),
+			Quakecraft.id("grenade_launcher"),
 			Items.BLAZE_ROD,
 			new Weapon.Settings(45)
 					.ammoSize(16)

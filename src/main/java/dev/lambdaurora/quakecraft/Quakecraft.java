@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 LambdAurora <aurora42lambda@gmail.com>
+ * Copyright (c) 2022 LambdAurora <email@lambdaurora.dev>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -47,7 +47,7 @@ import java.util.Locale;
  * Represents the Quakecraft minigame mod.
  *
  * @author LambdAurora
- * @version 1.6.1
+ * @version 1.7.3
  * @since 1.0.0
  */
 public class Quakecraft implements ModInitializer {
@@ -104,7 +104,7 @@ public class Quakecraft implements ModInitializer {
 		return INSTANCE;
 	}
 
-	public static Identifier mc(@NotNull String name) {
+	public static Identifier id(@NotNull String name) {
 		return new Identifier(NAMESPACE, name);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 LambdAurora <aurora42lambda@gmail.com>
+ * Copyright (c) 2022 LambdAurora <email@lambdaurora.dev>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -57,7 +57,7 @@ public final class RayUtils {
 	 * @return the absolute distance between the source and the most far hit. The sign bit is used as a boolean to represent a success or not
 	 */
 	public static double raycastEntities(Entity source, double range, double margin, Predicate<Entity> predicate, Consumer<Entity> consumer) {
-		World world = source.getEntityWorld();
+		World world = source.getWorld();
 
 		final Vec3d origin = source.getCameraPosVec(1.0F);
 		final Vec3d delta = source.getRotationVec(1.0F).multiply(range);
@@ -113,7 +113,7 @@ public final class RayUtils {
 	 * Thanks FarmyFeud (https://github.com/NucleoidMC/farmy-feud/blob/1.16.2/src/main/java/xyz/nucleoid/farmyfeud/game/active/EntityRayTrace.java)
 	 */
 	public static @Nullable EntityHitResult raycastEntity(Entity source, double range, double margin, Predicate<Entity> predicate) {
-		World world = source.getEntityWorld();
+		World world = source.getWorld();
 
 		Vec3d origin = source.getCameraPosVec(1.0F);
 		Vec3d delta = source.getRotationVec(1.0F).multiply(range);

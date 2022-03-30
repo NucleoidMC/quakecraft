@@ -10,7 +10,7 @@
     "max": 16
   },
   "teams": [
-    { "key": "red", "display": "Red", "color": "red" },
-    { "key": "blue", "display": "Blue", "color": "blue" }
+    { "key": "red", "name": "Red", "color": "red" },
+    { "key": "blue", "name": "Blue", "color": "blue" }
   ]
 }
