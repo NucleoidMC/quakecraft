@@ -28,9 +28,7 @@ import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.world.GameMode;
@@ -138,11 +136,11 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
 		this.kills += this.killsWithinATick;
 		if (this.killsWithinATick >= 2) {
 			if (this.killsWithinATick <= 5) {
-				world.getPlayers().sendMessage(new TranslatableText("quakecraft.game.special.kills." + this.killsWithinATick,
+				world.getPlayers().sendMessage(Text.translatable("quakecraft.game.special.kills." + this.killsWithinATick,
 						this.getDisplayName())
 						.formatted(Formatting.RED, Formatting.BOLD));
 			} else {
-				world.getPlayers().sendMessage(new TranslatableText("quakecraft.game.special.kills.lot", this.getDisplayName())
+				world.getPlayers().sendMessage(Text.translatable("quakecraft.game.special.kills.lot", this.getDisplayName())
 						.formatted(Formatting.RED, Formatting.BOLD));
 			}
 		}
@@ -156,9 +154,9 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
 			if (secondaryCooldown > 0) {
 				var bar = "▊▊▊▊▊▊▊▊▊▊";
 				int progress = (int) (secondaryCooldown / (double) heldWeapon.secondaryCooldown * bar.length());
-				this.player.sendMessage(new LiteralText("[").formatted(Formatting.GRAY)
-						.append(new LiteralText(bar.substring(progress)).formatted(Formatting.GREEN))
-						.append(new LiteralText(bar.substring(0, progress)).formatted(Formatting.RED))
+				this.player.sendMessage(Text.literal("[").formatted(Formatting.GRAY)
+						.append(Text.literal(bar.substring(progress)).formatted(Formatting.GREEN))
+						.append(Text.literal(bar.substring(0, progress)).formatted(Formatting.RED))
 						.append("]"), true);
 			}
 		}
@@ -240,7 +238,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
 		if (this.player != null)
 			return this.player.getDisplayName();
 
-		return new LiteralText(this.name);
+		return Text.literal(this.name);
 	}
 
 	public @Nullable ServerPlayerEntity getPlayer() {

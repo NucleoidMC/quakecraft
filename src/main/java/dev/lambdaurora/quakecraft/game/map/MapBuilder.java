@@ -19,8 +19,7 @@ package dev.lambdaurora.quakecraft.game.map;
 
 import dev.lambdaurora.quakecraft.Quakecraft;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import xyz.nucleoid.map_templates.BlockBounds;
 import xyz.nucleoid.map_templates.MapTemplate;
 import xyz.nucleoid.map_templates.MapTemplateSerializer;
@@ -43,7 +42,7 @@ public record MapBuilder(MapConfig config) {
 		try {
 			template = MapTemplateSerializer.loadFromResource(server, this.config.id());
 		} catch (IOException e) {
-			throw new GameOpenException(new TranslatableText("quakecraft.error.load_map", this.config.id().toString()), e);
+			throw new GameOpenException(Text.translatable("quakecraft.error.load_map", this.config.id().toString()), e);
 		}
 
 		BlockBounds spawn = template.getMetadata().getFirstRegionBounds("waiting_spawn");
@@ -51,7 +50,7 @@ public record MapBuilder(MapConfig config) {
 			spawn = template.getMetadata().getFirstRegionBounds("spawn");
 			if (spawn == null) {
 				Quakecraft.get().logger.error("No spawn is defined on the map! The game will not work.");
-				throw new GameOpenException(new LiteralText("No spawn defined."));
+				throw new GameOpenException(Text.literal("No spawn defined."));
 			}
 		}
 
@@ -59,7 +58,7 @@ public record MapBuilder(MapConfig config) {
 
 		if (spawns.size() == 0) {
 			Quakecraft.get().logger.error("No player spawns are defined on the map! The game will not work.");
-			throw new GameOpenException(new LiteralText("No player spawn defined."));
+			throw new GameOpenException(Text.literal("No player spawn defined."));
 		}
 
 		var map = new QuakecraftMap(template, spawn, spawns);

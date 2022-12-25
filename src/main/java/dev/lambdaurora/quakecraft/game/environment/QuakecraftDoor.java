@@ -23,6 +23,7 @@ import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -171,7 +172,7 @@ public class QuakecraftDoor {
 		// A block must be explicitly defined.
 		if (!region.getData().getCompound("block").contains("Name"))
 			return Optional.empty();
-		BlockState closedState = NbtHelper.toBlockState(region.getData().getCompound("block"));
+		BlockState closedState = NbtHelper.toBlockState(Registries.BLOCK.asLookup(), region.getData().getCompound("block"));
 
 		GameTeam team = game.getTeam(region.getData().getString("team"));
 

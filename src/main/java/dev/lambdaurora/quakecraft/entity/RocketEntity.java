@@ -42,7 +42,7 @@ public class RocketEntity extends FireballEntity implements CritableEntity {
 	public void detonate() {
 		this.kill();
 		this.getWorld().createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.75f : 1.75f,
-				Explosion.DestructionType.NONE);
+				World.ExplosionSourceType.NONE);
 	}
 
 	@Override

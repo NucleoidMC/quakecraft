@@ -25,10 +25,10 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -207,7 +207,7 @@ public final class RayUtils {
 			double y = origin.y + stepY * d;
 			double z = origin.z + stepZ * d;
 
-			world.spawnParticles(new DustParticleEffect(new Vec3f(1.f, 0.647f, 0.f), .75f),
+			world.spawnParticles(new DustParticleEffect(new Vector3f(1.f, 0.647f, 0.f), .75f),
 					x, y, z, 3, 0.f, 0.f, 0.f, 1.f);
 		}
 	}

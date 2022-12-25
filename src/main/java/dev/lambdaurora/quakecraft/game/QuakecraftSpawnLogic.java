@@ -23,7 +23,7 @@ import dev.lambdaurora.quakecraft.game.map.QuakecraftMap;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
@@ -87,7 +87,7 @@ public class QuakecraftSpawnLogic {
 		player.getInventory().clear();
 
 		var leaveGame = ItemStackBuilder.of(Items.RED_BED)
-				.setName(new LiteralText("Leave Lobby").styled(style -> style.withItalic(false).withColor(Formatting.YELLOW)))
+				.setName(Text.literal("Leave Lobby").styled(style -> style.withItalic(false).withColor(Formatting.YELLOW)))
 				.build();
 		player.getInventory().insertStack(8, leaveGame);
 

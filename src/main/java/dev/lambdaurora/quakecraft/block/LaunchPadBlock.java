@@ -19,13 +19,14 @@ package dev.lambdaurora.quakecraft.block;
 
 import dev.lambdaurora.quakecraft.Quakecraft;
 import dev.lambdaurora.quakecraft.QuakecraftRegistry;
-import eu.pb4.polymer.api.block.PolymerBlock;
+import eu.pb4.polymer.core.api.block.PolymerBlock;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.IntProperty;
@@ -34,7 +35,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
@@ -125,7 +126,7 @@ public class LaunchPadBlock extends Block implements PolymerBlock {
 	public static BlockState fromNbt(NbtCompound data) {
 		Block block = QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK;
 		if (data.contains("type", NbtType.STRING)) {
-			block = Registry.BLOCK.getOrEmpty(Quakecraft.id(data.getString("type") + "_launchpad")).orElse(QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK);
+			block = Registries.BLOCK.getOrEmpty(Quakecraft.id(data.getString("type") + "_launchpad")).orElse(QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK);
 		}
 		var state = block.getDefaultState();
 		Direction direction = Quakecraft.getDirectionByName(data.getString("direction"));

@@ -19,17 +19,17 @@ pluginManagement {
 dependencyResolutionManagement {
 	versionCatalogs {
 		libs {
-			def mc = "1.18.2"
-			def mappings = 21
+			def mc = "1.19.3"
+			def mappings = 9
 
 			version("minecraft", mc)
 			version("mappings", "${mc}+build.${mappings}")
 
 			library("minecraft", "com.mojang", "minecraft").versionRef("minecraft")
 			library("minecraft-mappings", "org.quiltmc", "quilt-mappings").versionRef("mappings")
-			library("fabric-loader", "net.fabricmc:fabric-loader:0.13.3")
+			library("fabric-loader", "net.fabricmc:fabric-loader:0.14.11")
 
-			library("fabric-api", "net.fabricmc.fabric-api:fabric-api:0.48.0+${mc}")
+			library("fabric-api", "net.fabricmc.fabric-api:fabric-api:0.68.1+${mc}")
 			library("nucleoid-plasmid", "xyz.nucleoid:plasmid:0.5+${mc}-SNAPSHOT")
 		}
 	}

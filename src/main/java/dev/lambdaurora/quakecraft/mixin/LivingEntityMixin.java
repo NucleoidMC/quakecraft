@@ -62,7 +62,7 @@ public abstract class LivingEntityMixin extends Entity {
 			method = "travel",
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/entity/LivingEntity;method_26317(DZLnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/Vec3d;",
+					target = "Lnet/minecraft/entity/LivingEntity;m_gfhvqjeo(DZLnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/Vec3d;",
 					shift = At.Shift.BEFORE
 			)
 	)

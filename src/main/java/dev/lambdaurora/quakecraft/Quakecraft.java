@@ -20,7 +20,6 @@ package dev.lambdaurora.quakecraft;
 import dev.lambdaurora.quakecraft.game.QuakecraftConfig;
 import dev.lambdaurora.quakecraft.game.QuakecraftLogic;
 import dev.lambdaurora.quakecraft.game.QuakecraftWaiting;
-import dev.lambdaurora.quakecraft.mixin.DirectionAccessor;
 import dev.lambdaurora.quakecraft.mixin.FireworkRocketEntityAccessor;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -115,7 +114,7 @@ public class Quakecraft implements ModInitializer {
 	 * @since 1.1.0
 	 */
 	public static void applySpeed(ServerPlayerEntity player) {
-		var movementSpeedAttribute = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+		var movementSpeedAttribute = player.getAttributes().m_rkfdyugp(EntityAttributes.GENERIC_MOVEMENT_SPEED);
 		if (movementSpeedAttribute != null) {
 			movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
 			movementSpeedAttribute.addTemporaryModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
@@ -129,14 +128,14 @@ public class Quakecraft implements ModInitializer {
 	 * @since 1.1.0
 	 */
 	public static void removeSpeed(ServerPlayerEntity player) {
-		var movementSpeedAttribute = player.getAttributes().getCustomInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+		var movementSpeedAttribute = player.getAttributes().m_rkfdyugp(EntityAttributes.GENERIC_MOVEMENT_SPEED);
 		if (movementSpeedAttribute != null) {
 			movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
 		}
 	}
 
 	public static Direction getDirectionByName(@Nullable String name) {
-		return name == null ? null : DirectionAccessor.quakecraft$getNameMap().get(name.toLowerCase(Locale.ROOT));
+		return name == null ? null : Direction.byName(name.toLowerCase(Locale.ROOT));
 	}
 
 	public static void spawnFirework(ServerWorld world, double x, double y, double z, int[] colors, boolean silent, int lifetime) {

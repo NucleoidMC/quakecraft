@@ -1,7 +1,7 @@
 plugins {
 	id 'fabric-loom' version '0.12.+'
 	id 'io.github.juuxel.loom-quiltflower' version '1.6.+'
-	id 'org.quiltmc.quilt-mappings-on-loom' version '4.0.0'
+	id 'org.quiltmc.quilt-mappings-on-loom' version '4.2.3'
 	id 'java-library'
 	id 'maven-publish'
 	id 'org.quiltmc.gradle.licenser' version '1.1.+'
@@ -54,9 +54,12 @@ dependencies {
 	minecraft libs.minecraft
 	modImplementation libs.fabric.loader
 
-	mappings(loom.layered {
-		addLayer(quiltMappings.mappings(libs.minecraft.mappings.get().toString() + ":v2"))
-	})
+	/*mappings(loom.layered {
+		addLayer(quiltMappings.mappings(libs.minecraft.mappings.get().toString() + ":intermediary-v2"))
+	})*/
+
+	mappings "org.quiltmc:quilt-mappings:1.19.3+build.9:intermediary-v2"
+
 
 	// Fabric API.
 	modImplementation libs.fabric.api

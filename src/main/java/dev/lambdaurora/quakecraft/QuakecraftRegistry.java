@@ -20,12 +20,13 @@ package dev.lambdaurora.quakecraft;
 import dev.lambdaurora.quakecraft.block.LaunchPadBlock;
 import dev.lambdaurora.quakecraft.block.TeamBarrierBlock;
 import dev.lambdaurora.quakecraft.block.entity.TeamBarrierBlockEntity;
-import eu.pb4.polymer.api.block.PolymerBlockUtils;
+import eu.pb4.polymer.core.api.block.PolymerBlockUtils;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 
 /**
  * The Quakecraft registry.
@@ -52,13 +53,13 @@ public class QuakecraftRegistry {
 
 	public static TeamBarrierBlock TEAM_BARRIER_BLOCK = register("team_barrier", new TeamBarrierBlock());
 
-	public static BlockEntityType<TeamBarrierBlockEntity> TEAM_BARRIER_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE,
+	public static BlockEntityType<TeamBarrierBlockEntity> TEAM_BARRIER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			Quakecraft.id("team_barrier"),
 			FabricBlockEntityTypeBuilder.create(TeamBarrierBlockEntity::new, TEAM_BARRIER_BLOCK).build()
 	);
 
 	private static <T extends Block> T register(String identifier, T block) {
-		return register(Registry.BLOCK, identifier, block);
+		return register(Registries.BLOCK, identifier, block);
 	}
 
 	private static <P, T extends P> T register(Registry<P> registry, String name, T item) {

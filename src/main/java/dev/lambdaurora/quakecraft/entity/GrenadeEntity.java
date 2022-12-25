@@ -107,7 +107,7 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity {
 	public void detonate() {
 		this.kill();
 		this.getWorld().createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.5f : 1.5f,
-				Explosion.DestructionType.NONE);
+				World.ExplosionSourceType.NONE);
 	}
 
 	@Override

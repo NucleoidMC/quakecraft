@@ -21,7 +21,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.TranslatableText;
+
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -113,7 +114,7 @@ public class Weapon {
 	 */
 	public final ItemStack build(ServerPlayerEntity player) {
 		return this.stackBuilder()
-				.setName(new TranslatableText("weapon." + this.identifier.getNamespace() + "." + this.identifier.getPath())
+				.setName(Text.translatable("weapon." + this.identifier.getNamespace() + "." + this.identifier.getPath())
 						.styled(style -> style.withItalic(false)))
 				.build();
 	}

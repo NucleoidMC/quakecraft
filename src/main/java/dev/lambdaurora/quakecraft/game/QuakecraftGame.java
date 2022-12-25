@@ -21,6 +21,7 @@ import com.google.common.collect.Multimap;
 import dev.lambdaurora.quakecraft.PlayerAction;
 import dev.lambdaurora.quakecraft.Quakecraft;
 import dev.lambdaurora.quakecraft.entity.GrenadeEntity;
+import dev.lambdaurora.quakecraft.entity.RocketEntity;
 import dev.lambdaurora.quakecraft.game.map.QuakecraftMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -28,11 +29,12 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -166,12 +168,12 @@ public class QuakecraftGame extends QuakecraftLogic {
 			this.time--;
 
 			if (activePlayer[0] <= 1) {
-				this.getSpace().getPlayers().sendMessage(new TranslatableText("quakecraft.game.end.not_enough_players").formatted(Formatting.RED));
+				this.getSpace().getPlayers().sendMessage(Text.translatable("quakecraft.game.end.not_enough_players").formatted(Formatting.RED));
 				this.getSpace().close(GameCloseReason.CANCELED);
 			}
 
 			if (this.time <= 0) {
-				this.getSpace().getPlayers().sendMessage(new TranslatableText("quakecraft.game.end.nobody_won").formatted(Formatting.RED));
+				this.getSpace().getPlayers().sendMessage(Text.translatable("quakecraft.game.end.nobody_won").formatted(Formatting.RED));
 				this.getSpace().close(GameCloseReason.FINISHED);
 			}
 
@@ -206,7 +208,7 @@ public class QuakecraftGame extends QuakecraftLogic {
 	}
 
 	private void onWin(QuakecraftPlayer winner) {
-		this.getSpace().getPlayers().sendMessage(new TranslatableText("quakecraft.game.end.win", winner.getDisplayName()).formatted(Formatting.GREEN));
+		this.getSpace().getPlayers().sendMessage(Text.translatable("quakecraft.game.end.win", winner.getDisplayName()).formatted(Formatting.GREEN));
 		this.end = true;
 		this.running = false;
 		this.winners.add(winner);
@@ -229,6 +231,8 @@ public class QuakecraftGame extends QuakecraftLogic {
 			Entity attacker = null;
 			if (source.getSource() instanceof GrenadeEntity grenade) {
 				attacker = grenade.getOwner();
+			} else if (source.getSource() instanceof RocketEntity rocket) {
+				attacker = rocket.getOwner();
 			} else if (source.getSource() instanceof ServerPlayerEntity) {
 				attacker = source.getSource();
 			}
@@ -239,9 +243,10 @@ public class QuakecraftGame extends QuakecraftLogic {
 					playerAttacker.setAttacking(player);
 					player.kill();
 				}
+				return ActionResult.FAIL;
 			}
 		}
-		return source.isExplosive() && !(source.getAttacker() instanceof ServerPlayerEntity) ? ActionResult.FAIL : ActionResult.PASS;
+		return ActionResult.PASS;
 	}
 
 	private ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
@@ -249,10 +254,10 @@ public class QuakecraftGame extends QuakecraftLogic {
 		if (attacker != null) {
 			QuakecraftPlayer other = this.participants.get(attacker.getUuid());
 			if (other != null) {
-				((ServerPlayerEntity) attacker).playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING, SoundCategory.MASTER, 2.f, 5.f);
+				((ServerPlayerEntity) attacker).playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), SoundCategory.MASTER, 2.f, 5.f);
 				other.incrementKills();
 				this.getSpace().getPlayers().sendMessage(
-						new TranslatableText("quakecraft.game.kill", attacker.getDisplayName(), player.getDisplayName()).formatted(Formatting.GRAY)
+						Text.translatable("quakecraft.game.kill", attacker.getDisplayName(), player.getDisplayName()).formatted(Formatting.GRAY)
 				);
 
 				this.getOptParticipant(player).ifPresent(QuakecraftPlayer::onDeath);
@@ -307,7 +312,7 @@ public class QuakecraftGame extends QuakecraftLogic {
 				if (result != -1) {
 					this.getSpace().getPlayers().forEach(other -> {
 						if (player.squaredDistanceTo(other) <= 16.f) {
-							other.networkHandler.sendPacket(new PlaySoundS2CPacket(SoundEvents.ENTITY_HORSE_SADDLE, SoundCategory.MASTER, player.getX(), player.getY(), player.getZ(), 2.f, 1.f));
+							other.networkHandler.sendPacket(new PlaySoundS2CPacket(Registries.SOUND_EVENT.wrapAsHolder(SoundEvents.ENTITY_HORSE_SADDLE), SoundCategory.MASTER, player.getX(), player.getY(), player.getZ(), 2.f, 1.f, 0));
 						}
 					});
 					cooldown.set(heldStack.getItem(), result);
