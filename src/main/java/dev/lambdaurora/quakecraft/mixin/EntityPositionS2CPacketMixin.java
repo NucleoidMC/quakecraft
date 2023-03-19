@@ -19,7 +19,7 @@ package dev.lambdaurora.quakecraft.mixin;
 
 import dev.lambdaurora.quakecraft.entity.GrenadeEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.s2c.play.EntityPositionS2CPacket;
+import net.minecraft.network.packet.s2c.play.EntityPositionUpdateS2CPacket;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * @version 1.2.0
  * @since 1.2.0
  */
-@Mixin(EntityPositionS2CPacket.class)
+@Mixin(EntityPositionUpdateS2CPacket.class)
 public class EntityPositionS2CPacketMixin {
 	@Mutable
 	@Final

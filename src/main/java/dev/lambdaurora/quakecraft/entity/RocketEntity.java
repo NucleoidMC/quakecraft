@@ -20,6 +20,7 @@ package dev.lambdaurora.quakecraft.entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.projectile.FireballEntity;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
@@ -88,7 +89,7 @@ public class RocketEntity extends FireballEntity implements CritableEntity {
 	public boolean damage(DamageSource source, float amount) {
 		if (this.isInvulnerableTo(source))
 			return false;
-		if (source.isExplosive())
+		if (source.isTypeIn(DamageTypeTags.IS_EXPLOSION))
 			return false;
 		this.detonate();
 		return true;

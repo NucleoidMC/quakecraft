@@ -28,8 +28,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
+import net.minecraft.network.packet.s2c.play.SoundPlayS2CPacket;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -227,7 +228,7 @@ public class QuakecraftGame extends QuakecraftLogic {
 	}
 
 	private ActionResult onDamage(ServerPlayerEntity player, DamageSource source, float amount) {
-		if (source.isExplosive()) {
+		if (source.isTypeIn(DamageTypeTags.IS_EXPLOSION)) {
 			Entity attacker = null;
 			if (source.getSource() instanceof GrenadeEntity grenade) {
 				attacker = grenade.getOwner();
@@ -312,7 +313,7 @@ public class QuakecraftGame extends QuakecraftLogic {
 				if (result != -1) {
 					this.getSpace().getPlayers().forEach(other -> {
 						if (player.squaredDistanceTo(other) <= 16.f) {
-							other.networkHandler.sendPacket(new PlaySoundS2CPacket(Registries.SOUND_EVENT.wrapAsHolder(SoundEvents.ENTITY_HORSE_SADDLE), SoundCategory.MASTER, player.getX(), player.getY(), player.getZ(), 2.f, 1.f, 0));
+							other.networkHandler.sendPacket(new SoundPlayS2CPacket(Registries.SOUND_EVENT.wrapAsHolder(SoundEvents.ENTITY_HORSE_SADDLE), SoundCategory.MASTER, player.getX(), player.getY(), player.getZ(), 2.f, 1.f, 0));
 						}
 					});
 					cooldown.set(heldStack.getItem(), result);

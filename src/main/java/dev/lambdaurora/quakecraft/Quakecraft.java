@@ -114,7 +114,7 @@ public class Quakecraft implements ModInitializer {
 	 * @since 1.1.0
 	 */
 	public static void applySpeed(ServerPlayerEntity player) {
-		var movementSpeedAttribute = player.getAttributes().m_rkfdyugp(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+		var movementSpeedAttribute = player.getAttributes().createIfAbsent(EntityAttributes.GENERIC_MOVEMENT_SPEED);
 		if (movementSpeedAttribute != null) {
 			movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
 			movementSpeedAttribute.addTemporaryModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
@@ -128,7 +128,7 @@ public class Quakecraft implements ModInitializer {
 	 * @since 1.1.0
 	 */
 	public static void removeSpeed(ServerPlayerEntity player) {
-		var movementSpeedAttribute = player.getAttributes().m_rkfdyugp(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+		var movementSpeedAttribute = player.getAttributes().createIfAbsent(EntityAttributes.GENERIC_MOVEMENT_SPEED);
 		if (movementSpeedAttribute != null) {
 			movementSpeedAttribute.removeModifier(QuakecraftConstants.PLAYER_MOVEMENT_SPEED_MODIFIER);
 		}
