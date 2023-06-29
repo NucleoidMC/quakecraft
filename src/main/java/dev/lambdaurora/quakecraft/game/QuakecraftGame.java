@@ -27,6 +27,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.ItemCooldownManager;
+import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.SoundPlayS2CPacket;
 import net.minecraft.registry.Registries;
@@ -234,6 +235,8 @@ public class QuakecraftGame extends QuakecraftLogic {
 				attacker = grenade.getOwner();
 			} else if (source.getSource() instanceof RocketEntity rocket) {
 				attacker = rocket.getOwner();
+			} else if (source.getSource() instanceof FireworkRocketEntity fireworkRocket) {
+				return ActionResult.FAIL;
 			} else if (source.getSource() instanceof ServerPlayerEntity) {
 				attacker = source.getSource();
 			}

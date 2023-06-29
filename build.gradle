@@ -58,7 +58,7 @@ dependencies {
 		addLayer(quiltMappings.mappings(libs.minecraft.mappings.get().toString() + ":intermediary-v2"))
 	})*/
 
-	mappings "org.quiltmc:quilt-mappings:1.19.4+build.5:intermediary-v2"
+	mappings "org.quiltmc:quilt-mappings:1.20.1+build.1:intermediary-v2"
 
 
 	// Fabric API.

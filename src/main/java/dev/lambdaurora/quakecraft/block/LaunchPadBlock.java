@@ -55,7 +55,7 @@ public class LaunchPadBlock extends Block implements PolymerBlock {
 	private final Block proxy;
 
 	public LaunchPadBlock(Block proxy) {
-		super(FabricBlockSettings.of(Material.AIR).noCollision().dropsNothing());
+		super(FabricBlockSettings.create().noCollision().dropsNothing());
 		this.setDefaultState(this.stateManager.getDefaultState()
 				.with(Properties.HORIZONTAL_FACING, Direction.NORTH)
 				.with(POWER, 3));

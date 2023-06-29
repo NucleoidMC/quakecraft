@@ -72,10 +72,10 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity {
 	}
 
 	public @Nullable Entity getOwner() {
-		if (this.ownerUuid != null && this.world instanceof ServerWorld) {
-			return ((ServerWorld) this.world).getEntity(this.ownerUuid);
+		if (this.ownerUuid != null && this.getWorld() instanceof ServerWorld) {
+			return ((ServerWorld) this.getWorld()).getEntity(this.ownerUuid);
 		} else {
-			return this.ownerEntityId != 0 ? this.world.getEntityById(this.ownerEntityId) : null;
+			return this.ownerEntityId != 0 ? this.getWorld().getEntityById(this.ownerEntityId) : null;
 		}
 	}
 
@@ -118,7 +118,7 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity {
 
 		this.move(MovementType.SELF, this.getVelocity());
 		this.setVelocity(this.getVelocity().multiply(0.98D));
-		if (this.onGround) {
+		if (this.isOnGround()) {
 			this.setVelocity(this.getVelocity().multiply(0.7D, -0.5D, 0.7D));
 		}
 
@@ -128,13 +128,13 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity {
 			return;
 		} else {
 			this.updateWaterState();
-			if (this.world.isClient) {
-				this.world.addParticle(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5D, this.getZ(), 0.0D, 0.0D, 0.0D);
+			if (this.getWorld().isClient) {
+				this.getWorld().addParticle(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5D, this.getZ(), 0.0D, 0.0D, 0.0D);
 			}
 		}
 
 		if (this.isCritical()) {
-			CritableEntity.spawnCritParticles(this.world, this.getX(), this.getY(), this.getZ(), this.getVelocity());
+			CritableEntity.spawnCritParticles(this.getWorld(), this.getX(), this.getY(), this.getZ(), this.getVelocity());
 		}
 
 		if (!this.leftOwner) {
@@ -158,7 +158,7 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity {
 	private boolean checkOwnerLeft() {
 		var owner = this.getOwner();
 		if (owner != null) {
-			for (var other : this.world.getOtherEntities(this, this.getBoundingBox().stretch(this.getVelocity()).expand(1.0D),
+			for (var other : this.getWorld().getOtherEntities(this, this.getBoundingBox().stretch(this.getVelocity()).expand(1.0D),
 					other -> !other.isSpectator() && other.collides())) {
 				if (other.getRootVehicle() == owner.getRootVehicle()) {
 					return false;

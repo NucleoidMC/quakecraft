@@ -47,7 +47,7 @@ import xyz.nucleoid.plasmid.game.common.team.GameTeam;
  */
 public class TeamBarrierBlock extends BlockWithEntity implements PolymerBlock {
 	public TeamBarrierBlock() {
-		super(FabricBlockSettings.of(Material.BARRIER, MapColor.CLEAR).strength(-1.0F, 3600000.0F)
+		super(FabricBlockSettings.create().mapColor(MapColor.NONE).strength(-1.0F, 3600000.0F)
 				.nonOpaque().collidable(true).dropsNothing());
 	}
 

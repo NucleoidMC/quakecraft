@@ -51,7 +51,7 @@ public class RocketEntity extends FireballEntity implements CritableEntity {
 		super.tick();
 
 		if (this.isCritical()) {
-			CritableEntity.spawnCritParticles(this.world, this.getX(), this.getY(), this.getZ(), this.getVelocity());
+			CritableEntity.spawnCritParticles(this.getWorld(), this.getX(), this.getY(), this.getZ(), this.getVelocity());
 		}
 	}
 
