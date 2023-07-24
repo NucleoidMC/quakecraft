@@ -1,0 +1,13 @@
+{
+  "type": "quakecraft:quakecraft",
+  "name": "Quakecraft Streets",
+  "map": {
+    "id": "quakecraft:streets"
+  },
+  "players": {
+    "min": 2,
+    "threshold": 4,
+    "max": 8
+  },
+  "teams": []
+}
