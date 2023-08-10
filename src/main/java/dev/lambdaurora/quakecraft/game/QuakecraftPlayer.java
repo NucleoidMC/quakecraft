@@ -121,7 +121,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
 		this.player.getInventory().clear();
 
 		this.weapons.insertStacks(this.player);
-		this.syncInventory();
+		//this.syncInventory();
 
 		this.player.setVelocity(0, 0, 0);
 
@@ -161,7 +161,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
 			}
 		}
 
-		this.syncInventory();
+		//this.syncInventory();
 	}
 
 	/**
