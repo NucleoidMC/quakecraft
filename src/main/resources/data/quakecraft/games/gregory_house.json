@@ -1,0 +1,13 @@
+{
+  "type": "quakecraft:quakecraft",
+  "name": "Quakecraft Gregory House",
+  "map": {
+    "id": "quakecraft:gregory_house"
+  },
+  "players": {
+    "min": 2,
+    "threshold": 6,
+    "max": 16
+  },
+  "teams": []
+}
