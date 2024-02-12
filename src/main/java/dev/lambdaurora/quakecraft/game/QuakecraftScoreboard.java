@@ -57,15 +57,11 @@ public class QuakecraftScoreboard {
                 /*if ((playerName + ": 10").length() > 16)
                     playerName = playerName.substring(0, 12);*/
 				if (player.hasLeft()) {
-					content.add(Text.literal(playerName).formatted(Formatting.GRAY, Formatting.STRIKETHROUGH)
-							.append(Text.literal(": ").formatted(Formatting.RESET))
-							.append(Text.literal(String.valueOf(player.getKills())).formatted(Formatting.AQUA))
-					);
+					content.add(Text.literal(playerName).formatted(Formatting.GRAY, Formatting.STRIKETHROUGH),
+							Text.literal(String.valueOf(player.getKills())).formatted(Formatting.AQUA));
 				} else {
-					content.add(Text.literal(playerName).formatted(Formatting.GRAY)
-							.append(Text.literal(": ").formatted(Formatting.RESET))
-							.append(Text.literal(String.valueOf(player.getKills())).formatted(Formatting.AQUA))
-					);
+					content.add(Text.literal(playerName).formatted(Formatting.GRAY),
+							Text.literal(String.valueOf(player.getKills())).formatted(Formatting.AQUA));
 				}
 			});
 		});
