@@ -69,7 +69,7 @@ public class ShooterWeapon extends Weapon {
 				yVelocity,
 				rotationVec.z * QuakecraftConstants.DASH_VELOCITY
 		));
-		player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
+		player.networkHandler.send(new EntityVelocityUpdateS2CPacket(player));
 
 		player.playSound(SoundEvents.ENTITY_BAT_TAKEOFF, SoundCategory.MASTER, 1.0F, 0.5F);
 		return super.onSecondary(world, player, stack);

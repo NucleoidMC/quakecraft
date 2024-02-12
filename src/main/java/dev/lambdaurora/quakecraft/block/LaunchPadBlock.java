@@ -83,7 +83,7 @@ public class LaunchPadBlock extends Block implements PolymerBlock {
 		var vector = getVector(angle, entity.getPitch(1.f), entity.getYaw(1.f), state.get(POWER));
 		entity.setVelocity(vector.getX(), vector.getY(), vector.getZ());
 		if (entity instanceof ServerPlayerEntity) {
-			((ServerPlayerEntity) entity).networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(entity));
+			((ServerPlayerEntity) entity).networkHandler.send(new EntityVelocityUpdateS2CPacket(entity));
 		}
 	}
 

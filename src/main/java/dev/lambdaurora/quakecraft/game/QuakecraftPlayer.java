@@ -62,7 +62,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
 	public QuakecraftPlayer(ServerPlayerEntity player, GameTeam team) {
 		this.world = player.getServerWorld();
 		this.uuid = player.getUuid();
-		this.name = player.getEntityName();
+		this.name = player.getProfileName();
 		this.weapons.add(Weapons.ADVANCED_SHOOTER);
 		this.weapons.add(Weapons.ROCKET_LAUNCHER);
 		this.weapons.add(Weapons.GRENADE_LAUNCHER);
@@ -170,7 +170,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
 	public void syncInventory() {
 		this.player.currentScreenHandler.sendContentUpdates();
 		this.player.playerScreenHandler.onContentChanged(this.player.getInventory());
-		this.player.networkHandler.sendPacket(
+		this.player.networkHandler.send(
 				new ScreenHandlerSlotUpdateS2CPacket(ScreenHandlerSlotUpdateS2CPacket.UPDATE_CURSOR_SYNC_ID,
 						this.player.currentScreenHandler.nextRevision(), 0,
 						this.player.currentScreenHandler.getCursorStack())

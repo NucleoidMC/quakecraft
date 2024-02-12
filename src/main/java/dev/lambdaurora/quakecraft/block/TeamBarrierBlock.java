@@ -17,6 +17,7 @@
 
 package dev.lambdaurora.quakecraft.block;
 
+import com.mojang.serialization.MapCodec;
 import dev.lambdaurora.quakecraft.Quakecraft;
 import dev.lambdaurora.quakecraft.QuakecraftRegistry;
 import dev.lambdaurora.quakecraft.block.entity.TeamBarrierBlockEntity;
@@ -99,5 +100,10 @@ public class TeamBarrierBlock extends BlockWithEntity implements PolymerBlock {
 				Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL);
 		var blockEntity = QuakecraftRegistry.TEAM_BARRIER_BLOCK_ENTITY.get(world, pos);
 		blockEntity.setTeam(team);
+	}
+
+	@Override
+	protected MapCodec<? extends BlockWithEntity> method_53969() {
+		return null;
 	}
 }

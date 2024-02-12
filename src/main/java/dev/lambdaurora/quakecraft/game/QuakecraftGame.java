@@ -316,7 +316,7 @@ public class QuakecraftGame extends QuakecraftLogic {
 				if (result != -1) {
 					this.getSpace().getPlayers().forEach(other -> {
 						if (player.squaredDistanceTo(other) <= 16.f) {
-							other.networkHandler.sendPacket(new SoundPlayS2CPacket(Registries.SOUND_EVENT.wrapAsHolder(SoundEvents.ENTITY_HORSE_SADDLE), SoundCategory.MASTER, player.getX(), player.getY(), player.getZ(), 2.f, 1.f, 0));
+							other.networkHandler.send(new SoundPlayS2CPacket(Registries.SOUND_EVENT.wrapAsHolder(SoundEvents.ENTITY_HORSE_SADDLE), SoundCategory.MASTER, player.getX(), player.getY(), player.getZ(), 2.f, 1.f, 0));
 						}
 					});
 					cooldown.set(heldStack.getItem(), result);

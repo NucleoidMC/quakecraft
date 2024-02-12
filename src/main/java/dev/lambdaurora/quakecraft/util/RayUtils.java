@@ -59,7 +59,7 @@ public final class RayUtils {
 	public static double raycastEntities(Entity source, double range, double margin, Predicate<Entity> predicate, Consumer<Entity> consumer) {
 		World world = source.getWorld();
 
-		final Vec3d origin = source.getCameraPosVec(1.0F);
+		final Vec3d origin = source.getLerpedEyePos(1.0F);
 		final Vec3d delta = source.getRotationVec(1.0F).multiply(range);
 
 		final Vec3d target = origin.add(delta);
@@ -115,7 +115,7 @@ public final class RayUtils {
 	public static @Nullable EntityHitResult raycastEntity(Entity source, double range, double margin, Predicate<Entity> predicate) {
 		World world = source.getWorld();
 
-		Vec3d origin = source.getCameraPosVec(1.0F);
+		Vec3d origin = source.getLerpedEyePos(1.0F);
 		Vec3d delta = source.getRotationVec(1.0F).multiply(range);
 
 		Vec3d target = origin.add(delta);
@@ -165,7 +165,7 @@ public final class RayUtils {
 	}
 
 	public static void drawRay(ServerWorld world, Entity source, double range) {
-		Vec3d origin = source.getCameraPosVec(1.f).subtract(0, 0.5, 0);
+		Vec3d origin = source.getLerpedEyePos(1.f).subtract(0, 0.5, 0);
 		Vec3d delta = source.getRotationVec(1.f).multiply(range);
 
 		Vec3d target = origin.add(delta);
@@ -181,9 +181,9 @@ public final class RayUtils {
 	}
 
 	public static void drawRay(ServerWorld world, Entity source, Entity target) {
-		Vec3d origin = source.getCameraPosVec(1.f).subtract(0, 0.5, 0);
+		Vec3d origin = source.getLerpedEyePos(1.f).subtract(0, 0.5, 0);
 
-		Vec3d end = target.getCameraPosVec(1.f).subtract(0, 0.5, 0);
+		Vec3d end = target.getLerpedEyePos(1.f).subtract(0, 0.5, 0);
 
 		((RayAccessor) source).quakecraft$setRaycasting(true);
 		BlockHitResult blockHitResult = world.raycast(new RaycastContext(origin, end, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, source));
