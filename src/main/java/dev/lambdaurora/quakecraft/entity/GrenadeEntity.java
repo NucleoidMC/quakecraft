@@ -104,9 +104,9 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity {
 		this.prevPitch = this.getPitch();
 	}
 
-	public void detonate() {
-		this.kill();
-		this.getWorld().createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.5f : 1.5f,
+	public void detonate(ServerWorld world) {
+		this.kill(world);
+		world.createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.5f : 1.5f,
 				World.ExplosionSourceType.NONE);
 	}
 
@@ -124,7 +124,7 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity {
 
 		this.life++;
 		if (this.life >= this.lifetime) {
-			this.detonate();
+			this.detonate((ServerWorld) this.getWorld());
 			return;
 		} else {
 			this.updateWaterState();
@@ -143,7 +143,7 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity {
 
 		var hitResult = ProjectileUtil.getEntityCollision(this.getWorld(), this, this.getPos(), this.getPos().add(this.getVelocity()),
 				this.getBoundingBox().stretch(this.getVelocity()).expand(1.0D), entity -> {
-					if (!entity.isSpectator() && entity.isAlive() && entity.collides()) {
+					if (!entity.isSpectator() && entity.isAlive() && entity.canHit()) {
 						Entity entity2 = this.getOwner();
 						return entity2 == null || this.leftOwner || !entity2.isConnectedThroughVehicle(entity);
 					} else {
@@ -159,7 +159,7 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity {
 		var owner = this.getOwner();
 		if (owner != null) {
 			for (var other : this.getWorld().getOtherEntities(this, this.getBoundingBox().stretch(this.getVelocity()).expand(1.0D),
-					other -> !other.isSpectator() && other.collides())) {
+					other -> !other.isSpectator() && other.canHit())) {
 				if (other.getRootVehicle() == owner.getRootVehicle()) {
 					return false;
 				}
@@ -170,7 +170,7 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity {
 	}
 
 	protected void onEntityHit(@NotNull EntityHitResult hitResult) {
-		this.detonate();
+		this.detonate((ServerWorld) this.getWorld());
 	}
 
 	@Override
@@ -186,5 +186,10 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity {
 	@Override
 	public void rollCritical() {
 		this.setCritical(this.random.nextInt(6) == 0);
+	}
+
+	@Override
+	public Vec3d getSyncedPos() {
+		return super.getSyncedPos().subtract(0, 0.35, 0);
 	}
 }

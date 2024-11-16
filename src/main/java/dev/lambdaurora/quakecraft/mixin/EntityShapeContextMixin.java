@@ -32,8 +32,8 @@ public class EntityShapeContextMixin implements UsefulEntityShapeContext {
 	@Unique
 	private Entity quakecraft$entity;
 
-	@Inject(method = "<init>(Lnet/minecraft/entity/Entity;)V", at = @At("RETURN"))
-	private void onInit(Entity entity, CallbackInfo ci) {
+	@Inject(method = "<init>(Lnet/minecraft/entity/Entity;Z)V", at = @At("RETURN"))
+	private void onInit(Entity entity, boolean collidesWithFluid, CallbackInfo ci) {
 		this.quakecraft$entity = entity;
 	}
 

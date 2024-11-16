@@ -20,7 +20,6 @@ package dev.lambdaurora.quakecraft.block;
 import dev.lambdaurora.quakecraft.Quakecraft;
 import dev.lambdaurora.quakecraft.QuakecraftRegistry;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
-import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.*;
 import net.minecraft.entity.Entity;
@@ -39,6 +38,7 @@ import net.minecraft.registry.Registry;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 /**
  * Represents a launch pad block.
@@ -54,8 +54,8 @@ public class LaunchPadBlock extends Block implements PolymerBlock {
 	protected static final VoxelShape SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 5.0, 16.0);
 	private final Block proxy;
 
-	public LaunchPadBlock(Block proxy) {
-		super(FabricBlockSettings.create().noCollision().dropsNothing());
+	public LaunchPadBlock(AbstractBlock.Settings settings, Block proxy) {
+		super(settings.noCollision().dropsNothing());
 		this.setDefaultState(this.stateManager.getDefaultState()
 				.with(Properties.HORIZONTAL_FACING, Direction.NORTH)
 				.with(POWER, 3));
@@ -83,7 +83,7 @@ public class LaunchPadBlock extends Block implements PolymerBlock {
 		var vector = getVector(angle, entity.getPitch(1.f), entity.getYaw(1.f), state.get(POWER));
 		entity.setVelocity(vector.getX(), vector.getY(), vector.getZ());
 		if (entity instanceof ServerPlayerEntity) {
-			((ServerPlayerEntity) entity).networkHandler.send(new EntityVelocityUpdateS2CPacket(entity));
+			((ServerPlayerEntity) entity).networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(entity));
 		}
 	}
 
@@ -114,8 +114,8 @@ public class LaunchPadBlock extends Block implements PolymerBlock {
 	}
 
 	@Override
-	public Block getPolymerBlock(BlockState state) {
-		return this.proxy;
+	public BlockState getPolymerBlockState(BlockState state, PacketContext context) {
+		return this.proxy.getDefaultState();
 	}
 
 	@Override
@@ -126,7 +126,7 @@ public class LaunchPadBlock extends Block implements PolymerBlock {
 	public static BlockState fromNbt(NbtCompound data) {
 		Block block = QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK;
 		if (data.contains("type", NbtType.STRING)) {
-			block = Registries.BLOCK.getOrEmpty(Quakecraft.id(data.getString("type") + "_launchpad")).orElse(QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK);
+			block = Registries.BLOCK.getOptionalValue(Quakecraft.id(data.getString("type") + "_launchpad")).orElse(QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK);
 		}
 		var state = block.getDefaultState();
 		Direction direction = Quakecraft.getDirectionByName(data.getString("direction"));

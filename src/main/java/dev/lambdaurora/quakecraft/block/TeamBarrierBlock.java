@@ -25,7 +25,6 @@ import dev.lambdaurora.quakecraft.game.QuakecraftPlayer;
 import dev.lambdaurora.quakecraft.util.RayAccessor;
 import dev.lambdaurora.quakecraft.util.UsefulEntityShapeContext;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
-import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -35,7 +34,8 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.plasmid.game.common.team.GameTeam;
+import xyz.nucleoid.packettweaker.PacketContext;
+import xyz.nucleoid.plasmid.api.game.common.team.GameTeam;
 
 /**
  * Represents a team barrier block.
@@ -47,9 +47,14 @@ import xyz.nucleoid.plasmid.game.common.team.GameTeam;
  * @since 1.5.0
  */
 public class TeamBarrierBlock extends BlockWithEntity implements PolymerBlock {
-	public TeamBarrierBlock() {
-		super(FabricBlockSettings.create().mapColor(MapColor.NONE).strength(-1.0F, 3600000.0F)
-				.nonOpaque().collidable(true).dropsNothing());
+	public TeamBarrierBlock(AbstractBlock.Settings settings) {
+		super(settings.mapColor(MapColor.CLEAR).strength(-1.0F, 3600000.0F)
+				.nonOpaque().dynamicBounds().dropsNothing());
+	}
+
+	@Override
+	protected MapCodec<? extends BlockWithEntity> getCodec() {
+		return null;
 	}
 
 	@Override
@@ -84,8 +89,8 @@ public class TeamBarrierBlock extends BlockWithEntity implements PolymerBlock {
 	}
 
 	@Override
-	public Block getPolymerBlock(BlockState state) {
-		return Blocks.AIR;
+	public BlockState getPolymerBlockState(BlockState state, PacketContext context) {
+		return Blocks.AIR.getDefaultState();
 	}
 
 	@Override
@@ -100,10 +105,5 @@ public class TeamBarrierBlock extends BlockWithEntity implements PolymerBlock {
 				Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL);
 		var blockEntity = QuakecraftRegistry.TEAM_BARRIER_BLOCK_ENTITY.get(world, pos);
 		blockEntity.setTeam(team);
-	}
-
-	@Override
-	protected MapCodec<? extends BlockWithEntity> method_53969() {
-		return null;
 	}
 }

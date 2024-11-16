@@ -21,10 +21,11 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.projectile.FireballEntity;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraft.world.explosion.Explosion;
 
 /**
  * Represents a rocket entity.
@@ -37,12 +38,12 @@ public class RocketEntity extends FireballEntity implements CritableEntity {
 	private boolean critical = false;
 
 	public RocketEntity(World world, LivingEntity owner, double velocityX, double velocityY, double velocityZ) {
-		super(world, owner, velocityX, velocityY, velocityZ, 1);
+		super(world, owner, new Vec3d(velocityX, velocityY, velocityZ), 1);
 	}
 
-	public void detonate() {
-		this.kill();
-		this.getWorld().createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.75f : 1.75f,
+	public void detonate(ServerWorld world) {
+		this.kill(world);
+		world.createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.75f : 1.75f,
 				World.ExplosionSourceType.NONE);
 	}
 
@@ -69,15 +70,15 @@ public class RocketEntity extends FireballEntity implements CritableEntity {
 	protected void onCollision(HitResult hitResult) {
 		if (hitResult.getType() == HitResult.Type.ENTITY) {
 			if (((EntityHitResult) hitResult).getEntity() instanceof RocketEntity) {
-				((EntityHitResult) hitResult).getEntity().kill();
-				this.detonate();
+				((EntityHitResult) hitResult).getEntity().kill((ServerWorld) this.getWorld());
+				this.detonate((ServerWorld) this.getWorld());
 				return;
 			}
 
 			this.onEntityHit((EntityHitResult) hitResult);
 		}
 
-		this.detonate();
+		this.detonate((ServerWorld) this.getWorld());
 	}
 
 	@Override
@@ -86,12 +87,10 @@ public class RocketEntity extends FireballEntity implements CritableEntity {
 	}
 
 	@Override
-	public boolean damage(DamageSource source, float amount) {
-		if (this.isInvulnerableTo(source))
+	public boolean damage(ServerWorld world, DamageSource source, float amount) {;
+		if (source.isIn(DamageTypeTags.IS_EXPLOSION))
 			return false;
-		if (source.isTypeIn(DamageTypeTags.IS_EXPLOSION))
-			return false;
-		this.detonate();
+		this.detonate(world);
 		return true;
 	}
 

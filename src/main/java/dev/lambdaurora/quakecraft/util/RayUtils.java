@@ -24,6 +24,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
@@ -59,7 +60,7 @@ public final class RayUtils {
 	public static double raycastEntities(Entity source, double range, double margin, Predicate<Entity> predicate, Consumer<Entity> consumer) {
 		World world = source.getWorld();
 
-		final Vec3d origin = source.getLerpedEyePos(1.0F);
+		final Vec3d origin = source.getCameraPosVec(1.0F);
 		final Vec3d delta = source.getRotationVec(1.0F).multiply(range);
 
 		final Vec3d target = origin.add(delta);
@@ -115,7 +116,7 @@ public final class RayUtils {
 	public static @Nullable EntityHitResult raycastEntity(Entity source, double range, double margin, Predicate<Entity> predicate) {
 		World world = source.getWorld();
 
-		Vec3d origin = source.getLerpedEyePos(1.0F);
+		Vec3d origin = source.getCameraPosVec(1.0F);
 		Vec3d delta = source.getRotationVec(1.0F).multiply(range);
 
 		Vec3d target = origin.add(delta);
@@ -165,7 +166,7 @@ public final class RayUtils {
 	}
 
 	public static void drawRay(ServerWorld world, Entity source, double range) {
-		Vec3d origin = source.getLerpedEyePos(1.f).subtract(0, 0.5, 0);
+		Vec3d origin = source.getCameraPosVec(1.f).subtract(0, 0.5, 0);
 		Vec3d delta = source.getRotationVec(1.f).multiply(range);
 
 		Vec3d target = origin.add(delta);
@@ -181,9 +182,9 @@ public final class RayUtils {
 	}
 
 	public static void drawRay(ServerWorld world, Entity source, Entity target) {
-		Vec3d origin = source.getLerpedEyePos(1.f).subtract(0, 0.5, 0);
+		Vec3d origin = source.getCameraPosVec(1.f).subtract(0, 0.5, 0);
 
-		Vec3d end = target.getLerpedEyePos(1.f).subtract(0, 0.5, 0);
+		Vec3d end = target.getCameraPosVec(1.f).subtract(0, 0.5, 0);
 
 		((RayAccessor) source).quakecraft$setRaycasting(true);
 		BlockHitResult blockHitResult = world.raycast(new RaycastContext(origin, end, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, source));
@@ -207,7 +208,7 @@ public final class RayUtils {
 			double y = origin.y + stepY * d;
 			double z = origin.z + stepZ * d;
 
-			world.spawnParticles(new DustParticleEffect(new Vector3f(1.f, 0.647f, 0.f), .75f),
+			world.spawnParticles(new DustParticleEffect(ColorHelper.fromFloats (0, 1.f, 0.647f, 0.f), .75f),
 					x, y, z, 3, 0.f, 0.f, 0.f, 1.f);
 		}
 	}

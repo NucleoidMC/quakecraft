@@ -1,6 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.4.+'
-	id 'org.quiltmc.quilt-mappings-on-loom' version '4.2.3'
+	id 'fabric-loom' version '1.7.+'
 	id 'java-library'
 	id 'maven-publish'
 	id 'org.quiltmc.gradle.licenser' version '1.1.+'
@@ -11,7 +10,7 @@ version = "${project.mod_version}+${getMCVersionString()}"
 archivesBaseName = project.archives_base_name
 
 // This field defines the Java version your mod target.
-def targetJavaVersion = 17
+def targetJavaVersion = 21
 
 boolean isMCVersionNonRelease() {
 	def mc = libs.versions.minecraft.get()
@@ -53,13 +52,8 @@ dependencies {
 	minecraft libs.minecraft
 	modImplementation libs.fabric.loader
 
-	/*mappings(loom.layered {
-		addLayer(quiltMappings.mappings(libs.minecraft.mappings.get().toString() + ":intermediary-v2"))
-	})*/
-
-	mappings "org.quiltmc:quilt-mappings:1.20.4+build.1:intermediary-v2"
-
-
+	// mappings libs.minecraft.mappings
+	mappings "net.fabricmc:yarn:1.21.3+build.1:v2"
 	// Fabric API.
 	modImplementation libs.fabric.api
 

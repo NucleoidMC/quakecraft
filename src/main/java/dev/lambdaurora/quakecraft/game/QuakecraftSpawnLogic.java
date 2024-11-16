@@ -28,10 +28,11 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameMode;
-import xyz.nucleoid.plasmid.game.GameSpace;
-import xyz.nucleoid.plasmid.util.ItemStackBuilder;
+import xyz.nucleoid.plasmid.api.game.GameSpace;
+import xyz.nucleoid.plasmid.api.util.ItemStackBuilder;
 
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Represents the Quakecraft spawn logic.
@@ -63,7 +64,7 @@ public class QuakecraftSpawnLogic {
 				continue;
 			var currentSpawn = this.map.getSpawn(i);
 
-			var box = Box.method_54784(currentSpawn.pos().add(-16, -5, -16), currentSpawn.pos().add(16, 5, 16));
+			var box = Box.enclosing(currentSpawn.pos().add(-16, -5, -16), currentSpawn.pos().add(16, 5, 16));
 			int playersNearSpawn = (int) this.space.getPlayers().stream().filter(p -> box.contains(p.getPos())).count();
 			if (playersNearSpawn < lowestPlayers) {
 				lowestPlayers = playersNearSpawn;
@@ -79,7 +80,7 @@ public class QuakecraftSpawnLogic {
 			this.spawnCache.push(spawnIndex);
 		}
 
-		player.teleport(this.world, spawn.pos().getX(), spawn.pos().getY(), spawn.pos().getZ(), spawn.direction(), 0.f);
+		player.teleport(this.world, spawn.pos().getX(), spawn.pos().getY(), spawn.pos().getZ(), Set.of(), spawn.direction(), 0.f, false);
 	}
 
 	public void resetWaitingPlayer(ServerPlayerEntity player) {
@@ -108,7 +109,7 @@ public class QuakecraftSpawnLogic {
 		double z = MathHelper.nextDouble(player.getRandom(), min.getZ(), max.getZ());
 		double y = min.getY() + 0.5;
 
-		player.teleport(this.world, x, y, z, 0.f, 0.f);
+		player.teleport(this.world, x, y, z, Set.of(), 0.f, 0.f, false);
 	}
 
 	/**

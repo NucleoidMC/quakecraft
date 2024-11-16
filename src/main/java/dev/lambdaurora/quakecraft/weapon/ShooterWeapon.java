@@ -50,7 +50,7 @@ public class ShooterWeapon extends Weapon {
 					var hitPlayer = (ServerPlayerEntity) entity;
 					hitPlayer.setAttacker(player);
 					player.setAttacking(hitPlayer);
-					hitPlayer.kill();
+					hitPlayer.kill(world);
 				});
 		RayUtils.drawRay(world, player, Math.abs(result));
 
@@ -69,9 +69,9 @@ public class ShooterWeapon extends Weapon {
 				yVelocity,
 				rotationVec.z * QuakecraftConstants.DASH_VELOCITY
 		));
-		player.networkHandler.send(new EntityVelocityUpdateS2CPacket(player));
+		player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
 
-		player.playSound(SoundEvents.ENTITY_BAT_TAKEOFF, SoundCategory.MASTER, 1.0F, 0.5F);
+		player.playSoundToPlayer(SoundEvents.ENTITY_BAT_TAKEOFF, SoundCategory.MASTER, 1.0F, 0.5F);
 		return super.onSecondary(world, player, stack);
 	}
 }

@@ -18,18 +18,19 @@
 package dev.lambdaurora.quakecraft.game;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.lambdaurora.quakecraft.game.map.MapConfig;
-import xyz.nucleoid.plasmid.game.common.config.PlayerConfig;
-import xyz.nucleoid.plasmid.game.common.team.GameTeam;
+import xyz.nucleoid.plasmid.api.game.common.config.WaitingLobbyConfig;
+import xyz.nucleoid.plasmid.api.game.common.team.GameTeam;
 
 import java.util.List;
 
-public record QuakecraftConfig(MapConfig map, PlayerConfig players,
+public record QuakecraftConfig(MapConfig map, WaitingLobbyConfig players,
                                List<GameTeam> teams, int time) {
-	public static final Codec<QuakecraftConfig> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final MapCodec<QuakecraftConfig> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			MapConfig.CODEC.fieldOf("map").forGetter(QuakecraftConfig::map),
-			PlayerConfig.CODEC.fieldOf("players").forGetter(QuakecraftConfig::players),
+			WaitingLobbyConfig.CODEC.fieldOf("players").forGetter(QuakecraftConfig::players),
 			GameTeam.CODEC.listOf().fieldOf("teams").forGetter(QuakecraftConfig::teams),
 			Codec.INT.optionalFieldOf("time", 20 * 60 * 20).forGetter(QuakecraftConfig::time)
 	).apply(instance, QuakecraftConfig::new));

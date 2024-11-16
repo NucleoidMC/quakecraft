@@ -30,7 +30,7 @@ import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.map_templates.BlockBounds;
 import xyz.nucleoid.map_templates.TemplateRegion;
-import xyz.nucleoid.plasmid.game.common.team.GameTeam;
+import xyz.nucleoid.plasmid.api.game.common.team.GameTeam;
 
 import java.util.Optional;
 
@@ -172,7 +172,7 @@ public class QuakecraftDoor {
 		// A block must be explicitly defined.
 		if (!region.getData().getCompound("block").contains("Name"))
 			return Optional.empty();
-		BlockState closedState = NbtHelper.toBlockState(Registries.BLOCK.asLookup(), region.getData().getCompound("block"));
+		BlockState closedState = NbtHelper.toBlockState(Registries.BLOCK, region.getData().getCompound("block"));
 
 		GameTeam team = game.getTeam(region.getData().getString("team"));
 

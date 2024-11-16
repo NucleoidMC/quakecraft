@@ -28,21 +28,21 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.fantasy.RuntimeWorldConfig;
-import xyz.nucleoid.plasmid.game.GameActivity;
-import xyz.nucleoid.plasmid.game.GameOpenContext;
-import xyz.nucleoid.plasmid.game.GameOpenProcedure;
-import xyz.nucleoid.plasmid.game.GameResult;
-import xyz.nucleoid.plasmid.game.common.GameWaitingLobby;
-import xyz.nucleoid.plasmid.game.common.team.GameTeam;
-import xyz.nucleoid.plasmid.game.common.team.TeamAllocator;
-import xyz.nucleoid.plasmid.game.event.GameActivityEvents;
-import xyz.nucleoid.plasmid.game.event.GamePlayerEvents;
-import xyz.nucleoid.plasmid.game.player.PlayerOffer;
-import xyz.nucleoid.plasmid.game.player.PlayerOfferResult;
-import xyz.nucleoid.plasmid.game.rule.GameRuleType;
+import xyz.nucleoid.plasmid.api.game.GameActivity;
+import xyz.nucleoid.plasmid.api.game.GameOpenContext;
+import xyz.nucleoid.plasmid.api.game.GameOpenProcedure;
+import xyz.nucleoid.plasmid.api.game.GameResult;
+import xyz.nucleoid.plasmid.api.game.common.GameWaitingLobby;
+import xyz.nucleoid.plasmid.api.game.common.team.GameTeam;
+import xyz.nucleoid.plasmid.api.game.common.team.TeamAllocator;
+import xyz.nucleoid.plasmid.api.game.event.GameActivityEvents;
+import xyz.nucleoid.plasmid.api.game.event.GamePlayerEvents;
+import xyz.nucleoid.plasmid.api.game.player.JoinAcceptor;
+import xyz.nucleoid.plasmid.api.game.player.JoinAcceptorResult;
+import xyz.nucleoid.plasmid.api.game.rule.GameRuleType;
+import xyz.nucleoid.stimuli.event.EventResult;
 import xyz.nucleoid.stimuli.event.item.ItemUseEvent;
 import xyz.nucleoid.stimuli.event.player.PlayerDeathEvent;
 
@@ -85,7 +85,7 @@ public class QuakecraftWaiting {
 
 			game.listen(GameActivityEvents.REQUEST_START, waiting::requestStart);
 
-			game.listen(GamePlayerEvents.OFFER, waiting::addPlayer);
+			game.listen(GamePlayerEvents.ACCEPT, waiting::addPlayer);
 			game.listen(GamePlayerEvents.REMOVE, waiting::removePlayer);
 
 			game.listen(PlayerDeathEvent.EVENT, waiting::onPlayerDeath);
@@ -102,34 +102,32 @@ public class QuakecraftWaiting {
 		return GameResult.ok();
 	}
 
-	private PlayerOfferResult addPlayer(PlayerOffer offer) {
-		this.spawnLogic.spawnWaitingPlayer(offer.player());
-
-		return offer.accept(this.world, this.map.waitingSpawn.center())
-				.and(() -> {
-					this.spawnLogic.resetWaitingPlayer(offer.player());
-				});
+	private JoinAcceptorResult addPlayer(JoinAcceptor offer) {
+		return offer.teleport(this.world, this.map.waitingSpawn.center()).thenRunForEach(player -> {
+				this.spawnLogic.spawnWaitingPlayer(player);
+				this.spawnLogic.resetWaitingPlayer(player);
+		});
 	}
 
 	private void removePlayer(ServerPlayerEntity player) {
 		Quakecraft.removeSpeed(player);
 	}
 
-	private ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
+	private EventResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
 		this.spawnLogic.resetWaitingPlayer(player);
 		this.spawnLogic.spawnWaitingPlayer(player);
-		return ActionResult.FAIL;
+		return EventResult.DENY;
 	}
 
-	private TypedActionResult<ItemStack> onUseItem(ServerPlayerEntity player, Hand hand) {
+	private ActionResult onUseItem(ServerPlayerEntity player, Hand hand) {
 		var heldStack = player.getStackInHand(hand);
 
 		if (heldStack.isIn(ItemTags.BEDS)) {
 			this.game.getGameSpace().getPlayers().kick(player);
-			return TypedActionResult.success(heldStack);
+			return ActionResult.SUCCESS_SERVER;
 		}
 
-		return TypedActionResult.pass(ItemStack.EMPTY);
+		return ActionResult.PASS;
 	}
 
 	private @Nullable Multimap<GameTeam, ServerPlayerEntity> allocatePlayers() {

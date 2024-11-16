@@ -43,13 +43,13 @@ public class RocketLauncherWeapon extends Weapon {
 	public ActionResult onPrimary(ServerWorld world, ServerPlayerEntity player, Hand hand) {
 		var rocket = new RocketEntity(world, player, 0, 0, 0);
 
-		var origin = player.getLerpedEyePos(1.0F);
+		var origin = player.getCameraPosVec(1.0F);
 		var delta = player.getRotationVec(1.0F).multiply(0.25);
 
 		var target = origin.add(delta);
 		rocket.setPos(target.getX(), target.getY(), target.getZ());
 
-		rocket.setProperties(player, player.getPitch(), player.getYaw(), 0.f, 1.5f, 1.f);
+		rocket.setVelocity(player, player.getPitch(), player.getYaw(), 0.f, 1.5f, 1.f);
 		rocket.setVelocity(rocket.getVelocity().multiply(0.75));
 		rocket.setItem(new ItemStack(Items.FIRE_CHARGE));
 		rocket.rollCritical();
