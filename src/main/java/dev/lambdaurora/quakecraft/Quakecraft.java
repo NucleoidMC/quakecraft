@@ -25,6 +25,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.FireworkExplosionComponent;
+import net.minecraft.component.type.FireworksComponent;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.ItemStack;
@@ -144,8 +145,8 @@ public class Quakecraft implements ModInitializer {
 	public static void spawnFirework(ServerWorld world, double x, double y, double z, int[] colors, boolean silent, int lifetime) {
 		var fireworkStack = new ItemStack(Items.FIREWORK_ROCKET);
 
-		fireworkStack.set(DataComponentTypes.FIREWORK_EXPLOSION, new FireworkExplosionComponent(FireworkExplosionComponent.Type.SMALL_BALL,
-				IntList.of(colors), IntList.of(), false, false));
+		fireworkStack.set(DataComponentTypes.FIREWORKS, new FireworksComponent(0, List.of(new FireworkExplosionComponent(FireworkExplosionComponent.Type.SMALL_BALL,
+				IntList.of(colors), IntList.of(), false, false))));
 		var firework = new FireworkRocketEntity(world, x, y, z, fireworkStack);
 		firework.setSilent(silent);
 		if (lifetime >= 0)
