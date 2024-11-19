@@ -52,6 +52,7 @@ import xyz.nucleoid.plasmid.api.game.common.team.GameTeam;
 import xyz.nucleoid.plasmid.api.game.event.GameActivityEvents;
 import xyz.nucleoid.plasmid.api.game.event.GamePlayerEvents;
 import xyz.nucleoid.plasmid.api.game.player.JoinIntent;
+import xyz.nucleoid.plasmid.api.game.player.JoinOffer;
 import xyz.nucleoid.plasmid.api.game.rule.GameRuleType;
 import xyz.nucleoid.stimuli.event.EventResult;
 import xyz.nucleoid.stimuli.event.block.BlockUseEvent;
@@ -120,7 +121,7 @@ public class QuakecraftGame extends QuakecraftLogic {
 			game.listen(GameActivityEvents.ENABLE, active::onOpen);
 			game.listen(GameActivityEvents.DISABLE, active::onClose);
 
-			game.listen(GamePlayerEvents.OFFER, offer -> offer.intent() == JoinIntent.SPECTATE ? offer.accept() : offer.pass());
+			game.listen(GamePlayerEvents.OFFER, JoinOffer::acceptSpectators);
 			game.listen(GamePlayerEvents.ACCEPT, offer -> offer.teleport(active.world(), active.map().waitingSpawn.center()));
 			game.listen(GamePlayerEvents.ADD, active::addPlayer);
 			game.listen(GamePlayerEvents.REMOVE, active::removePlayer);
