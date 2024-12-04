@@ -53,7 +53,7 @@ dependencies {
 	modImplementation libs.fabric.loader
 
 	// mappings libs.minecraft.mappings
-	mappings "net.fabricmc:yarn:1.21.3+build.1:v2"
+	mappings "net.fabricmc:yarn:1.21.4+build.1:v2"
 	// Fabric API.
 	modImplementation libs.fabric.api
 
