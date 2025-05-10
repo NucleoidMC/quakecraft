@@ -49,7 +49,7 @@ public class ShooterWeapon extends Weapon {
 				entity -> {
 					var hitPlayer = (ServerPlayerEntity) entity;
 					hitPlayer.setAttacker(player);
-					player.setAttacking(hitPlayer);
+					player.setAttacking(hitPlayer, 200);
 					hitPlayer.kill(world);
 				});
 		RayUtils.drawRay(world, player, Math.abs(result));

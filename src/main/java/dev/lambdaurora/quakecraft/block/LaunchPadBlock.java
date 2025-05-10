@@ -23,6 +23,7 @@ import eu.pb4.polymer.core.api.block.PolymerBlock;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.*;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityCollisionHandler;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
@@ -70,7 +71,7 @@ public class LaunchPadBlock extends Block implements PolymerBlock {
 	}
 
 	@Override
-	public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
+	protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler) {
 		if (world.isClient())
 			return;
 		var direction = state.get(Properties.HORIZONTAL_FACING);
@@ -125,16 +126,16 @@ public class LaunchPadBlock extends Block implements PolymerBlock {
 
 	public static BlockState fromNbt(NbtCompound data) {
 		Block block = QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK;
-		if (data.contains("type", NbtType.STRING)) {
-			block = Registries.BLOCK.getOptionalValue(Quakecraft.id(data.getString("type") + "_launchpad")).orElse(QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK);
+		if (data.contains("type")) {
+			block = Registries.BLOCK.getOptionalValue(Quakecraft.id(data.getString("type", "") + "_launchpad")).orElse(QuakecraftRegistry.STONE_LAUNCHPAD_BLOCK);
 		}
 		var state = block.getDefaultState();
-		Direction direction = Quakecraft.getDirectionByName(data.getString("direction"));
+		Direction direction = Quakecraft.getDirectionByName(data.getString("direction", ""));
 		if (direction.getAxis().isVertical())
 			return state;
 		state = state.with(Properties.HORIZONTAL_FACING, direction);
-		if (data.contains("power", NbtType.INT)) {
-			state = state.with(POWER, MathHelper.clamp(data.getInt("power"), POWER_MIN, POWER_MAX));
+		if (data.contains("power")) {
+			state = state.with(POWER, MathHelper.clamp(data.getInt("power", 0), POWER_MIN, POWER_MAX));
 		}
 		return state;
 	}

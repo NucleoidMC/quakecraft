@@ -139,7 +139,7 @@ public class Quakecraft implements ModInitializer {
 	}
 
 	public static Direction getDirectionByName(@Nullable String name) {
-		return name == null ? null : Direction.byName(name.toLowerCase(Locale.ROOT));
+		return name == null ? null : Direction.byId(name.toLowerCase(Locale.ROOT));
 	}
 
 	public static void spawnFirework(ServerWorld world, double x, double y, double z, int[] colors, boolean silent, int lifetime) {

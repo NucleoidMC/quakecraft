@@ -35,7 +35,7 @@ public class MapSpawn {
 	public MapSpawn(TemplateRegion region) {
 		this.region = region;
 		this.pos = BlockPos.ofFloored(region.getBounds().center());
-		this.direction = region.getData().getInt("direction");
+		this.direction = region.getData().getInt("direction", 0);
 	}
 
 	/**

@@ -147,16 +147,16 @@ public class QuakecraftDoor {
 
 		BlockBounds detectionBounds = null;
 
-		if (region.getData().contains("activation", NbtType.STRING)) {
-			detectionBounds = game.map().getDoorActivationBounds(region.getData().getString("activation"));
+		if (region.getData().contains("activation")) {
+			detectionBounds = game.map().getDoorActivationBounds(region.getData().getString("activation", ""));
 		}
 
-		if (detectionBounds == null && region.getData().contains("distance", NbtType.INT)) {
-			int distance = region.getData().getInt("distance");
+		if (detectionBounds == null && region.getData().contains("distance")) {
+			int distance = region.getData().getInt("distance", 0);
 			if (distance == 0)
 				return Optional.empty();
 
-			Direction.Axis axis = Direction.Axis.fromName(region.getData().getString("axis"));
+			Direction.Axis axis = Direction.Axis.CODEC.byId(region.getData().getString("axis", "x"));
 			if (axis == null)
 				return Optional.empty();
 
@@ -170,11 +170,11 @@ public class QuakecraftDoor {
 			return Optional.empty();
 
 		// A block must be explicitly defined.
-		if (!region.getData().getCompound("block").contains("Name"))
+		if (!region.getData().getCompoundOrEmpty("block").contains("Name"))
 			return Optional.empty();
-		BlockState closedState = NbtHelper.toBlockState(Registries.BLOCK, region.getData().getCompound("block"));
+		BlockState closedState = NbtHelper.toBlockState(Registries.BLOCK, region.getData().getCompoundOrEmpty("block"));
 
-		GameTeam team = game.getTeam(region.getData().getString("team"));
+		GameTeam team = game.getTeam(region.getData().getString("team", ""));
 
 		var door = new QuakecraftDoor(game, region, bounds, detectionBounds, closedState, team);
 		door.close();

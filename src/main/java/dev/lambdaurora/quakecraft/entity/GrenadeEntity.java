@@ -52,6 +52,8 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity {
 	private boolean leftOwner = false;
 	private int life = 0;
 	private boolean critical = false;
+	private float prevYaw;
+	private float prevPitch;
 
 	public GrenadeEntity(@NotNull World world, @NotNull LivingEntity owner, int lifetime) {
 		super(world, owner.getX(), owner.getEyeY() - 0.10000000149011612D, owner.getZ());
@@ -128,9 +130,6 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity {
 			return;
 		} else {
 			this.updateWaterState();
-			if (this.getWorld().isClient) {
-				this.getWorld().addParticle(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5D, this.getZ(), 0.0D, 0.0D, 0.0D);
-			}
 		}
 
 		if (this.isCritical()) {

@@ -129,7 +129,7 @@ public class QuakecraftMap {
 
 		if (game.getTeams().size() != 0) {
 			this.template.getMetadata().getRegions("team_barrier").forEach(region -> {
-				GameTeam team = game.getTeam(region.getData().getString("team"));
+				GameTeam team = game.getTeam(region.getData().getString("team", ""));
 
 				if (team != null) {
 					region.getBounds().forEach(pos -> TeamBarrierBlock.createAt(game.world(), pos, team));

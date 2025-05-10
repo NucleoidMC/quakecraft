@@ -20,6 +20,7 @@ package dev.lambdaurora.quakecraft.mixin;
 import dev.lambdaurora.quakecraft.util.UsefulEntityShapeContext;
 import net.minecraft.block.EntityShapeContext;
 import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -27,13 +28,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.function.Predicate;
+
 @Mixin(EntityShapeContext.class)
 public class EntityShapeContextMixin implements UsefulEntityShapeContext {
 	@Unique
 	private Entity quakecraft$entity;
 
-	@Inject(method = "<init>(Lnet/minecraft/entity/Entity;Z)V", at = @At("RETURN"))
-	private void onInit(Entity entity, boolean collidesWithFluid, CallbackInfo ci) {
+	@Inject(method = "<init>(ZZDLnet/minecraft/item/ItemStack;Ljava/util/function/Predicate;Lnet/minecraft/entity/Entity;)V", at = @At("RETURN"))
+	private void onInit(boolean descending, boolean placement, double minY, ItemStack heldItem, Predicate walkOnFluidPredicate, Entity entity, CallbackInfo ci) {
 		this.quakecraft$entity = entity;
 	}
 
