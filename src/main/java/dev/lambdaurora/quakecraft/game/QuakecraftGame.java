@@ -249,7 +249,7 @@ public class QuakecraftGame extends QuakecraftLogic {
 				if (attacker instanceof ServerPlayerEntity playerAttacker && attacker != player) {
 					player.setAttacker(playerAttacker);
 					playerAttacker.setAttacking(player, 200);
-					player.kill(player.getServerWorld());
+					player.kill(player.getWorld());
 				}
 				return EventResult.DENY;
 			}

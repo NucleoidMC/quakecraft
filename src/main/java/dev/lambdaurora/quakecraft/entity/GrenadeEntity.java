@@ -148,7 +148,7 @@ public class GrenadeEntity extends ArmorStandEntity implements CritableEntity {
 					} else {
 						return false;
 					}
-				});
+				}, ProjectileUtil.getToleranceMargin(this));
 		if (hitResult != null) {
 			this.onEntityHit(hitResult);
 		}

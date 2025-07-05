@@ -38,51 +38,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
 
-	@Shadow
-	public abstract boolean isClimbing();
-
-	@Shadow public abstract boolean hasStatusEffect(RegistryEntry<StatusEffect> effect);
-
 	public LivingEntityMixin(EntityType<?> type, World world) {
 		super(type, world);
 	}
-
-	private final ThreadLocal<Vec3d> preTravelVelocity = new ThreadLocal<>();
-
-	/*Inject(
-			method = "travel",
-			at = @At(
-					value = "INVOKE",
-					target = "Lnet/minecraft/entity/LivingEntity;move(Lnet/minecraft/entity/MovementType;Lnet/minecraft/util/math/Vec3d;)V",
-					shift = At.Shift.AFTER
-			)
-	)
-	private void onPostMove(Vec3d movementInput, CallbackInfo ci) {
-		this.preTravelVelocity.set(this.getVelocity());
-	}
-
-	@Inject(
-			method = "travel",
-			at = @At(
-					value = "INVOKE",
-					target = "Lnet/minecraft/entity/LivingEntity;getFallingInFluidAdjustedMovement(DZLnet/minecraft/util/math/Vec3d;)Lnet/minecraft/util/math/Vec3d;",
-					shift = At.Shift.BEFORE
-			)
-	)
-	private void onTravel(Vec3d movementInput, CallbackInfo ci) {
-		if (this.isTouchingWater() && !this.hasStatusEffect(StatusEffects.DOLPHINS_GRACE)) {
-			//noinspection ConstantConditions
-			if (((Object) this) instanceof ServerPlayerEntity player && Quakecraft.get().isPlayerActive(player)) {
-				var vec3d = this.preTravelVelocity.get();
-
-				if (this.horizontalCollision && this.isClimbing()) {
-					vec3d = new Vec3d(vec3d.x, 0.2D, vec3d.z);
-				}
-
-				double j = 0.96;
-
-				this.setVelocity(vec3d.multiply(j, 0.800000011920929D, j));
-			}
-		}
-	}*/
 }

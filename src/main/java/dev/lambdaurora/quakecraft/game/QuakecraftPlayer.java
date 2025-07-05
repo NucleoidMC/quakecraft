@@ -60,7 +60,7 @@ public class QuakecraftPlayer implements Comparable<QuakecraftPlayer> {
 	private boolean left = false;
 
 	public QuakecraftPlayer(ServerPlayerEntity player, GameTeam team) {
-		this.world = player.getServerWorld();
+		this.world = player.getWorld();
 		this.uuid = player.getUuid();
 		this.name = player.getNameForScoreboard();
 		this.weapons.add(Weapons.ADVANCED_SHOOTER);
