@@ -20,19 +20,19 @@ package dev.lambdaurora.quakecraft.game;
 import dev.lambdaurora.quakecraft.Quakecraft;
 import dev.lambdaurora.quakecraft.game.map.MapSpawn;
 import dev.lambdaurora.quakecraft.game.map.QuakecraftMap;
-import net.minecraft.item.Items;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.GameMode;
 import xyz.nucleoid.plasmid.api.game.GameSpace;
 import xyz.nucleoid.plasmid.api.util.ItemStackBuilder;
 
 import java.util.Random;
 import java.util.Set;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.AABB;
 
 /**
  * Represents the Quakecraft spawn logic.
@@ -44,18 +44,18 @@ import java.util.Set;
 public class QuakecraftSpawnLogic {
 	private static final Random RANDOM = new Random();
 	private final GameSpace space;
-	private final ServerWorld world;
+	private final ServerLevel world;
 	private final QuakecraftMap map;
 	private final SpawnCache spawnCache;
 
-	public QuakecraftSpawnLogic(GameSpace space, ServerWorld world, QuakecraftMap map) {
+	public QuakecraftSpawnLogic(GameSpace space, ServerLevel world, QuakecraftMap map) {
 		this.space = space;
 		this.world = world;
 		this.map = map;
 		this.spawnCache = new SpawnCache(map.getSpawnCount() / 2);
 	}
 
-	public void spawnPlayer(ServerPlayerEntity player) {
+	public void spawnPlayer(ServerPlayer player) {
 		MapSpawn spawn = null;
 		int spawnIndex = -1;
 		int lowestPlayers = this.space.getPlayers().size();
@@ -64,8 +64,8 @@ public class QuakecraftSpawnLogic {
 				continue;
 			var currentSpawn = this.map.getSpawn(i);
 
-			var box = Box.enclosing(currentSpawn.pos().add(-16, -5, -16), currentSpawn.pos().add(16, 5, 16));
-			int playersNearSpawn = (int) this.space.getPlayers().stream().filter(p -> box.contains(p.getPos())).count();
+			var box = AABB.encapsulatingFullBlocks(currentSpawn.pos().offset(-16, -5, -16), currentSpawn.pos().offset(16, 5, 16));
+			int playersNearSpawn = (int) this.space.getPlayers().stream().filter(p -> box.contains(p.position())).count();
 			if (playersNearSpawn < lowestPlayers) {
 				lowestPlayers = playersNearSpawn;
 				spawn = currentSpawn;
@@ -80,17 +80,17 @@ public class QuakecraftSpawnLogic {
 			this.spawnCache.push(spawnIndex);
 		}
 
-		player.teleport(this.world, spawn.pos().getX(), spawn.pos().getY(), spawn.pos().getZ(), Set.of(), spawn.direction(), 0.f, false);
+		player.teleportTo(this.world, spawn.pos().getX(), spawn.pos().getY(), spawn.pos().getZ(), Set.of(), spawn.direction(), 0.f, false);
 	}
 
-	public void resetWaitingPlayer(ServerPlayerEntity player) {
-		player.changeGameMode(GameMode.ADVENTURE);
-		player.getInventory().clear();
+	public void resetWaitingPlayer(ServerPlayer player) {
+		player.setGameMode(GameType.ADVENTURE);
+		player.getInventory().clearContent();
 
 		var leaveGame = ItemStackBuilder.of(Items.RED_BED)
-				.setName(Text.literal("Leave Lobby").styled(style -> style.withItalic(false).withColor(Formatting.YELLOW)))
+				.setName(Component.literal("Leave Lobby").withStyle(style -> style.withItalic(false).withColor(ChatFormatting.YELLOW)))
 				.build();
-		player.getInventory().insertStack(8, leaveGame);
+		player.getInventory().add(8, leaveGame);
 
 		Quakecraft.applySpeed(player);
 	}
@@ -100,16 +100,16 @@ public class QuakecraftSpawnLogic {
 	 *
 	 * @param player the player to spawn
 	 */
-	public final void spawnWaitingPlayer(ServerPlayerEntity player) {
+	public final void spawnWaitingPlayer(ServerPlayer player) {
 		var bounds = this.map.waitingSpawn;
 		var min = bounds.min();
 		var max = bounds.max();
 
-		double x = MathHelper.nextDouble(player.getRandom(), min.getX(), max.getX());
-		double z = MathHelper.nextDouble(player.getRandom(), min.getZ(), max.getZ());
+		double x = Mth.nextDouble(player.getRandom(), min.getX(), max.getX());
+		double z = Mth.nextDouble(player.getRandom(), min.getZ(), max.getZ());
 		double y = min.getY() + 0.5;
 
-		player.teleport(this.world, x, y, z, Set.of(), 0.f, 0.f, false);
+		player.teleportTo(this.world, x, y, z, Set.of(), 0.f, 0.f, false);
 	}
 
 	/**

@@ -1,5 +1,5 @@
-accessWidener	v2	named
+accessWidener	v2	official
 
-accessible method net/minecraft/entity/decoration/ArmorStandEntity setHideBasePlate (Z)V
-accessible method net/minecraft/entity/decoration/ArmorStandEntity setMarker (Z)V
-accessible method net/minecraft/entity/decoration/ArmorStandEntity setSmall (Z)V
+accessible method net/minecraft/world/entity/decoration/ArmorStand setNoBasePlate (Z)V
+accessible method net/minecraft/world/entity/decoration/ArmorStand setMarker (Z)V
+accessible method net/minecraft/world/entity/decoration/ArmorStand setSmall (Z)V

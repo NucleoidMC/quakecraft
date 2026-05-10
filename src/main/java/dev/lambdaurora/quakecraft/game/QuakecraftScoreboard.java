@@ -17,13 +17,13 @@
 
 package dev.lambdaurora.quakecraft.game;
 
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.plasmid.api.game.common.GlobalWidgets;
 import xyz.nucleoid.plasmid.api.game.common.widget.SidebarWidget;
 
 import java.util.Comparator;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 
 /**
  * Represents the Quakecraft scoreboard.
@@ -38,7 +38,7 @@ public class QuakecraftScoreboard {
 
 	public QuakecraftScoreboard(@NotNull QuakecraftGame game, GlobalWidgets widgets) {
 		this.game = game;
-		this.sidebar = widgets.addSidebar(Text.literal("Quakecraft").formatted(Formatting.GOLD));
+		this.sidebar = widgets.addSidebar(Component.literal("Quakecraft").withStyle(ChatFormatting.GOLD));
 	}
 
 	/**
@@ -47,21 +47,21 @@ public class QuakecraftScoreboard {
 	public void update() {
 		this.sidebar.set(content -> {
 			var seconds = this.game.getTime() / 20;
-			content.add(Text.literal("Time left: ")
-					.append(Text.literal(String.format("%d:%02d", seconds / 60, seconds % 60)).formatted(Formatting.GREEN))
+			content.add(Component.literal("Time left: ")
+					.append(Component.literal(String.format("%d:%02d", seconds / 60, seconds % 60)).withStyle(ChatFormatting.GREEN))
 			);
-			content.add(Text.empty());
+			content.add(Component.empty());
 
 			this.game.getParticipants().stream().sorted(Comparator.reverseOrder()).limit(15).forEach(player -> {
 				String playerName = player.name;
                 /*if ((playerName + ": 10").length() > 16)
                     playerName = playerName.substring(0, 12);*/
 				if (player.hasLeft()) {
-					content.add(Text.literal(playerName).formatted(Formatting.GRAY, Formatting.STRIKETHROUGH),
-							Text.literal(String.valueOf(player.getKills())).formatted(Formatting.AQUA));
+					content.add(Component.literal(playerName).withStyle(ChatFormatting.GRAY, ChatFormatting.STRIKETHROUGH),
+							Component.literal(String.valueOf(player.getKills())).withStyle(ChatFormatting.AQUA));
 				} else {
-					content.add(Text.literal(playerName).formatted(Formatting.GRAY),
-							Text.literal(String.valueOf(player.getKills())).formatted(Formatting.AQUA));
+					content.add(Component.literal(playerName).withStyle(ChatFormatting.GRAY),
+							Component.literal(String.valueOf(player.getKills())).withStyle(ChatFormatting.AQUA));
 				}
 			});
 		});

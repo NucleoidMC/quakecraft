@@ -17,10 +17,10 @@
 
 package dev.lambdaurora.quakecraft.entity;
 
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -37,14 +37,14 @@ public interface CritableEntity {
 
 	void rollCritical();
 
-	static void spawnCritParticles(@NotNull World world, double x, double y, double z, Vec3d velocity) {
+	static void spawnCritParticles(@NotNull Level world, double x, double y, double z, Vec3 velocity) {
 		for (int i = 0; i < 4; i++) {
-			((ServerWorld) world).spawnParticles(ParticleTypes.CRIT,
-					x + velocity.getX() * i / 4.0,
-					y + velocity.getY() * i / 4.0,
-					z + velocity.getZ() * i / 4.0,
+			((ServerLevel) world).sendParticles(ParticleTypes.CRIT,
+					x + velocity.x() * i / 4.0,
+					y + velocity.y() * i / 4.0,
+					z + velocity.z() * i / 4.0,
 					1,
-					-velocity.getX(), -velocity.getY() + 0.2, -velocity.getZ(),
+					-velocity.x(), -velocity.y() + 0.2, -velocity.z(),
 					0.5);
 		}
 	}

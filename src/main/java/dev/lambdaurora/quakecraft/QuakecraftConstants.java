@@ -17,14 +17,13 @@
 
 package dev.lambdaurora.quakecraft;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.GameMode;
-
 import java.util.UUID;
 import java.util.function.Predicate;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.level.GameType;
 
 /**
  * Represents constants used in Quakecraft.
@@ -42,11 +41,11 @@ public class QuakecraftConstants {
 	 */
 	public static final double DASH_VELOCITY = 1.2;
 
-	public static final Predicate<Entity> PLAYER_PREDICATE = entity -> entity instanceof ServerPlayerEntity
-			&& ((ServerPlayerEntity) entity).interactionManager.getGameMode() != GameMode.SPECTATOR;
+	public static final Predicate<Entity> PLAYER_PREDICATE = entity -> entity instanceof ServerPlayer
+			&& ((ServerPlayer) entity).gameMode.getGameModeForPlayer() != GameType.SPECTATOR;
 
-	public static final EntityAttributeModifier PLAYER_MOVEMENT_SPEED_MODIFIER = new EntityAttributeModifier(
-			 Identifier.of("quakecraft", "movement.speed"),
+	public static final AttributeModifier PLAYER_MOVEMENT_SPEED_MODIFIER = new AttributeModifier(
+			 Identifier.fromNamespaceAndPath("quakecraft", "movement.speed"),
 			2 * 0.20000000298023224D,
-			EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+			AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 }

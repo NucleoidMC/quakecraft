@@ -17,7 +17,7 @@
 
 package dev.lambdaurora.quakecraft.game.map;
 
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import xyz.nucleoid.map_templates.TemplateRegion;
 
 /**
@@ -34,8 +34,8 @@ public class MapSpawn {
 
 	public MapSpawn(TemplateRegion region) {
 		this.region = region;
-		this.pos = BlockPos.ofFloored(region.getBounds().center());
-		this.direction = region.getData().getInt("direction", 0);
+		this.pos = BlockPos.containing(region.getBounds().center());
+		this.direction = region.getData().getIntOr("direction", 0);
 	}
 
 	/**

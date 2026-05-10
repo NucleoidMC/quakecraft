@@ -20,14 +20,14 @@ package dev.lambdaurora.quakecraft.weapon.inventory;
 import dev.lambdaurora.quakecraft.weapon.Weapon;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Hand;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Represents a weapon manager.
@@ -71,14 +71,14 @@ public final class WeaponManager {
 		}
 	}
 
-	public void insertStacks(ServerPlayerEntity player) {
+	public void insertStacks(ServerPlayer player) {
 		for (var weapon : this.weapons) {
-			player.getInventory().insertStack(weapon.build(player));
+			player.getInventory().add(weapon.build(player));
 		}
 	}
 
-	public int onPrimary(ServerWorld world, ServerPlayerEntity player, Hand hand) {
-		ItemStack heldStack = player.getStackInHand(hand);
+	public int onPrimary(ServerLevel world, ServerPlayer player, InteractionHand hand) {
+		ItemStack heldStack = player.getItemInHand(hand);
 
 		for (var weapon : this.weapons) {
 			if (weapon.matchesStack(heldStack)) {
@@ -90,8 +90,8 @@ public final class WeaponManager {
 		return -1;
 	}
 
-	public void onSecondary(ServerWorld world, ServerPlayerEntity player) {
-		ItemStack heldStack = player.getStackInHand(Hand.MAIN_HAND);
+	public void onSecondary(ServerLevel world, ServerPlayer player) {
+		ItemStack heldStack = player.getItemInHand(InteractionHand.MAIN_HAND);
 
 		for (var weapon : this.weapons) {
 			if (weapon.matchesStack(heldStack) && weapon.hasSecondaryAction()) {

@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.10.+'
+	id 'net.fabricmc.fabric-loom' version '1.16.+'
 	id 'java-library'
 	id 'maven-publish'
 	id 'org.quiltmc.gradle.licenser' version '1.1.+'
@@ -7,10 +7,11 @@ plugins {
 
 group = project.maven_group
 version = "${project.mod_version}+${getMCVersionString()}"
-archivesBaseName = project.archives_base_name
-
+base {
+	archivesName = project.archives_base_name
+}
 // This field defines the Java version your mod target.
-def targetJavaVersion = 21
+def targetJavaVersion = 25
 
 boolean isMCVersionNonRelease() {
 	def mc = libs.versions.minecraft.get()
@@ -50,15 +51,13 @@ configurations {
 
 dependencies {
 	minecraft libs.minecraft
-	modImplementation libs.fabric.loader
+	implementation libs.fabric.loader
 
-	// mappings libs.minecraft.mappings
-	mappings "net.fabricmc:yarn:1.21.7+build.1:v2"
 	// Fabric API.
-	modImplementation libs.fabric.api
+	implementation libs.fabric.api
 
 	// Plasmid.
-	modImplementation libs.nucleoid.plasmid
+	implementation libs.nucleoid.plasmid
 }
 
 java {
@@ -84,7 +83,7 @@ processResources {
 
 jar {
 	from('LICENSE') {
-		rename { "${it}_${project.archivesBaseName}" }
+		rename { "${it}_${project.archives_base_name}" }
 	}
 }
 

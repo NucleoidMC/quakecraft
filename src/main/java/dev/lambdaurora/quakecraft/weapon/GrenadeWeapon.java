@@ -18,12 +18,12 @@
 package dev.lambdaurora.quakecraft.weapon;
 
 import dev.lambdaurora.quakecraft.entity.GrenadeEntity;
-import net.minecraft.item.Item;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.Item;
 
 /**
  * Represents a grenade weapon.
@@ -38,11 +38,11 @@ public class GrenadeWeapon extends Weapon {
 	}
 
 	@Override
-	public ActionResult onPrimary(ServerWorld world, ServerPlayerEntity player, Hand hand) {
+	public InteractionResult onPrimary(ServerLevel world, ServerPlayer player, InteractionHand hand) {
 		var grenade = new GrenadeEntity(world, player, 40);
-		grenade.setProperties(player, player.getPitch(), player.getYaw(), 0.f, 1.5f, 1.f);
+		grenade.setProperties(player, player.getXRot(), player.getYRot(), 0.f, 1.5f, 1.f);
 		grenade.rollCritical();
-		world.spawnEntity(grenade);
+		world.addFreshEntity(grenade);
 
 		return super.onPrimary(world, player, hand);
 	}

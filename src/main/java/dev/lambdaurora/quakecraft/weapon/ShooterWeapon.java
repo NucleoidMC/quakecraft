@@ -19,17 +19,18 @@ package dev.lambdaurora.quakecraft.weapon;
 
 import dev.lambdaurora.quakecraft.QuakecraftConstants;
 import dev.lambdaurora.quakecraft.util.RayUtils;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
+import xyz.nucleoid.plasmid.api.util.PlayerUtil;
 
 /**
  * Represents a weapon that shoot.
@@ -44,34 +45,34 @@ public class ShooterWeapon extends Weapon {
 	}
 
 	@Override
-	public ActionResult onPrimary(ServerWorld world, ServerPlayerEntity player, Hand hand) {
+	public InteractionResult onPrimary(ServerLevel world, ServerPlayer player, InteractionHand hand) {
 		var result = RayUtils.raycastEntities(player, 80.0, 0.25, QuakecraftConstants.PLAYER_PREDICATE,
 				entity -> {
-					var hitPlayer = (ServerPlayerEntity) entity;
-					hitPlayer.setAttacker(player);
-					player.setAttacking(hitPlayer, 200);
+					var hitPlayer = (ServerPlayer) entity;
+					hitPlayer.setLastHurtByMob(player);
+					player.setLastHurtByPlayer(hitPlayer, 200);
 					hitPlayer.kill(world);
 				});
 		RayUtils.drawRay(world, player, Math.abs(result));
 
 		if (result < 0.0)
-			return ActionResult.SUCCESS;
+			return InteractionResult.SUCCESS;
 
 		return super.onPrimary(world, player, hand);
 	}
 
 	@Override
-	public ActionResult onSecondary(ServerWorld world, ServerPlayerEntity player, ItemStack stack) {
-		var rotationVec = player.getRotationVec(1.0F);
-		var yVelocity = player.getVelocity().y;
-		player.setVelocity(new Vec3d(
+	public InteractionResult onSecondary(ServerLevel world, ServerPlayer player, ItemStack stack) {
+		var rotationVec = player.getViewVector(1.0F);
+		var yVelocity = player.getDeltaMovement().y;
+		player.setDeltaMovement(new Vec3(
 				rotationVec.x * QuakecraftConstants.DASH_VELOCITY,
 				yVelocity,
 				rotationVec.z * QuakecraftConstants.DASH_VELOCITY
 		));
-		player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(player));
+		player.connection.send(new ClientboundSetEntityMotionPacket(player));
 
-		player.playSoundToPlayer(SoundEvents.ENTITY_BAT_TAKEOFF, SoundCategory.MASTER, 1.0F, 0.5F);
+		PlayerUtil.playSoundToPlayer(player, SoundEvents.BAT_TAKEOFF, SoundSource.MASTER, 1.0F, 0.5F);
 		return super.onSecondary(world, player, stack);
 	}
 }

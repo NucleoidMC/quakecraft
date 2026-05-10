@@ -22,15 +22,14 @@ import dev.lambdaurora.quakecraft.block.TeamBarrierBlock;
 import dev.lambdaurora.quakecraft.block.entity.TeamBarrierBlockEntity;
 import eu.pb4.polymer.core.api.block.PolymerBlockUtils;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import java.util.function.Function;
 
 /**
@@ -58,13 +57,13 @@ public class QuakecraftRegistry {
 
 	public static TeamBarrierBlock TEAM_BARRIER_BLOCK = register("team_barrier", TeamBarrierBlock::new);
 
-	public static BlockEntityType<TeamBarrierBlockEntity> TEAM_BARRIER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+	public static BlockEntityType<TeamBarrierBlockEntity> TEAM_BARRIER_BLOCK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,
 			Quakecraft.id("team_barrier"),
 			FabricBlockEntityTypeBuilder.create(TeamBarrierBlockEntity::new, TEAM_BARRIER_BLOCK).build()
 	);
 
-	private static <T extends Block> T register(String identifier, Function<AbstractBlock.Settings, T> function) {
-		return register(Registries.BLOCK, identifier, function.apply(AbstractBlock.Settings.create().registryKey(RegistryKey.of(RegistryKeys.BLOCK, Quakecraft.id(identifier)))));
+	private static <T extends Block> T register(String identifier, Function<BlockBehaviour.Properties, T> function) {
+		return register(BuiltInRegistries.BLOCK, identifier, function.apply(BlockBehaviour.Properties.of().setId(ResourceKey.create(Registries.BLOCK, Quakecraft.id(identifier)))));
 	}
 
 	private static <P, T extends P> T register(Registry<P> registry, String name, T item) {

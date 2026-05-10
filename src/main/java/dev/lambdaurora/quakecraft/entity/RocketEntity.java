@@ -17,15 +17,15 @@
 
 package dev.lambdaurora.quakecraft.entity;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.projectile.FireballEntity;
-import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.hurtingprojectile.LargeFireball;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Represents a rocket entity.
@@ -34,17 +34,17 @@ import net.minecraft.world.World;
  * @version 1.7.0
  * @since 1.3.0
  */
-public class RocketEntity extends FireballEntity implements CritableEntity {
+public class RocketEntity extends LargeFireball implements CritableEntity {
 	private boolean critical = false;
 
-	public RocketEntity(World world, LivingEntity owner, double velocityX, double velocityY, double velocityZ) {
-		super(world, owner, new Vec3d(velocityX, velocityY, velocityZ), 1);
+	public RocketEntity(Level world, LivingEntity owner, double velocityX, double velocityY, double velocityZ) {
+		super(world, owner, new Vec3(velocityX, velocityY, velocityZ), 1);
 	}
 
-	public void detonate(ServerWorld world) {
+	public void detonate(ServerLevel world) {
 		this.kill(world);
-		world.createExplosion(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.75f : 1.75f,
-				World.ExplosionSourceType.NONE);
+		world.explode(this, this.getX(), this.getEyeY(), this.getZ(), critical ? 2.75f : 1.75f,
+				Level.ExplosionInteraction.NONE);
 	}
 
 	@Override
@@ -52,43 +52,43 @@ public class RocketEntity extends FireballEntity implements CritableEntity {
 		super.tick();
 
 		if (this.isCritical()) {
-			CritableEntity.spawnCritParticles(this.getWorld(), this.getX(), this.getY(), this.getZ(), this.getVelocity());
+			CritableEntity.spawnCritParticles(this.level(), this.getX(), this.getY(), this.getZ(), this.getDeltaMovement());
 		}
 	}
 
 	@Override
-	protected boolean isBurning() {
+	protected boolean shouldBurn() {
 		return false;
 	}
 
 	@Override
-	protected float getDrag() {
+	protected float getInertia() {
 		return 1.f;
 	}
 
 	@Override
-	protected void onCollision(HitResult hitResult) {
+	protected void onHit(HitResult hitResult) {
 		if (hitResult.getType() == HitResult.Type.ENTITY) {
 			if (((EntityHitResult) hitResult).getEntity() instanceof RocketEntity) {
-				((EntityHitResult) hitResult).getEntity().kill((ServerWorld) this.getWorld());
-				this.detonate((ServerWorld) this.getWorld());
+				((EntityHitResult) hitResult).getEntity().kill((ServerLevel) this.level());
+				this.detonate((ServerLevel) this.level());
 				return;
 			}
 
-			this.onEntityHit((EntityHitResult) hitResult);
+			this.onHitEntity((EntityHitResult) hitResult);
 		}
 
-		this.detonate((ServerWorld) this.getWorld());
+		this.detonate((ServerLevel) this.level());
 	}
 
 	@Override
-	protected void onEntityHit(EntityHitResult entityHitResult) {
-		super.onEntityHit(entityHitResult);
+	protected void onHitEntity(EntityHitResult entityHitResult) {
+		super.onHitEntity(entityHitResult);
 	}
 
 	@Override
-	public boolean damage(ServerWorld world, DamageSource source, float amount) {;
-		if (source.isIn(DamageTypeTags.IS_EXPLOSION))
+	public boolean hurtServer(ServerLevel world, DamageSource source, float amount) {;
+		if (source.is(DamageTypeTags.IS_EXPLOSION))
 			return false;
 		this.detonate(world);
 		return true;

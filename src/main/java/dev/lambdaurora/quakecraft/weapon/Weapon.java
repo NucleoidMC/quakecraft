@@ -17,15 +17,14 @@
 
 package dev.lambdaurora.quakecraft.weapon;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import xyz.nucleoid.plasmid.api.util.ItemStackBuilder;
 
 /**
@@ -94,12 +93,12 @@ public class Weapon {
 	public void tick(ItemStack stack) {
 	}
 
-	public ActionResult onPrimary(ServerWorld world, ServerPlayerEntity player, Hand hand) {
-		return ActionResult.PASS;
+	public InteractionResult onPrimary(ServerLevel world, ServerPlayer player, InteractionHand hand) {
+		return InteractionResult.PASS;
 	}
 
-	public ActionResult onSecondary(ServerWorld world, ServerPlayerEntity player, ItemStack stack) {
-		return ActionResult.PASS;
+	public InteractionResult onSecondary(ServerLevel world, ServerPlayer player, ItemStack stack) {
+		return InteractionResult.PASS;
 	}
 
 	public ItemStackBuilder stackBuilder() {
@@ -112,10 +111,10 @@ public class Weapon {
 	 *
 	 * @return the item stack
 	 */
-	public final ItemStack build(ServerPlayerEntity player) {
+	public final ItemStack build(ServerPlayer player) {
 		return this.stackBuilder()
-				.setName(Text.translatable("weapon." + this.identifier.getNamespace() + "." + this.identifier.getPath())
-						.styled(style -> style.withItalic(false)))
+				.setName(Component.translatable("weapon." + this.identifier.getNamespace() + "." + this.identifier.getPath())
+						.withStyle(style -> style.withItalic(false)))
 				.build();
 	}
 

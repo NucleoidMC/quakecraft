@@ -20,13 +20,13 @@ package dev.lambdaurora.quakecraft.game.environment;
 import dev.lambdaurora.quakecraft.block.TeamBarrierBlock;
 import dev.lambdaurora.quakecraft.game.QuakecraftLogic;
 import net.fabricmc.fabric.api.util.NbtType;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.registry.Registries;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.map_templates.BlockBounds;
 import xyz.nucleoid.map_templates.TemplateRegion;
@@ -110,7 +110,7 @@ public class QuakecraftDoor {
 	}
 
 	public void tick() {
-		var players = this.game.world().getEntitiesByClass(ServerPlayerEntity.class,
+		var players = this.game.world().getEntitiesOfClass(ServerPlayer.class,
 				this.detectionBounds.asBox(),
 				player -> this.game.canOpenDoor(this, player));
 		if (players.size() > 0) {
@@ -137,8 +137,8 @@ public class QuakecraftDoor {
 	 * Closes the door.
 	 */
 	public void close() {
-		this.getBounds().forEach(pos -> this.game.world().setBlockState(pos, this.closedState,
-				Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL));
+		this.getBounds().forEach(pos -> this.game.world().setBlock(pos, this.closedState,
+				Block.UPDATE_SUPPRESS_DROPS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_IMMEDIATE | Block.UPDATE_ALL));
 		this.open = false;
 	}
 
@@ -148,20 +148,20 @@ public class QuakecraftDoor {
 		BlockBounds detectionBounds = null;
 
 		if (region.getData().contains("activation")) {
-			detectionBounds = game.map().getDoorActivationBounds(region.getData().getString("activation", ""));
+			detectionBounds = game.map().getDoorActivationBounds(region.getData().getStringOr("activation", ""));
 		}
 
 		if (detectionBounds == null && region.getData().contains("distance")) {
-			int distance = region.getData().getInt("distance", 0);
+			int distance = region.getData().getIntOr("distance", 0);
 			if (distance == 0)
 				return Optional.empty();
 
-			Direction.Axis axis = Direction.Axis.CODEC.byId(region.getData().getString("axis", "x"));
+			Direction.Axis axis = Direction.Axis.CODEC.byName(region.getData().getStringOr("axis", "x"));
 			if (axis == null)
 				return Optional.empty();
 
-			BlockPos min = bounds.min().offset(Direction.from(axis, Direction.AxisDirection.NEGATIVE), distance);
-			BlockPos max = bounds.max().offset(Direction.from(axis, Direction.AxisDirection.POSITIVE), distance);
+			BlockPos min = bounds.min().relative(Direction.fromAxisAndDirection(axis, Direction.AxisDirection.NEGATIVE), distance);
+			BlockPos max = bounds.max().relative(Direction.fromAxisAndDirection(axis, Direction.AxisDirection.POSITIVE), distance);
 
 			detectionBounds = BlockBounds.of(min, max);
 		}
@@ -172,9 +172,9 @@ public class QuakecraftDoor {
 		// A block must be explicitly defined.
 		if (!region.getData().getCompoundOrEmpty("block").contains("Name"))
 			return Optional.empty();
-		BlockState closedState = NbtHelper.toBlockState(Registries.BLOCK, region.getData().getCompoundOrEmpty("block"));
+		BlockState closedState = NbtUtils.readBlockState(BuiltInRegistries.BLOCK, region.getData().getCompoundOrEmpty("block"));
 
-		GameTeam team = game.getTeam(region.getData().getString("team", ""));
+		GameTeam team = game.getTeam(region.getData().getStringOr("team", ""));
 
 		var door = new QuakecraftDoor(game, region, bounds, detectionBounds, closedState, team);
 		door.close();

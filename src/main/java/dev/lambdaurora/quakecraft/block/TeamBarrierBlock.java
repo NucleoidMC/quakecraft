@@ -23,18 +23,24 @@ import dev.lambdaurora.quakecraft.QuakecraftRegistry;
 import dev.lambdaurora.quakecraft.block.entity.TeamBarrierBlockEntity;
 import dev.lambdaurora.quakecraft.game.QuakecraftPlayer;
 import dev.lambdaurora.quakecraft.util.RayAccessor;
-import dev.lambdaurora.quakecraft.util.UsefulEntityShapeContext;
 import eu.pb4.polymer.core.api.block.PolymerBlock;
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.packettweaker.PacketContext;
 import xyz.nucleoid.plasmid.api.game.common.team.GameTeam;
 
 /**
@@ -46,28 +52,27 @@ import xyz.nucleoid.plasmid.api.game.common.team.GameTeam;
  * @version 1.7.3
  * @since 1.5.0
  */
-public class TeamBarrierBlock extends BlockWithEntity implements PolymerBlock {
-	public TeamBarrierBlock(AbstractBlock.Settings settings) {
-		super(settings.mapColor(MapColor.CLEAR).strength(-1.0F, 3600000.0F)
-				.nonOpaque().dynamicBounds().dropsNothing());
+public class TeamBarrierBlock extends BaseEntityBlock implements PolymerBlock {
+	public TeamBarrierBlock(BlockBehaviour.Properties settings) {
+		super(settings.mapColor(MapColor.NONE).strength(-1.0F, 3600000.0F)
+				.noOcclusion().dynamicShape().noLootTable());
 	}
 
 	@Override
-	protected MapCodec<? extends BlockWithEntity> getCodec() {
+	protected MapCodec<? extends BaseEntityBlock> codec() {
 		return null;
 	}
 
 	@Override
-	public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		TeamBarrierBlockEntity blockEntity = QuakecraftRegistry.TEAM_BARRIER_BLOCK_ENTITY.get(world, pos);
+	public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+		TeamBarrierBlockEntity blockEntity = QuakecraftRegistry.TEAM_BARRIER_BLOCK_ENTITY.getBlockEntity(world, pos);
 		GameTeam team = blockEntity == null ? null : blockEntity.getTeam();
 
 		if (team == null)
-			return VoxelShapes.empty();
+			return Shapes.empty();
 
-		if (context instanceof UsefulEntityShapeContext) {
-			var entity = ((UsefulEntityShapeContext) context).quakecraft$getEntity();
-			if (entity instanceof ServerPlayerEntity player && !((RayAccessor) entity).quakecraft$isRaycasting()) {
+		if (context instanceof EntityCollisionContext entityCollisionContext) {
+			if (entityCollisionContext.getEntity() instanceof ServerPlayer player && !((RayAccessor) player).quakecraft$isRaycasting()) {
 				var quakecraft = Quakecraft.get();
 				if (quakecraft.isPlayerActive(player)) {
 					for (var game : quakecraft.getActiveGames()) {
@@ -75,9 +80,9 @@ public class TeamBarrierBlock extends BlockWithEntity implements PolymerBlock {
 							var pTeam = game.getOptParticipant(player).map(QuakecraftPlayer::getTeam).orElse(null);
 							if (pTeam != null) {
 								if (team != pTeam) {
-									return VoxelShapes.fullCube();
+									return Shapes.block();
 								} else {
-									return VoxelShapes.empty();
+									return Shapes.empty();
 								}
 							}
 						}
@@ -85,25 +90,25 @@ public class TeamBarrierBlock extends BlockWithEntity implements PolymerBlock {
 				}
 			}
 		}
-		return VoxelShapes.empty();
+		return Shapes.empty();
 	}
 
 	@Override
 	public BlockState getPolymerBlockState(BlockState state, PacketContext context) {
-		return Blocks.AIR.getDefaultState();
+		return Blocks.AIR.defaultBlockState();
 	}
 
 	@Override
-	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-		return QuakecraftRegistry.TEAM_BARRIER_BLOCK_ENTITY.instantiate(pos, state);
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+		return QuakecraftRegistry.TEAM_BARRIER_BLOCK_ENTITY.create(pos, state);
 	}
 
-	public static void createAt(ServerWorld world, BlockPos pos, @Nullable GameTeam team) {
+	public static void createAt(ServerLevel world, BlockPos pos, @Nullable GameTeam team) {
 		var block = QuakecraftRegistry.TEAM_BARRIER_BLOCK;
 
-		world.setBlockState(pos, block.getDefaultState(),
-				Block.SKIP_DROPS | Block.FORCE_STATE | Block.REDRAW_ON_MAIN_THREAD | Block.NOTIFY_ALL);
-		var blockEntity = QuakecraftRegistry.TEAM_BARRIER_BLOCK_ENTITY.get(world, pos);
+		world.setBlock(pos, block.defaultBlockState(),
+				Block.UPDATE_SUPPRESS_DROPS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_IMMEDIATE | Block.UPDATE_ALL);
+		var blockEntity = QuakecraftRegistry.TEAM_BARRIER_BLOCK_ENTITY.getBlockEntity(world, pos);
 		blockEntity.setTeam(team);
 	}
 }

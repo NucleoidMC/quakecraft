@@ -21,15 +21,14 @@ import com.google.common.collect.Multimap;
 import dev.lambdaurora.quakecraft.Quakecraft;
 import dev.lambdaurora.quakecraft.game.map.MapBuilder;
 import dev.lambdaurora.quakecraft.game.map.QuakecraftMap;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.fantasy.RuntimeWorldConfig;
+import xyz.nucleoid.fantasy.RuntimeLevelConfig;
 import xyz.nucleoid.plasmid.api.game.GameActivity;
 import xyz.nucleoid.plasmid.api.game.GameOpenContext;
 import xyz.nucleoid.plasmid.api.game.GameOpenProcedure;
@@ -55,12 +54,12 @@ import xyz.nucleoid.stimuli.event.player.PlayerDeathEvent;
  */
 public class QuakecraftWaiting {
 	private final GameActivity game;
-	private final ServerWorld world;
+	private final ServerLevel world;
 	private final QuakecraftMap map;
 	private final QuakecraftConfig config;
 	private final QuakecraftSpawnLogic spawnLogic;
 
-	private QuakecraftWaiting(GameActivity game, ServerWorld world, QuakecraftMap map, QuakecraftConfig config) {
+	private QuakecraftWaiting(GameActivity game, ServerLevel world, QuakecraftMap map, QuakecraftConfig config) {
 		this.game = game;
 		this.world = world;
 		this.map = map;
@@ -72,11 +71,13 @@ public class QuakecraftWaiting {
 		var config = context.config();
 
 		var map = new MapBuilder(config.map()).create(context.server());
-		var worldConfig = new RuntimeWorldConfig()
+		var worldConfig = new RuntimeLevelConfig()
 				.setGenerator(map.asGenerator(context.server()))
-				.setTimeOfDay(config.map().time());
+				// Todo fix this
+				//.setTimeOfDay(config.map().time())
+				;
 
-		return context.openWithWorld(worldConfig, (game, world) -> {
+		return context.openWithLevel(worldConfig, (game, world) -> {
 			map.init(world);
 
 			QuakecraftWaiting waiting = new QuakecraftWaiting(game, world, map, config);
@@ -109,32 +110,32 @@ public class QuakecraftWaiting {
 		});
 	}
 
-	private void removePlayer(ServerPlayerEntity player) {
+	private void removePlayer(ServerPlayer player) {
 		Quakecraft.removeSpeed(player);
 	}
 
-	private EventResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {
+	private EventResult onPlayerDeath(ServerPlayer player, DamageSource source) {
 		this.spawnLogic.resetWaitingPlayer(player);
 		this.spawnLogic.spawnWaitingPlayer(player);
 		return EventResult.DENY;
 	}
 
-	private ActionResult onUseItem(ServerPlayerEntity player, Hand hand) {
-		var heldStack = player.getStackInHand(hand);
+	private InteractionResult onUseItem(ServerPlayer player, InteractionHand hand) {
+		var heldStack = player.getItemInHand(hand);
 
-		if (heldStack.isIn(ItemTags.BEDS)) {
+		if (heldStack.is(ItemTags.BEDS)) {
 			this.game.getGameSpace().getPlayers().kick(player);
-			return ActionResult.SUCCESS_SERVER;
+			return InteractionResult.SUCCESS_SERVER;
 		}
 
-		return ActionResult.PASS;
+		return InteractionResult.PASS;
 	}
 
-	private @Nullable Multimap<GameTeam, ServerPlayerEntity> allocatePlayers() {
+	private @Nullable Multimap<GameTeam, ServerPlayer> allocatePlayers() {
 		if (this.config.teams().size() == 0) {
 			return null;
 		}
-		var allocator = new TeamAllocator<GameTeam, ServerPlayerEntity>(this.config.teams());
+		var allocator = new TeamAllocator<GameTeam, ServerPlayer>(this.config.teams());
 		this.game.getGameSpace().getPlayers().forEach(player -> allocator.add(player, null));
 		return allocator.allocate();
 	}

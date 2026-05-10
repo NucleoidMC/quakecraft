@@ -18,14 +18,14 @@
 package dev.lambdaurora.quakecraft.weapon;
 
 import dev.lambdaurora.quakecraft.entity.RocketEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 /**
  * Represents a rocket launcher.
@@ -40,20 +40,20 @@ public class RocketLauncherWeapon extends Weapon {
 	}
 
 	@Override
-	public ActionResult onPrimary(ServerWorld world, ServerPlayerEntity player, Hand hand) {
+	public InteractionResult onPrimary(ServerLevel world, ServerPlayer player, InteractionHand hand) {
 		var rocket = new RocketEntity(world, player, 0, 0, 0);
 
-		var origin = player.getCameraPosVec(1.0F);
-		var delta = player.getRotationVec(1.0F).multiply(0.25);
+		var origin = player.getEyePosition(1.0F);
+		var delta = player.getViewVector(1.0F).scale(0.25);
 
 		var target = origin.add(delta);
-		rocket.setPos(target.getX(), target.getY(), target.getZ());
+		rocket.setPosRaw(target.x(), target.y(), target.z());
 
-		rocket.setVelocity(player, player.getPitch(), player.getYaw(), 0.f, 1.5f, 1.f);
-		rocket.setVelocity(rocket.getVelocity().multiply(0.75));
+		rocket.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.f, 1.5f, 1.f);
+		rocket.setDeltaMovement(rocket.getDeltaMovement().scale(0.75));
 		rocket.setItem(new ItemStack(Items.FIRE_CHARGE));
 		rocket.rollCritical();
-		world.spawnEntity(rocket);
+		world.addFreshEntity(rocket);
 
 		return super.onPrimary(world, player, hand);
 	}
