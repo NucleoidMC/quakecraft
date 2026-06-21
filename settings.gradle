@@ -15,15 +15,15 @@ pluginManagement {
 dependencyResolutionManagement {
 	versionCatalogs {
 		libs {
-			def mc = "26.1.2"
+			def mc = "26.2"
 
 			version("minecraft", mc)
 
 			library("minecraft", "com.mojang", "minecraft").versionRef("minecraft")
-			library("fabric-loader", "net.fabricmc:fabric-loader:0.18.4")
+			library("fabric-loader", "net.fabricmc:fabric-loader:0.19.2")
 
-			library("fabric-api", "net.fabricmc.fabric-api:fabric-api:0.145.4+26.1.2")
-			library("nucleoid-plasmid", "xyz.nucleoid:plasmid:0.7.0+${mc}")
+			library("fabric-api", "net.fabricmc.fabric-api:fabric-api:0.152.2+26.2")
+			library("nucleoid-plasmid", "xyz.nucleoid:plasmid:0.7.2-SNAPSHOT+26.2")
 		}
 	}
 }

@@ -87,7 +87,7 @@ public class QuakecraftSpawnLogic {
 		player.setGameMode(GameType.ADVENTURE);
 		player.getInventory().clearContent();
 
-		var leaveGame = ItemStackBuilder.of(Items.RED_BED)
+		var leaveGame = ItemStackBuilder.of(Items.BED.red())
 				.setName(Component.literal("Leave Lobby").withStyle(style -> style.withItalic(false).withColor(ChatFormatting.YELLOW)))
 				.build();
 		player.getInventory().add(8, leaveGame);
