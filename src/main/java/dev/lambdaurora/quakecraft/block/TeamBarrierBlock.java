@@ -59,11 +59,6 @@ public class TeamBarrierBlock extends BaseEntityBlock implements PolymerBlock {
 	}
 
 	@Override
-	protected MapCodec<? extends BaseEntityBlock> codec() {
-		return null;
-	}
-
-	@Override
 	public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
 		TeamBarrierBlockEntity blockEntity = QuakecraftRegistry.TEAM_BARRIER_BLOCK_ENTITY.getBlockEntity(world, pos);
 		GameTeam team = blockEntity == null ? null : blockEntity.getTeam();
